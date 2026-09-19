@@ -41,6 +41,17 @@ This regenerates everything in `outputs/`. Then **open `outputs/dashboard.html`*
 - Inspect the ranked SKUs directly in `outputs/opportunities.csv` (Excel / any tool).
 - No install, no network, deterministic: same input → identical output.
 
+### Tests
+
+```bash
+python -m unittest test_analyze -v
+```
+
+22 stdlib `unittest` cases (no dependencies) covering the rule engine three ways: exact helper
+math, **each business rule in isolation** on synthetic fixtures, cell-level gap detection/ranking,
+and **regression locks** against the shipped dataset (action counts + known anchor SKUs). Runs in
+~0.03 s.
+
 ---
 
 ## What's in the box
@@ -48,6 +59,7 @@ This regenerates everything in `outputs/`. Then **open `outputs/dashboard.html`*
 ```
 TakeHome/
 ├── analyze.py                     # the whole pipeline (pure stdlib, ~1 file)
+├── test_analyze.py                # 22 unit tests (stdlib unittest, no deps)
 ├── README.md                      # this file
 ├── sku_performance.csv            # INPUT — 235 SKUs, channel + market performance
 ├── product_metadata.csv           # INPUT — attributes, shelf space, supplier, EAN
@@ -117,7 +129,7 @@ the rest are kept in `also_flagged`. Assortment gaps are evaluated at the (subca
 3. **Elasticity-aware pricing** once historical price/volume is available, replacing the benchmark heuristic.
 4. **Config file + CLI flags** for thresholds so a category manager can tune without editing code.
 5. **Scheduled refresh** writing a dated snapshot per review cycle to track whether actions moved share.
-6. **Unit tests** on the rule engine (fixture SKUs → expected action/value).
+6. ~~Unit tests on the rule engine~~ — **done** (`test_analyze.py`, 22 cases); next: wire into CI (GitHub Actions).
 
 ---
 
