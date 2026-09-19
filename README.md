@@ -1,5 +1,7 @@
 # Category Opportunity Review — Hair Coloration
 
+[![tests](https://github.com/glejdis/zenline-category-opportunity-review/actions/workflows/tests.yml/badge.svg)](https://github.com/glejdis/zenline-category-opportunity-review/actions/workflows/tests.yml)
+
 A small, reproducible **category opportunity review** for *ZenBeauty Retail* (fictional German
 drugstore), category **Beauty > Hair Coloration**.
 
