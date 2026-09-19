@@ -510,6 +510,33 @@ tr:hover td{background:var(--cp-accent-soft)}
 .bar{height:6px;border-radius:999px;background:var(--cp-surface-soft);position:relative;min-width:60px}
 .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--cp-accent)}
 .muted{color:var(--cp-text-soft)}
+.charts{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
+@media(max-width:860px){.charts{grid-template-columns:1fr}}
+.card{background:var(--cp-surface);border:1px solid var(--cp-border);border-radius:16px;padding:16px 18px;
+  box-shadow:0 0 2px rgba(0,0,0,0.12),0 1px 2px rgba(0,0,0,0.14)}
+.card h3{margin:0 0 2px;font-size:1rem}
+.card .sub{color:var(--cp-text-muted);font-size:.8rem;margin-bottom:10px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.legc{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--cp-text-muted);
+  border:1px solid var(--cp-border);border-radius:999px;padding:3px 9px;cursor:pointer;user-select:none}
+.legc.off{opacity:.35}
+.legc .dot{width:10px;height:10px;border-radius:50%}
+.map svg{width:100%;height:auto;display:block;overflow:visible}
+.map circle{cursor:pointer;transition:opacity .1s}
+.map .axis{stroke:var(--cp-border);stroke-width:1}
+.map .grid{stroke:var(--cp-border);stroke-dasharray:2 3;opacity:.5}
+.map .refline{stroke:var(--cp-accent);stroke-dasharray:5 4;stroke-width:1.3;opacity:.8}
+.map .atxt{fill:var(--cp-text-soft);font-size:11px}
+.map .qtxt{fill:var(--cp-text-soft);font-size:10.5px;font-style:italic;opacity:.75}
+.sbar{display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center;margin:7px 0;font-size:.8rem}
+.sbar .lab{color:var(--cp-text-muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbar .track{background:var(--cp-surface-soft);border-radius:999px;height:20px;position:relative;overflow:hidden}
+.sbar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--cp-accent);border-radius:999px}
+.sbar .val{position:absolute;right:8px;top:0;line-height:20px;font-size:.72rem;color:var(--cp-text)}
+#tip{position:fixed;z-index:50;pointer-events:none;display:none;max-width:260px;background:var(--cp-panel-strong,
+  var(--cp-surface));color:var(--cp-text);border:1px solid var(--cp-border-strong);border-radius:10px;
+  padding:8px 10px;font-size:.78rem;box-shadow:var(--cp-shadow)}
+#tip b{color:var(--cp-accent)}
 .count{color:var(--cp-text-muted);font-size:.82rem;margin-left:auto}
 footer{margin-top:34px;color:var(--cp-text-soft);font-size:.78rem}
 a{color:var(--cp-link)}
@@ -527,6 +554,22 @@ a{color:var(--cp-link)}
 
 <h2>Top recommendations</h2>
 <div class="recs" id="recs"></div>
+
+<h2>Opportunity map — where the prize is</h2>
+<div class="charts">
+  <div class="card map">
+    <h3>Demand vs. our execution</h3>
+    <div class="sub">Each bubble is a SKU · x = 12-week market demand (log scale) · y = our channel share ·
+      size = € opportunity · colour = action. Bubbles in the low-right are strong demand we under-capture.</div>
+    <div id="scatter"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="card">
+    <h3>Execution by subcategory</h3>
+    <div class="sub">Channel share of market demand — the whole category sits far below potential.</div>
+    <div id="subbars"></div>
+  </div>
+</div>
 
 <h2>Opportunity explorer</h2>
 <div class="controls">
@@ -567,6 +610,7 @@ a{color:var(--cp-link)}
   </table>
 </div>
 
+<div id="tip"></div>
 <footer>
   Modeled value = market revenue × subcategory-median channel share − current channel revenue (a prioritisation
   ceiling, not a forecast). Data is synthetic; brand names illustrative. Source of truth:
@@ -622,7 +666,7 @@ function setup(){
     `<tr><td>${g.subcategory}</td><td>${g.shade_group}</td><td class="num">${g.competitor_signal_0_100.toFixed(0)}</td>
      <td class="num">${(g.competitor_trend_12w_pct*100).toFixed(0)}%</td><td class="num">${g.active_skus_held}</td>
      <td class="num">${g.competitor_rows}</td></tr>`).join("");
-  kpis(); recs(); render();
+  kpis(); recs(); render(); charts();
 }
 
 function setAction(a){activeAction=a;document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active',p.textContent===a));render();}
@@ -657,6 +701,79 @@ function render(){
   }).join("");
   document.getElementById("count").textContent = rows.length+" of "+DATA.opportunities.length+" flagged SKUs";
 }
+
+const ACOLOR={"Fix availability":"--cp-warning","Promote":"--cp-success","Delist / markdown":"--cp-danger","Price / margin":"--cp-accent","None":"--cp-border-strong"};
+const hidden = new Set();
+
+function pctile(arr,q){const s=[...arr].sort((a,b)=>a-b);if(!s.length)return 0;const p=q*(s.length-1),lo=Math.floor(p);return s[lo]+(p-lo)*((s[lo+1]??s[lo])-s[lo]);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function charts(){
+  drawScatter(); drawSubbars();
+  const tip=document.getElementById("tip");
+  document.addEventListener("mousemove",e=>{if(tip.style.display==="block"){tip.style.left=Math.min(e.clientX+14,window.innerWidth-270)+"px";tip.style.top=(e.clientY+16)+"px";}});
+}
+
+function drawScatter(){
+  const pts=DATA.landscape, W=900,H=470,pL=58,pR=18,pT=16,pB=44;
+  const mkts=pts.map(p=>Math.max(500,p.market_revenue_eur_12w));
+  const xmin=Math.max(500,Math.min(...mkts)), xmax=Math.max(...mkts);
+  const lx=v=>Math.log10(Math.max(500,v));
+  const X=v=>pL+(lx(v)-lx(xmin))/(lx(xmax)-lx(xmin))*(W-pL-pR);
+  const shares=pts.map(p=>p.channel_share_pct);
+  const yMax=Math.max(10,Math.ceil(pctile(shares,0.98)/5)*5);
+  const Y=v=>(H-pB)-(Math.min(v,yMax)/yMax)*(H-pT-pB);
+  const maxVal=Math.max(...pts.map(p=>p.opportunity_value_eur),1);
+  const R=p=>p.opportunity_value_eur>0?4+(Math.sqrt(p.opportunity_value_eur)/Math.sqrt(maxVal))*15:2.6;
+
+  let g="";
+  // y grid + ticks
+  for(let s=0;s<=yMax;s+=5){const y=Y(s);g+=`<line class="grid" x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}"/><text class="atxt" x="${pL-8}" y="${y+3}" text-anchor="end">${s}%</text>`;}
+  // x ticks at powers of ten
+  for(let e=3;e<=6;e++){const v=Math.pow(10,e);if(v<xmin*0.9||v>xmax*1.1)continue;const x=X(v);const lab=e>=6?"€1M":e===5?"€100k":e===4?"€10k":"€1k";g+=`<line class="grid" x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}"/><text class="atxt" x="${x}" y="${H-pB+16}" text-anchor="middle">${lab}</text>`;}
+  g+=`<line class="axis" x1="${pL}" y1="${H-pB}" x2="${W-pR}" y2="${H-pB}"/><line class="axis" x1="${pL}" y1="${pT}" x2="${pL}" y2="${H-pB}"/>`;
+  // median execution reference line
+  const med=DATA.channel_share_median, my=Y(med);
+  g+=`<line class="refline" x1="${pL}" y1="${my}" x2="${W-pR}" y2="${my}"/><text class="atxt" x="${W-pR}" y="${my-5}" text-anchor="end" style="fill:var(--cp-accent)">median execution ${med.toFixed(1)}%</text>`;
+  g+=`<text class="qtxt" x="${W-pR-6}" y="${H-pB-8}" text-anchor="end">▸ high demand · low share = the prize</text>`;
+  // bubbles (draw largest first so small sit on top)
+  const sorted=[...pts].sort((a,b)=>R(b)-R(a));
+  for(const p of sorted){
+    const c=ACOLOR[p.primary_action], op=p.primary_action==="None"?0.28:0.82;
+    g+=`<circle data-a="${esc(p.primary_action)}" cx="${X(p.market_revenue_eur_12w).toFixed(1)}" cy="${Y(p.channel_share_pct).toFixed(1)}" r="${R(p).toFixed(1)}" style="fill:var(${c});fill-opacity:${op};stroke:var(${c});stroke-opacity:.55" `
+      +`onmouseover="showTip(event,'${esc(p.product_id)}')" onmouseout="hideTip()" onclick="jumpTo('${esc(p.product_id)}')"><title>${esc(p.product_name)}</title></circle>`;
+  }
+  g+=`<text class="atxt" x="${(pL+W-pR)/2}" y="${H-6}" text-anchor="middle">12-week market demand (log)</text>`;
+  g+=`<text class="atxt" transform="translate(14,${(pT+H-pB)/2}) rotate(-90)" text-anchor="middle">our channel share</text>`;
+  document.getElementById("scatter").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Opportunity map">${g}</svg>`;
+
+  const acts=["Fix availability","Promote","Price / margin","Delist / markdown","None"];
+  document.getElementById("legend").innerHTML=acts.map(a=>
+    `<span class="legc${hidden.has(a)?' off':''}" onclick="toggleAct('${esc(a)}')"><span class="dot" style="background:var(${ACOLOR[a]})"></span>${a==="None"?"No action":a}</span>`).join("");
+}
+
+function toggleAct(a){hidden.has(a)?hidden.delete(a):hidden.add(a);
+  document.querySelectorAll('#scatter circle').forEach(c=>{if(c.dataset.a===a)c.style.display=hidden.has(a)?'none':'';});
+  document.querySelectorAll('.legc').forEach(el=>{if(el.textContent.trim()===(a==="None"?"No action":a))el.classList.toggle('off',hidden.has(a));});}
+
+const LMAP=Object.fromEntries(DATA.landscape.map(p=>[p.product_id,p]));
+function showTip(e,id){const p=LMAP[id],tip=document.getElementById("tip");
+  tip.innerHTML=`<b>${esc(p.product_name)}</b><br>${esc(p.brand)} · ${esc(p.subcategory)}<br>`
+    +`Market €${Math.round(p.market_revenue_eur_12w).toLocaleString()} · share ${p.channel_share_pct.toFixed(1)}%<br>`
+    +`<b>${p.primary_action==="None"?"No action":esc(p.primary_action)}</b>${p.opportunity_value_eur?" · €"+Math.round(p.opportunity_value_eur).toLocaleString()+" opportunity":""}`;
+  tip.style.display="block";tip.style.left=Math.min(e.clientX+14,window.innerWidth-270)+"px";tip.style.top=(e.clientY+16)+"px";}
+function hideTip(){document.getElementById("tip").style.display="none";}
+function jumpTo(id){document.getElementById("q").value=id;render();document.getElementById("tbl").scrollIntoView({behavior:"smooth",block:"center"});}
+
+function drawSubbars(){
+  const subs=DATA.subcategories, maxS=Math.max(...subs.map(s=>s.share_pct));
+  document.getElementById("subbars").innerHTML=subs.map(s=>{
+    const w=Math.max(2,(s.share_pct/maxS)*100);
+    return `<div class="sbar"><div class="lab" title="${esc(s.subcategory)}">${esc(s.subcategory)}</div>`
+      +`<div class="track"><div class="fill" style="width:${w}%"></div><span class="val">${s.share_pct.toFixed(1)}%</span></div></div>`;
+  }).join("")+`<div class="sub" style="margin-top:8px">Bars scaled to the strongest subcategory (${maxS.toFixed(1)}% share). Category-wide share is ${DATA.summary.channel_share_pct.toFixed(1)}%.</div>`;
+}
+
 setup();
 </script>
 </body>
@@ -709,13 +826,42 @@ def main():
     with open(os.path.join(OUT, "category_review.md"), "w", encoding="utf-8") as f:
         f.write(render_markdown(S, recs, gaps))
 
+    # per-SKU landscape (all 235) + subcategory execution rollup for the visuals
+    flagged_by_id = {f["product_id"]: f for f in flagged}
+    landscape = []
+    for s in sku:
+        fb = flagged_by_id.get(s["product_id"])
+        landscape.append({
+            "product_id": s["product_id"], "product_name": s["product_name"],
+            "brand": s["brand"], "subcategory": s["subcategory"],
+            "market_revenue_eur_12w": round(s["market_revenue_eur_12w"], 0),
+            "channel_revenue_eur_12w": round(s["channel_revenue_eur_12w"], 0),
+            "channel_share_pct": round(s["chan_share"] * 100, 2),
+            "primary_action": fb["primary_action"] if fb else "None",
+            "opportunity_value_eur": fb["opportunity_value_eur"] if fb else 0,
+        })
+    sub_agg = {}
+    for s in sku:
+        a = sub_agg.setdefault(s["subcategory"], {"chan": 0.0, "mkt": 0.0, "n": 0})
+        a["chan"] += s["channel_revenue_eur_12w"]
+        a["mkt"] += s["market_revenue_eur_12w"]
+        a["n"] += 1
+    subcategories = sorted(
+        [{"subcategory": k, "channel_rev": round(v["chan"], 0), "market_rev": round(v["mkt"], 0),
+          "share_pct": round(100 * v["chan"] / v["mkt"], 2) if v["mkt"] else 0.0, "n": v["n"]}
+         for k, v in sub_agg.items()],
+        key=lambda x: x["market_rev"], reverse=True)
+
     payload = {
         "generated": date.today().isoformat(),
         "summary": {k: S[k] for k in ("n_skus", "channel_rev", "market_rev", "channel_share_pct",
                                        "total_revenue_upside", "upside_availability", "upside_promote",
                                        "upside_margin", "delist_n", "shelf_freed_cm", "n_gaps")},
+        "channel_share_median": round(share_med * 100, 2),
         "recommendations": recs,
         "opportunities": flagged,
+        "landscape": landscape,
+        "subcategories": subcategories,
         "assortment_gaps": gaps,
     }
     with open(os.path.join(OUT, "dashboard.html"), "w", encoding="utf-8") as f:
