@@ -1,0 +1,76 @@
+competitor_product_id,competitor_product_name,brand,category,subcategory,shade_group,price_eur,rank_or_popularity_signal,signal_score_0_100,source,trend_score_12w_pct,observed_date
+CM001,Manic Panic High Voltage Ultra Violet,Manic Panic,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Vivid,11.99,18,96.0,amazon.de,0.58,2026-07-01
+CM002,Wella Shinefinity Pearl Blonde Gloss,Wella,Beauty > Hair Coloration,Toner / Gloss,Ash Blonde,14.49,31,93.5,flaconi.de,0.44,2026-07-01
+CM003,Garnier Olia Copper Glow,Garnier,Beauty > Hair Coloration,Permanent Color,Copper,7.95,42,90.2,rossmann.de,0.33,2026-07-01
+CM004,Bleach London Super Cool Colour Icy Plum,Bleach London,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Winter,8.99,55,88.1,tiktok_shop_signal,0.49,2026-07-01
+CM005,Madison Reed Semi-Permanent Mahogany Auburn,Madison Reed,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Auburn,18.09,829,28.6,douglas.de,-0.332,2026-07-01
+CM006,Garnier Permanent Chocolate Brown,Garnier,Beauty > Hair Coloration,Men's Color,Dark Brown,12.17,386,62.5,dm.de,-0.317,2026-07-01
+CM007,Bleach London Root Mulled Wine,Bleach London,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Winter,8.26,442,49.2,google_trends,0.039,2026-07-01
+CM008,Syoss Care Warm Auburn,Syoss,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Auburn,21.81,586,43.1,douglas.de,0.504,2026-07-01
+CM009,Crazy Color Permanent Dark Blonde,Crazy Color,Beauty > Hair Coloration,Permanent Color,Blonde,29.23,632,43.7,tiktok_shop_signal,0.628,2026-07-01
+CM010,eSalon Color Silver Grey,eSalon,Beauty > Hair Coloration,Permanent Color,Silver/Grey,25.75,358,74.4,douglas.de,-0.323,2026-07-01
+CM011,Kérastase Chroma Absolu Permanent Chocolate Brown,Kérastase Chroma Absolu,Beauty > Hair Coloration,Root Touch-Up,Dark Brown,29.78,422,56.6,google_trends,-0.106,2026-07-01
+CM012,Herbatint Color Pearl Silver,Herbatint,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Silver/Grey,5.69,313,61.6,rossmann.de,-0.33,2026-07-01
+CM013,eSalon Permanent Peach Sorbet,eSalon,Beauty > Hair Coloration,Permanent Color,Pastel,17.37,432,53.5,google_trends,0.12,2026-07-01
+CM014,Schwarzkopf Semi-Permanent Apricot Copper,Schwarzkopf,Beauty > Hair Coloration,Men's Color,Copper,12.37,101,100.1,dm.de,0.341,2026-07-01
+CM015,John Frieda Care Intense Red,John Frieda,Beauty > Hair Coloration,Root Touch-Up,Red,8.32,307,68.4,flaconi.de,-0.148,2026-07-01
+CM016,Kérastase Chroma Absolu Color Mulled Wine,Kérastase Chroma Absolu,Beauty > Hair Coloration,Bleach / Lightener,Winter,9.56,272,64.0,douglas.de,0.052,2026-07-01
+CM017,Herbatint Care Mocha Brown,Herbatint,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Dark Brown,6.45,345,62.3,douglas.de,0.451,2026-07-01
+CM018,Directions Color Smoky Blonde,Directions,Beauty > Hair Coloration,Root Touch-Up,Ash Blonde,25.41,517,58.4,flaconi.de,0.313,2026-07-01
+CM019,eSalon Root Spiced Copper,eSalon,Beauty > Hair Coloration,Permanent Color,Copper,17.39,688,40.3,rossmann.de,0.531,2026-07-01
+CM020,Kérastase Chroma Absolu Gloss Coral Rose,Kérastase Chroma Absolu,Beauty > Hair Coloration,Toner / Gloss,Summer,16.97,677,46.4,google_trends,0.588,2026-07-01
+CM021,Naturtint Semi-Permanent Intense Red,Naturtint,Beauty > Hair Coloration,Color Care Add-on,Red,28.29,745,31.2,douglas.de,-0.149,2026-07-01
+CM022,Arctic Fox Care Caramel Brown,Arctic Fox,Beauty > Hair Coloration,Permanent Color,Medium Brown,23.89,865,14.4,amazon.de,0.51,2026-07-01
+CM023,Wella Permanent Beach Blonde,Wella,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Summer,25.41,662,27.8,google_trends,0.251,2026-07-01
+CM024,Kristin Ess Gloss Hazelnut Brown,Kristin Ess,Beauty > Hair Coloration,Permanent Color,Medium Brown,10.38,848,13.0,flaconi.de,0.21,2026-07-01
+CM025,Manic Panic Gloss Natural Black,Manic Panic,Beauty > Hair Coloration,Root Touch-Up,Black,11.08,30,93.5,tiktok_shop_signal,-0.072,2026-07-01
+CM026,Bleach London Color Coral Rose,Bleach London,Beauty > Hair Coloration,Permanent Color,Summer,16.62,21,89.3,dm.de,-0.036,2026-07-01
+CM027,Madison Reed Root Spiced Copper,Madison Reed,Beauty > Hair Coloration,Bleach / Lightener,Copper,21.08,93,90.6,tiktok_shop_signal,0.374,2026-07-01
+CM028,Clairol Care Pearl Silver,Clairol,Beauty > Hair Coloration,Permanent Color,Silver/Grey,28.25,535,53.1,douglas.de,0.6,2026-07-01
+CM029,Crazy Color Gloss Mocha Brown,Crazy Color,Beauty > Hair Coloration,Permanent Color,Dark Brown,7.17,827,15.1,tiktok_shop_signal,0.234,2026-07-01
+CM030,Kristin Ess Gloss Neon Green,Kristin Ess,Beauty > Hair Coloration,Toner / Gloss,Vivid,9.66,110,83.4,amazon.de,0.089,2026-07-01
+CM031,Naturtint Permanent Soft Black,Naturtint,Beauty > Hair Coloration,Bleach / Lightener,Black,13.73,972,0,douglas.de,0.074,2026-07-01
+CM032,Herbatint Gloss Frosted Chestnut,Herbatint,Beauty > Hair Coloration,Color Care Add-on,Winter,16.35,377,72.8,dm.de,0.295,2026-07-01
+CM033,Goldwell Care Electric Blue,Goldwell,Beauty > Hair Coloration,Permanent Color,Vivid,21.95,808,26.0,amazon.de,0.203,2026-07-01
+CM034,Madison Reed Root Ultra Violet,Madison Reed,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Vivid,7.16,888,7.1,flaconi.de,0.038,2026-07-01
+CM035,Kristin Ess Root Honey Blonde,Kristin Ess,Beauty > Hair Coloration,Color Care Add-on,Blonde,28.33,775,18.4,rossmann.de,0.509,2026-07-01
+CM036,Revlon Root Peach Sorbet,Revlon,Beauty > Hair Coloration,Color Care Add-on,Pastel,14.55,35,93.4,dm.de,0.473,2026-07-01
+CM037,Directions Root Spiced Copper,Directions,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Copper,14.97,941,16.4,tiktok_shop_signal,-0.19,2026-07-01
+CM038,Naturtint Permanent Smoky Blonde,Naturtint,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Ash Blonde,22.95,561,52.3,flaconi.de,0.345,2026-07-01
+CM039,Garnier Care Chestnut Brown,Garnier,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Medium Brown,24.56,140,76.1,rossmann.de,0.278,2026-07-01
+CM040,eSalon Gloss Espresso Brown,eSalon,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Dark Brown,17.42,993,9.9,google_trends,0.413,2026-07-01
+CM041,Goldwell Root Frosted Chestnut,Goldwell,Beauty > Hair Coloration,Toner / Gloss,Winter,16.43,753,18.0,rossmann.de,0.337,2026-07-01
+CM042,eSalon Color Mushroom Brown,eSalon,Beauty > Hair Coloration,Toner / Gloss,Light Brown,13.55,403,71.6,tiktok_shop_signal,0.534,2026-07-01
+CM043,Herbatint Semi-Permanent Soft Black,Herbatint,Beauty > Hair Coloration,Permanent Color,Black,19.9,235,89.2,flaconi.de,-0.152,2026-07-01
+CM044,Revlon Permanent Pearl Silver,Revlon,Beauty > Hair Coloration,Permanent Color,Silver/Grey,10.75,92,104.8,rossmann.de,0.597,2026-07-01
+CM045,Syoss Permanent Intense Red,Syoss,Beauty > Hair Coloration,Permanent Color,Red,25.5,507,42.3,google_trends,-0.147,2026-07-01
+CM046,Naturtint Permanent Deep Auburn,Naturtint,Beauty > Hair Coloration,Permanent Color,Auburn,15.2,212,83.8,tiktok_shop_signal,-0.067,2026-07-01
+CM047,John Frieda Gloss Copper Glow,John Frieda,Beauty > Hair Coloration,Root Touch-Up,Copper,11.54,269,69.0,flaconi.de,0.557,2026-07-01
+CM048,dpHUE Permanent Pastel Pink,dpHUE,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Pastel,4.26,137,98.1,google_trends,0.048,2026-07-01
+CM049,John Frieda Permanent Ultra Violet,John Frieda,Beauty > Hair Coloration,Toner / Gloss,Vivid,19.52,75,84.9,dm.de,-0.298,2026-07-01
+CM050,Herbatint Semi-Permanent Smoky Blonde,Herbatint,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Ash Blonde,29.14,613,46.4,tiktok_shop_signal,-0.304,2026-07-01
+CM051,Naturtint Root Apricot Copper,Naturtint,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Copper,21.44,136,100.6,douglas.de,-0.309,2026-07-01
+CM052,Revlon Permanent Intense Red,Revlon,Beauty > Hair Coloration,Permanent Color,Red,26.82,136,78.6,google_trends,0.18,2026-07-01
+CM053,Clairol Color Cool Ash Blonde,Clairol,Beauty > Hair Coloration,Permanent Color,Ash Blonde,16.97,997,11.2,google_trends,0.011,2026-07-01
+CM054,Manic Panic Semi-Permanent Light Blonde,Manic Panic,Beauty > Hair Coloration,Permanent Color,Blonde,17.43,447,67.6,amazon.de,0.387,2026-07-01
+CM055,Directions Semi-Permanent Caramel Brown,Directions,Beauty > Hair Coloration,Toner / Gloss,Medium Brown,20.54,451,46.2,rossmann.de,-0.295,2026-07-01
+CM056,Revlon Gloss Dark Blonde,Revlon,Beauty > Hair Coloration,Permanent Color,Blonde,16.14,119,103.0,flaconi.de,-0.309,2026-07-01
+CM057,dpHUE Permanent Intense Red,dpHUE,Beauty > Hair Coloration,Men's Color,Red,16.81,867,21.3,rossmann.de,-0.226,2026-07-01
+CM058,Wella Gloss Honey Blonde,Wella,Beauty > Hair Coloration,Permanent Color,Blonde,23.49,843,12.5,google_trends,0.236,2026-07-01
+CM059,got2b Semi-Permanent Soft Black,got2b,Beauty > Hair Coloration,Men's Color,Black,8.68,943,0,tiktok_shop_signal,0.148,2026-07-01
+CM060,Syoss Root Soft Black,Syoss,Beauty > Hair Coloration,Bleach / Lightener,Black,29.5,125,87.4,douglas.de,0.579,2026-07-01
+CM061,Syoss Color Hazelnut Brown,Syoss,Beauty > Hair Coloration,Bleach / Lightener,Medium Brown,15.96,725,34.0,flaconi.de,0.278,2026-07-01
+CM062,Naturtint Root Natural Black,Naturtint,Beauty > Hair Coloration,Semi-Permanent / Fashion Color,Black,21.05,974,3.9,google_trends,0.65,2026-07-01
+CM063,got2b Color Coral Rose,got2b,Beauty > Hair Coloration,Permanent Color,Summer,11.35,818,9.6,dm.de,0.197,2026-07-01
+CM064,Goldwell Root Copper Glow,Goldwell,Beauty > Hair Coloration,Root Touch-Up,Copper,10.23,790,32.6,dm.de,-0.329,2026-07-01
+CM065,John Frieda Permanent Frosted Chestnut,John Frieda,Beauty > Hair Coloration,Permanent Color,Winter,20.82,978,8.6,dm.de,-0.051,2026-07-01
+CM066,Manic Panic Care Dark Blonde,Manic Panic,Beauty > Hair Coloration,Toner / Gloss,Blonde,7.4,682,24.2,amazon.de,0.163,2026-07-01
+CM067,Directions Permanent Apricot Copper,Directions,Beauty > Hair Coloration,Root Touch-Up,Copper,18.63,434,48.9,flaconi.de,0.461,2026-07-01
+CM068,Goldwell Permanent Pastel Pink,Goldwell,Beauty > Hair Coloration,Permanent Color,Pastel,5.04,350,79.3,google_trends,-0.126,2026-07-01
+CM069,Clairol Care Burgundy Red,Clairol,Beauty > Hair Coloration,Color Care Add-on,Red,17.63,298,71.9,dm.de,0.557,2026-07-01
+CM070,Directions Care Chestnut Brown,Directions,Beauty > Hair Coloration,Root Touch-Up,Medium Brown,25.87,536,47.1,douglas.de,-0.302,2026-07-01
+CM071,Wella Color Burgundy Red,Wella,Beauty > Hair Coloration,Color Care Add-on,Red,15.04,97,91.9,google_trends,0.218,2026-07-01
+CM072,Naturtint Color Pearl Silver,Naturtint,Beauty > Hair Coloration,Root Touch-Up,Silver/Grey,4.41,759,30.6,rossmann.de,0.436,2026-07-01
+CM073,Kristin Ess Care Apricot Copper,Kristin Ess,Beauty > Hair Coloration,Permanent Color,Copper,12.15,742,27.2,google_trends,0.1,2026-07-01
+CM074,Naturtint Gloss Sunlit Peach,Naturtint,Beauty > Hair Coloration,Root Touch-Up,Summer,8.8,765,38.1,amazon.de,0.522,2026-07-01
+CM075,Syoss Color Blue Black,Syoss,Beauty > Hair Coloration,Root Touch-Up,Black,7.02,176,88.8,flaconi.de,0.342,2026-07-01
