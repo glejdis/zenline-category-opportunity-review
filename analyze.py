@@ -668,6 +668,22 @@ def render_dashboard(payload):
     return HTML_TEMPLATE.replace("__DATA__", json.dumps(payload, ensure_ascii=False))
 
 
+# Root landing page so the GitHub Pages URL opens the dashboard directly.
+INDEX_REDIRECT = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="refresh" content="0; url=outputs/dashboard.html"/>
+<link rel="canonical" href="outputs/dashboard.html"/>
+<title>Category Opportunity Review — Hair Coloration</title>
+</head>
+<body style="font-family:Segoe UI,Calibri,sans-serif;padding:2rem">
+Redirecting to the <a href="outputs/dashboard.html">Category Opportunity Review dashboard</a>…
+</body>
+</html>
+"""
+
+
 # ------------------------------------------ Main --------------------------------------
 def main():
     os.makedirs(OUT, exist_ok=True)
@@ -705,6 +721,10 @@ def main():
     with open(os.path.join(OUT, "dashboard.html"), "w", encoding="utf-8") as f:
         f.write(render_dashboard(payload))
 
+    # site entry point for GitHub Pages (root URL -> dashboard)
+    with open(os.path.join(BASE, "index.html"), "w", encoding="utf-8") as f:
+        f.write(INDEX_REDIRECT)
+
     # console handoff
     print("Category Opportunity Review — pipeline complete\n" + "-" * 48)
     print(f"SKUs analysed        : {S['n_skus']}")
@@ -718,6 +738,7 @@ def main():
     print(f"Shelf freed (delist) : ~{S['shelf_freed_cm']:.0f} cm")
     print("\nOutputs written to ./outputs :")
     print("  opportunities.csv, assortment_gaps.csv, category_review.md, dashboard.html")
+    print("Site entry point    : ./index.html (redirects to the dashboard for GitHub Pages)")
 
 
 if __name__ == "__main__":
