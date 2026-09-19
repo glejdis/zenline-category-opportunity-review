@@ -2,6 +2,8 @@
 
 [![tests](https://github.com/glejdis/zenline-category-opportunity-review/actions/workflows/tests.yml/badge.svg)](https://github.com/glejdis/zenline-category-opportunity-review/actions/workflows/tests.yml)
 
+### ▶ [**Open the live interactive dashboard**](https://glejdis.github.io/zenline-category-opportunity-review/) — no install, opens in your browser
+
 A small, reproducible **category opportunity review** for *ZenBeauty Retail* (fictional German
 drugstore), category **Beauty > Hair Coloration**.
 
@@ -25,7 +27,8 @@ readable Markdown brief. Every recommendation traces back to specific SKUs and t
 - **19** competitor demand cells where we hold ≤1 active SKU → **supplier follow-up watchlist**.
 
 Full ranked detail: [`outputs/category_review.md`](outputs/category_review.md) ·
-interactive: [`outputs/dashboard.html`](outputs/dashboard.html).
+interactive: **[live dashboard](https://glejdis.github.io/zenline-category-opportunity-review/)**
+(or `outputs/dashboard.html` locally).
 
 ---
 
