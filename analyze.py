@@ -552,7 +552,8 @@ a{color:var(--cp-link)}
 
 <div class="kpis" id="kpis"></div>
 
-<h2>Top recommendations</h2>
+<h2>The 5 recommendations</h2>
+<p style="color:var(--cp-text-muted);font-size:.88rem;margin:-4px 0 14px">The evidence-backed actions for this category review. Each card = <b>what to do</b> · <b>why</b> (with the numbers) · the specific <b>SKUs</b> as evidence · the <b>action</b> to take.</p>
 <div class="recs" id="recs"></div>
 
 <h2>Opportunity map — where the prize is</h2>
