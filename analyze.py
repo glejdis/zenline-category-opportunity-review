@@ -240,6 +240,14 @@ def classify(sku, bench):
             if best[0] != "Delist / markdown":
                 primary_action, value_eur, rationale = best
 
+        # confidence: first-party data (channel/market/margin) is robust; a benchmark-only
+        # price flag leans on thin competitor cells, so grade it by competitor sample size.
+        if primary_action == "Price / margin" and value_eur == 0:
+            cn = b["comp_n"] if b else 0
+            confidence = "Low" if cn <= 1 else "Medium"
+        else:
+            confidence = "High"
+
         flagged.append({
             "product_id": s["product_id"], "product_name": s["product_name"],
             "brand": s["brand"], "subcategory": s["subcategory"], "shade_group": s["shade_group"],
@@ -259,6 +267,7 @@ def classify(sku, bench):
             "shelf_space_cm": round(s["shelf_space_cm"], 0),
             "primary_action": primary_action,
             "opportunity_value_eur": round(value_eur, 0),
+            "confidence": confidence,
             "rationale": rationale,
             "also_flagged": "; ".join(a[0] for a in actions if a[0] != primary_action),
         })
@@ -271,7 +280,11 @@ def classify(sku, bench):
     return flagged, T, chan_share_med
 
 
-def assortment_gaps(sku, bench):
+def assortment_gaps(sku, bench, comp=None):
+    # example competitor products per (subcategory, shade), strongest signal first
+    cell_products = {}
+    for c in (comp or []):
+        cell_products.setdefault((c["subcategory"], c["shade_group"]), []).append(c)
     gaps = []
     for (sc, shade), b in bench.items():
         cover = [s for s in sku if s["subcategory"] == sc and s["shade_group"] == shade
@@ -280,14 +293,23 @@ def assortment_gaps(sku, bench):
         if strong and len(cover) <= CFG["gap_max_active_cover"]:
             # blended priority: popularity is the robust signal, trend a bounded multiplier
             gap_score = b["comp_signal"] * (1 + max(0.0, min(b["comp_trend"], 0.6)))
+            prods = sorted(cell_products.get((sc, shade), []),
+                           key=lambda c: c["signal_score_0_100"], reverse=True)[:3]
+            examples = [{"name": c["competitor_product_name"], "brand": c["brand"],
+                         "price_eur": round(c["price_eur"], 2)} for c in prods]
+            confidence = "Low" if b["comp_n"] <= 1 else ("Medium" if b["comp_n"] <= 3 else "High")
             gaps.append({
                 "subcategory": sc, "shade_group": shade,
                 "gap_score": round(gap_score, 1),
+                "confidence": confidence,
                 "competitor_signal_0_100": round(b["comp_signal"], 1),
                 "competitor_trend_12w_pct": round(b["comp_trend"], 3),
                 "competitor_rows": b["comp_n"],
                 "active_skus_held": len(cover),
                 "channel_revenue_eur_12w": round(sum(s["channel_revenue_eur_12w"] for s in cover), 0),
+                "examples": examples,
+                "example_products": "; ".join(
+                    f"{e['name']} ({e['brand']}, €{e['price_eur']:.2f})" for e in examples),
             })
     gaps.sort(key=lambda g: g["gap_score"], reverse=True)
     return gaps
@@ -538,6 +560,14 @@ tr:hover td{background:var(--cp-accent-soft)}
   padding:8px 10px;font-size:.78rem;box-shadow:var(--cp-shadow)}
 #tip b{color:var(--cp-accent)}
 .count{color:var(--cp-text-muted);font-size:.82rem;margin-left:auto}
+.conf{font-size:.68rem;padding:1px 7px;border-radius:999px;border:1px solid var(--cp-border);white-space:nowrap}
+.conf.High{color:var(--cp-success);border-color:var(--cp-success);background:rgba(22,163,74,.12)}
+.conf.Medium{color:var(--cp-warning);border-color:var(--cp-warning);background:rgba(245,158,11,.12)}
+.conf.Low{color:var(--cp-text-soft)}
+.btn{background:var(--cp-accent);color:var(--cp-accent-fg);border:1px solid var(--cp-accent);border-radius:.625rem;padding:8px 14px;font-size:.82rem;cursor:pointer;font-weight:600}
+.btn:hover{background:var(--cp-accent-hover)}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:var(--cp-text-muted);cursor:pointer;user-select:none}
+.src{font-size:.78rem;color:var(--cp-text-muted)}
 footer{margin-top:34px;color:var(--cp-text-soft);font-size:.78rem}
 a{color:var(--cp-link)}
 </style>
@@ -579,6 +609,10 @@ a{color:var(--cp-link)}
 <div class="controls">
   <input id="q" placeholder="Search product, brand, subcategory…" oninput="render()"/>
   <select id="subcat" onchange="render()"></select>
+  <select id="brand" onchange="render()"></select>
+  <select id="supplier" onchange="render()"></select>
+  <label class="chk"><input type="checkbox" id="plonly" onchange="render()"/> Private label only</label>
+  <button class="btn" onclick="downloadCSV()">⬇ Download CSV</button>
   <span class="count" id="count"></span>
 </div>
 <div class="tablewrap">
@@ -594,6 +628,7 @@ a{color:var(--cp-link)}
       <th class="num" data-k="market_revenue_eur_12w">Market €</th>
       <th class="num" data-k="channel_share_pct">Share %</th>
       <th class="num" data-k="channel_margin_pct">Margin</th>
+      <th data-k="confidence">Confidence</th>
       <th>Evidence</th>
     </tr></thead>
     <tbody id="rows"></tbody>
@@ -606,6 +641,7 @@ a{color:var(--cp-link)}
     <thead><tr>
       <th>Subcategory</th><th>Shade</th><th class="num">Comp. signal</th>
       <th class="num">Comp. trend</th><th class="num">Active SKUs</th><th class="num">Comp. rows</th>
+      <th>Confidence</th><th>Products to source (competitor examples)</th>
     </tr></thead>
     <tbody id="gaprows"></tbody>
   </table>
@@ -622,7 +658,7 @@ a{color:var(--cp-link)}
 <script>
 const DATA = __DATA__;
 const TAGCLS = {"Fix availability":"avail","Promote":"promo","Delist / markdown":"delist","Price / margin":"price"};
-let activeAction = "All", sortK = "opportunity_value_eur", sortDir = -1;
+let activeAction = "All", sortK = "opportunity_value_eur", sortDir = -1, lastRows = [];
 
 function fmtEur(v){return v ? "€"+Math.round(v).toLocaleString() : "—";}
 function pct(v){return (v*100).toFixed(0)+"%";}
@@ -631,7 +667,7 @@ function kpis(){
   const s = DATA.summary;
   const cards = [
     ["Channel share of market", s.channel_share_pct.toFixed(1)+"%", fmtEur(s.channel_rev)+" of "+fmtEur(s.market_rev), "execution headroom"],
-    ["Revenue upside (12w)", fmtEur(s.total_revenue_upside), "availability + promotion", "modeled ceiling"],
+    ["Revenue upside (12w)", fmtEur(s.total_revenue_upside), "≈ "+fmtEur(s.total_revenue_upside*52/12)+"/yr · +"+(100*s.total_revenue_upside/s.channel_rev).toFixed(1)+"% to category", "availability + promotion"],
     ["Margin-repair upside", fmtEur(s.upside_margin), "thin-margin volume sellers", ""],
     ["Delist candidates", s.delist_n, "~"+Math.round(s.shelf_freed_cm)+" cm shelf freed", ""],
     ["Assortment gaps", s.n_gaps, "competitor demand cells", "supplier follow-up"],
@@ -644,9 +680,9 @@ function recs(){
   document.getElementById("recs").innerHTML = DATA.recommendations.map((r,i)=>{
     let ev="";
     if(r.action==="Assortment gap"){
-      ev = "<ul>"+r.evidence.map(g=>`<li><b>${g.subcategory} · ${g.shade_group}</b> — signal ${g.competitor_signal_0_100.toFixed(0)}, trend ${(g.competitor_trend_12w_pct*100).toFixed(0)}%, ${g.active_skus_held} active SKU(s)</li>`).join("")+"</ul>";
+      ev = "<ul>"+r.evidence.map(g=>`<li><b>${g.subcategory} · ${g.shade_group}</b> — signal ${g.competitor_signal_0_100.toFixed(0)}, trend ${(g.competitor_trend_12w_pct*100).toFixed(0)}%, ${g.active_skus_held} active SKU(s) <span class="conf ${g.confidence}">${g.confidence}</span>${g.examples&&g.examples.length?`<br><span class="src">source e.g.: ${g.examples.map(e=>esc(e.name)+" ("+esc(e.brand)+", €"+e.price_eur.toFixed(2)+")").join(" · ")}</span>`:""}</li>`).join("")+"</ul>";
     } else {
-      ev = "<ul>"+r.evidence.map(f=>`<li><b>${f.product_id}</b> ${f.product_name} — ${f.rationale}${f.opportunity_value_eur?" ("+fmtEur(f.opportunity_value_eur)+")":""}</li>`).join("")+"</ul>";
+      ev = "<ul>"+r.evidence.map(f=>`<li><b>${f.product_id}</b> ${f.product_name} — ${f.rationale}${f.opportunity_value_eur?" ("+fmtEur(f.opportunity_value_eur)+")":""} <span class="conf ${f.confidence}">${f.confidence}</span></li>`).join("")+"</ul>";
     }
     return `<div class="rec"><h3>${i+1}. ${r.title}</h3><div class="why">${r.why}</div>${ev}<div class="do">→ <b>Action:</b> ${r.do}</div></div>`;
   }).join("");
@@ -660,13 +696,18 @@ function setup(){
     `<span class="pill${a===activeAction?' active':''}" onclick="setAction('${a}')">${a}</span>`).join(" ");
   const subs = ["All subcategories", ...[...new Set(DATA.opportunities.map(o=>o.subcategory))].sort()];
   document.getElementById("subcat").innerHTML = subs.map(s=>`<option>${s}</option>`).join("");
+  const brands = ["All brands", ...[...new Set(DATA.opportunities.map(o=>o.brand))].sort()];
+  document.getElementById("brand").innerHTML = brands.map(s=>`<option>${s}</option>`).join("");
+  const supps = ["All suppliers", ...[...new Set(DATA.opportunities.map(o=>o.supplier).filter(Boolean))].sort()];
+  document.getElementById("supplier").innerHTML = supps.map(s=>`<option>${s}</option>`).join("");
   document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{
     const k=th.dataset.k; sortDir = (sortK===k)?-sortDir:-1; sortK=k; render();
   });
   document.getElementById("gaprows").innerHTML = DATA.assortment_gaps.map(g=>
     `<tr><td>${g.subcategory}</td><td>${g.shade_group}</td><td class="num">${g.competitor_signal_0_100.toFixed(0)}</td>
      <td class="num">${(g.competitor_trend_12w_pct*100).toFixed(0)}%</td><td class="num">${g.active_skus_held}</td>
-     <td class="num">${g.competitor_rows}</td></tr>`).join("");
+     <td class="num">${g.competitor_rows}</td><td><span class="conf ${g.confidence}">${g.confidence}</span></td>
+     <td class="src">${g.examples&&g.examples.length?g.examples.map(e=>esc(e.name)+" ("+esc(e.brand)+", €"+e.price_eur.toFixed(2)+")").join("<br>"):"—"}</td></tr>`).join("");
   kpis(); recs(); render(); charts();
 }
 
@@ -676,13 +717,20 @@ function toggleTheme(){const h=document.documentElement;h.setAttribute('data-the
 function render(){
   const q = document.getElementById("q").value.toLowerCase();
   const sc = document.getElementById("subcat").value;
+  const br = document.getElementById("brand").value;
+  const sp = document.getElementById("supplier").value;
+  const plonly = document.getElementById("plonly").checked;
   let rows = DATA.opportunities.filter(o=>{
     if(activeAction!=="All" && o.primary_action!==activeAction) return false;
     if(sc && !sc.startsWith("All") && o.subcategory!==sc) return false;
+    if(br && !br.startsWith("All") && o.brand!==br) return false;
+    if(sp && !sp.startsWith("All") && o.supplier!==sp) return false;
+    if(plonly && !o.private_label) return false;
     if(q && !(o.product_name+" "+o.brand+" "+o.subcategory+" "+o.product_id).toLowerCase().includes(q)) return false;
     return true;
   });
   rows.sort((a,b)=>{let x=a[sortK],y=b[sortK];if(typeof x==="string"){x=x||"";y=y||"";return sortDir*x.localeCompare(y);}return sortDir*((x||0)-(y||0));});
+  lastRows = rows;
   const maxv = Math.max(...DATA.opportunities.map(o=>o.opportunity_value_eur),1);
   document.getElementById("rows").innerHTML = rows.map(o=>{
     const cls = TAGCLS[o.primary_action]||"";
@@ -697,10 +745,22 @@ function render(){
       <td class="num">${fmtEur(o.market_revenue_eur_12w)}</td>
       <td class="num">${o.channel_share_pct.toFixed(1)}%</td>
       <td class="num">${pct(o.channel_margin_pct)}</td>
+      <td><span class="conf ${o.confidence}">${o.confidence}</span></td>
       <td class="muted">${o.rationale}</td>
     </tr>`;
   }).join("");
   document.getElementById("count").textContent = rows.length+" of "+DATA.opportunities.length+" flagged SKUs";
+}
+
+function downloadCSV(){
+  const cols = ["product_id","product_name","brand","subcategory","shade_group","supplier","private_label","primary_action","opportunity_value_eur","confidence","channel_revenue_eur_12w","market_revenue_eur_12w","channel_share_pct","channel_margin_pct","rationale"];
+  const cell = v => { v = v==null?"":String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  const csv = [cols.join(",")].concat(lastRows.map(r=>cols.map(c=>cell(r[c])).join(","))).join("\n");
+  const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "category_opportunities_"+(activeAction==="All"?"all":activeAction.replace(/[^a-z]/gi,"_").toLowerCase())+".csv";
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
 }
 
 const ACOLOR={"Fix availability":"--cp-warning","Promote":"--cp-success","Delist / markdown":"--cp-danger","Price / margin":"--cp-accent","None":"--cp-border-strong"};
@@ -808,18 +868,19 @@ def main():
     sku, comp = load()
     bench = competitor_benchmarks(comp)
     flagged, T, share_med = classify(sku, bench)
-    gaps = assortment_gaps(sku, bench)
+    gaps = assortment_gaps(sku, bench, comp)
     S = build_summary(sku, flagged, gaps)
     recs = recommendations(flagged, gaps, S)
 
     opp_fields = ["product_id", "product_name", "brand", "subcategory", "shade_group", "supplier",
                   "private_label", "status", "stock_status", "primary_action", "opportunity_value_eur",
-                  "priority_score", "rationale", "also_flagged", "price_eur", "comp_benchmark_price_eur",
-                  "price_index", "channel_revenue_eur_12w", "channel_units_12w", "channel_margin_pct",
-                  "channel_trend_12w_pct", "market_revenue_eur_12w", "market_trend_12w_pct",
-                  "channel_share_pct", "modeled_potential_eur", "shelf_space_cm"]
-    gap_fields = ["subcategory", "shade_group", "gap_score", "competitor_signal_0_100",
-                  "competitor_trend_12w_pct", "competitor_rows", "active_skus_held", "channel_revenue_eur_12w"]
+                  "confidence", "priority_score", "rationale", "also_flagged", "price_eur",
+                  "comp_benchmark_price_eur", "price_index", "channel_revenue_eur_12w", "channel_units_12w",
+                  "channel_margin_pct", "channel_trend_12w_pct", "market_revenue_eur_12w",
+                  "market_trend_12w_pct", "channel_share_pct", "modeled_potential_eur", "shelf_space_cm"]
+    gap_fields = ["subcategory", "shade_group", "gap_score", "confidence", "competitor_signal_0_100",
+                  "competitor_trend_12w_pct", "competitor_rows", "active_skus_held",
+                  "channel_revenue_eur_12w", "example_products"]
 
     write_csv(os.path.join(OUT, "opportunities.csv"), flagged, opp_fields)
     write_csv(os.path.join(OUT, "assortment_gaps.csv"), gaps, gap_fields)

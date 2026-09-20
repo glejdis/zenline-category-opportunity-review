@@ -11,8 +11,10 @@ drugstore), category **Beauty > Hair Coloration**.
 
 The pipeline turns the three source CSVs into **five evidence-backed action lists** that map 1:1 to
 the customer's in-scope levers — **fix availability, promote, delist/markdown, price/margin review,
-assortment gap / supplier follow-up** — and ships them as a one-page interactive dashboard plus a
-readable Markdown brief. Every recommendation traces back to specific SKUs and their raw metrics.
+assortment gap / supplier follow-up** — and ships them as a one-page interactive dashboard (with
+confidence grades, named competitor products to source, brand/supplier/private-label filters, and
+one-click CSV export) plus a readable Markdown brief. Every recommendation traces back to specific
+SKUs and their raw metrics.
 
 ---
 
@@ -52,7 +54,7 @@ This regenerates everything in `outputs/`. Then **open `outputs/dashboard.html`*
 python -m unittest test_analyze -v
 ```
 
-22 stdlib `unittest` cases (no dependencies) covering the rule engine three ways: exact helper
+24 stdlib `unittest` cases (no dependencies) covering the rule engine three ways: exact helper
 math, **each business rule in isolation** on synthetic fixtures, cell-level gap detection/ranking,
 and **regression locks** against the shipped dataset (action counts + known anchor SKUs). Runs in
 ~0.03 s.
@@ -130,11 +132,12 @@ the rest are kept in `also_flagged`. Assortment gaps are evaluated at the (subca
 ## Next improvements (with more time)
 
 1. **Sensitivity band** on modeled value (median vs top-quartile share) to show a range, not a point.
-2. **Confidence weighting** by `comp_rows` and by channel-vs-market unit consistency.
+2. **Confidence in ranking** — the dashboard already grades each item (High/Medium/Low by data support); next is to *weight* the sort by it and by channel-vs-market unit consistency.
 3. **Elasticity-aware pricing** once historical price/volume is available, replacing the benchmark heuristic.
 4. **Config file + CLI flags** for thresholds so a category manager can tune without editing code.
-5. **Scheduled refresh** writing a dated snapshot per review cycle to track whether actions moved share.
-6. ~~Unit tests on the rule engine~~ — **done** (`test_analyze.py`, 22 cases); next: wire into CI (GitHub Actions).
+5. **Workflow layer** — assign an owner, due date, and status per action so the review becomes a tracked to-do list (belongs in a proper tool, not this artifact).
+6. **Scheduled refresh** writing a dated snapshot per review cycle to track whether actions moved share.
+7. ~~Unit tests + CI~~ — **done** (`test_analyze.py`, 24 cases; GitHub Actions runs them on 3 Python versions per push).
 
 ---
 

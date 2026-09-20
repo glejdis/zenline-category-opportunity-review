@@ -1,20 +1,20 @@
-subcategory,shade_group,gap_score,competitor_signal_0_100,competitor_trend_12w_pct,competitor_rows,active_skus_held,channel_revenue_eur_12w
-Color Care Add-on,Pastel,137.6,93.4,0.473,1,0,0
-Men's Color,Copper,134.2,100.1,0.341,1,0,0
-Bleach / Lightener,Copper,124.5,90.6,0.374,1,0,0
-Toner / Gloss,Light Brown,109.8,71.6,0.534,1,1,15243.0
-Semi-Permanent / Fashion Color,Medium Brown,97.3,76.1,0.278,1,1,3109.0
-Color Care Add-on,Winter,94.3,72.8,0.295,1,0,0
-Toner / Gloss,Vivid,84.2,84.2,-0.104,2,0,0
-Color Care Add-on,Red,78.6,65.0,0.209,3,0,0
-Permanent Color,Copper,69.4,52.6,0.32,3,1,22956.0
-Root Touch-Up,Red,68.4,68.4,-0.148,1,1,4849.0
-Bleach / Lightener,Winter,67.3,64.0,0.052,1,0,0
-Men's Color,Dark Brown,62.5,62.5,-0.317,1,0,0
-Semi-Permanent / Fashion Color,Silver/Grey,61.6,61.6,-0.33,1,1,3199.0
-Bleach / Lightener,Black,58.0,43.7,0.326,2,0,0
-Root Touch-Up,Summer,58.0,38.1,0.522,1,1,6232.0
-Semi-Permanent / Fashion Color,Dark Brown,51.7,36.1,0.432,2,1,1010.0
-Root Touch-Up,Silver/Grey,43.9,30.6,0.436,1,0,0
-Bleach / Lightener,Medium Brown,43.5,34.0,0.278,1,0,0
-Semi-Permanent / Fashion Color,Black,6.2,3.9,0.65,1,1,201.0
+subcategory,shade_group,gap_score,confidence,competitor_signal_0_100,competitor_trend_12w_pct,competitor_rows,active_skus_held,channel_revenue_eur_12w,example_products
+Color Care Add-on,Pastel,137.6,Low,93.4,0.473,1,0,0,"Revlon Root Peach Sorbet (Revlon, €14.55)"
+Men's Color,Copper,134.2,Low,100.1,0.341,1,0,0,"Schwarzkopf Semi-Permanent Apricot Copper (Schwarzkopf, €12.37)"
+Bleach / Lightener,Copper,124.5,Low,90.6,0.374,1,0,0,"Madison Reed Root Spiced Copper (Madison Reed, €21.08)"
+Toner / Gloss,Light Brown,109.8,Low,71.6,0.534,1,1,15243.0,"eSalon Color Mushroom Brown (eSalon, €13.55)"
+Semi-Permanent / Fashion Color,Medium Brown,97.3,Low,76.1,0.278,1,1,3109.0,"Garnier Care Chestnut Brown (Garnier, €24.56)"
+Color Care Add-on,Winter,94.3,Low,72.8,0.295,1,0,0,"Herbatint Gloss Frosted Chestnut (Herbatint, €16.35)"
+Toner / Gloss,Vivid,84.2,Medium,84.2,-0.104,2,0,0,"John Frieda Permanent Ultra Violet (John Frieda, €19.52); Kristin Ess Gloss Neon Green (Kristin Ess, €9.66)"
+Color Care Add-on,Red,78.6,Medium,65.0,0.209,3,0,0,"Wella Color Burgundy Red (Wella, €15.04); Clairol Care Burgundy Red (Clairol, €17.63); Naturtint Semi-Permanent Intense Red (Naturtint, €28.29)"
+Permanent Color,Copper,69.4,Medium,52.6,0.32,3,1,22956.0,"Garnier Olia Copper Glow (Garnier, €7.95); eSalon Root Spiced Copper (eSalon, €17.39); Kristin Ess Care Apricot Copper (Kristin Ess, €12.15)"
+Root Touch-Up,Red,68.4,Low,68.4,-0.148,1,1,4849.0,"John Frieda Care Intense Red (John Frieda, €8.32)"
+Bleach / Lightener,Winter,67.3,Low,64.0,0.052,1,0,0,"Kérastase Chroma Absolu Color Mulled Wine (Kérastase Chroma Absolu, €9.56)"
+Men's Color,Dark Brown,62.5,Low,62.5,-0.317,1,0,0,"Garnier Permanent Chocolate Brown (Garnier, €12.17)"
+Semi-Permanent / Fashion Color,Silver/Grey,61.6,Low,61.6,-0.33,1,1,3199.0,"Herbatint Color Pearl Silver (Herbatint, €5.69)"
+Bleach / Lightener,Black,58.0,Medium,43.7,0.326,2,0,0,"Syoss Root Soft Black (Syoss, €29.50); Naturtint Permanent Soft Black (Naturtint, €13.73)"
+Root Touch-Up,Summer,58.0,Low,38.1,0.522,1,1,6232.0,"Naturtint Gloss Sunlit Peach (Naturtint, €8.80)"
+Semi-Permanent / Fashion Color,Dark Brown,51.7,Medium,36.1,0.432,2,1,1010.0,"Herbatint Care Mocha Brown (Herbatint, €6.45); eSalon Gloss Espresso Brown (eSalon, €17.42)"
+Root Touch-Up,Silver/Grey,43.9,Low,30.6,0.436,1,0,0,"Naturtint Color Pearl Silver (Naturtint, €4.41)"
+Bleach / Lightener,Medium Brown,43.5,Low,34.0,0.278,1,0,0,"Syoss Color Hazelnut Brown (Syoss, €15.96)"
+Semi-Permanent / Fashion Color,Black,6.2,Low,3.9,0.65,1,1,201.0,"Naturtint Root Natural Black (Naturtint, €21.05)"

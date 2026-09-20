@@ -171,6 +171,14 @@ class TestRules(unittest.TestCase):
         b, _, _ = classify(self.pop, self.bench)
         self.assertEqual(a, b)
 
+    def test_confidence_grades(self):
+        # first-party-data actions are High; a benchmark-only price flag is graded by comp sample
+        for pid in ["T-AVAIL", "T-PROMO", "T-INAKTIV", "T-DEAD", "T-MARGIN"]:
+            self.assertEqual(self.by_id[pid]["confidence"], "High")
+        self.assertEqual(self.by_id["T-PRICE"]["confidence"], "Medium")  # bench comp_n = 3
+        for f in self.by_id.values():
+            self.assertIn(f["confidence"], {"High", "Medium", "Low"})
+
     def test_priority_and_also_flagged(self):
         # A SKU that trips BOTH availability (low stock, rising) and margin (thin margin, high rev).
         pop = [
@@ -195,10 +203,13 @@ class TestAssortmentGaps(unittest.TestCase):
         # Two strong competitor cells with no coverage (gaps) + one strong but well-covered cell.
         self.comp = [
             {"subcategory": "Toner / Gloss", "shade_group": "Copper",
+             "competitor_product_name": "Rival Copper Toner", "brand": "RivalCo",
              "price_eur": 10.0, "signal_score_0_100": 90.0, "trend_score_12w_pct": 0.30},
             {"subcategory": "Bleach / Lightener", "shade_group": "Red",
+             "competitor_product_name": "Rival Red Bleach", "brand": "RivalCo",
              "price_eur": 12.0, "signal_score_0_100": 70.0, "trend_score_12w_pct": 0.10},
             {"subcategory": "Permanent Color", "shade_group": "Blonde",
+             "competitor_product_name": "Rival Blonde", "brand": "RivalCo",
              "price_eur": 9.0, "signal_score_0_100": 95.0, "trend_score_12w_pct": 0.20},
         ]
         self.sku = [
@@ -221,6 +232,15 @@ class TestAssortmentGaps(unittest.TestCase):
         scores = [g["gap_score"] for g in gaps]
         self.assertEqual(scores, sorted(scores, reverse=True))     # descending
         self.assertEqual(gaps[0]["shade_group"], "Copper")         # 90*(1.3) beats 70*(1.1)
+
+    def test_examples_and_confidence(self):
+        gaps = assortment_gaps(self.sku, self.bench, self.comp)
+        copper = next(g for g in gaps if g["shade_group"] == "Copper")
+        self.assertTrue(copper["examples"])                         # named products to source
+        self.assertEqual(copper["examples"][0]["name"], "Rival Copper Toner")
+        self.assertEqual(copper["confidence"], "Low")               # single competitor row
+        for g in gaps:
+            self.assertIn(g["confidence"], {"High", "Medium", "Low"})
 
 
 _CSV = os.path.join(analyze.BASE, "sku_performance.csv")
