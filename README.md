@@ -119,7 +119,7 @@ the source files and rule configuration; a fixed `--as-of` date makes generation
 
 ```console
 python -m unittest -v
-node --test test_dashboard.cjs
+node --test test_dashboard.cjs test_strategy_deck.cjs
 ```
 
 Node 18+ is needed only for the optional dashboard logic tests, not to generate or use the artifact.
@@ -128,9 +128,17 @@ CSV handling and the local decision workflow rather than merely freezing old rec
 
 ## Business presentation and production design
 
-The ten-slide executive briefing covers the customer problem, the evidence-first approach, the five
-selected decisions, scenario limitations, stakeholder responsibilities and a controlled path to production.
-Source IDs and talk tracks are in the PowerPoint's speaker notes. No realised sales uplift or ROI is claimed.
+The ten-slide executive briefing has **eight decision-led main slides and two appendices**. It opens
+with the recommended leadership decision, then shows the complete primary-action breakdown, the five
+product checks, shortlist-versus-full-queue scenario economics, proposed owners and pilot gates.
+Methodology and the unchanged Azure production proposal sit in the appendix rather than interrupting
+the executive discussion. Source IDs, exact calculations and talk tracks are in the speaker notes.
+No realised sales uplift, ROI or time saving is claimed.
+
+`presentation\strategy_metrics.cjs` derives the management response groups and shortlisted financial
+scenarios from `outputs\review.json`; `strategy_story.cjs` renders the decision narrative. The deck
+distinguishes the full queue's scenarios from the smaller subset represented by the five selected
+products, and never adds revenue to gross profit.
 
 The proposed production design uses **App Service** for an authenticated dashboard/API,
 **Container Apps Jobs** for scheduled analysis, **private Blob containers** for raw inputs and

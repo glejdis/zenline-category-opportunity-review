@@ -30,8 +30,8 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Run dashboard behavior tests (no dependencies)
-        run: node --test test_dashboard.cjs
+      - name: Run dashboard and presentation evidence tests (no dependencies)
+        run: node --test test_dashboard.cjs test_strategy_deck.cjs
 
       - name: Smoke-test the pipeline end-to-end
         run: python analyze.py
