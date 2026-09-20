@@ -1,0 +1,25 @@
+flowchart LR
+    FEEDS["Retail data exports<br/>SKU / metadata / competitor"]
+    BLOB[("Azure Blob Storage<br/>Private raw + review containers")]
+    JOB["Azure Container Apps Jobs<br/>Scheduled Python analysis"]
+    APP["Azure App Service<br/>Dashboard + Python API"]
+    DB[("Azure Database for PostgreSQL<br/>Flexible Server<br/>Shared plans + audit")]
+    USER["Category managers<br/>and buyers"]
+    ENTRA["Microsoft Entra ID<br/>Sign-in + app roles"]
+    FEEDS -->|"Controlled ingestion"| BLOB
+    BLOB -->|"Read raw inputs"| JOB
+    JOB -->|"Publish valid snapshots only"| BLOB
+    BLOB -->|"Authorised review reads"| APP
+    USER -->|"HTTPS"| APP
+    ENTRA -.->|"Authenticate"| APP
+    APP <-->|"Scoped plan edits"| DB
+    subgraph OPS["Supporting services - proposed"]
+        direction TB
+        CI["GitHub Actions + Azure Container Registry<br/>OIDC releases + versioned job images"]
+        MON["Azure Monitor<br/>Application Insights + Log Analytics"]
+        KV["Azure Key Vault - conditional<br/>External-source credentials only"]
+    end
+    CI -.->|"Release image"| JOB
+    APP -.->|"Telemetry"| MON
+    JOB -.->|"Refresh health"| MON
+    KV -.->|"Only when needed"| JOB

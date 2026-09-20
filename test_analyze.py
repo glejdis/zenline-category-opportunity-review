@@ -577,6 +577,31 @@ class TestOutputs(unittest.TestCase):
         with self.assertRaises(ValueError):
             analyze.render_dashboard({"not_valid": float("nan")})
 
+    def test_architecture_is_embedded_offline_and_explicitly_not_deployed(self):
+        architecture = analyze.load_architecture()
+        self.assertIn("not deployed", architecture["status"])
+        self.assertTrue(architecture["diagram_data_uri"].startswith("data:image/svg+xml;base64,"))
+        self.assertTrue(architecture["mermaid_source"].startswith("flowchart"))
+        self.assertIn("Azure App Service", architecture["mermaid_source"])
+        self.assertIn("PostgreSQL", architecture["mermaid_source"])
+        self.assertIn("Container Apps Jobs", architecture["mermaid_source"])
+        self.assertIn("browser", architecture["today"])
+        html = analyze.render_dashboard(self.payload)
+        self.assertIn('id="open-architecture"', html)
+        self.assertIn('id="architecture-dialog"', html)
+        self.assertIn("data:image/svg+xml;base64,", html)
+        self.assertNotIn('src="https://', html)
+
+    def test_changed_mermaid_source_cannot_silently_keep_an_old_preview(self):
+        with tempfile.TemporaryDirectory() as folder:
+            destination = Path(folder) / "architecture"
+            shutil.copytree(Path(analyze.BASE) / "architecture", destination)
+            with (destination / "production.mmd").open("a", encoding="utf-8") as stream:
+                stream.write("\n%% source changed\n")
+            with patch.object(analyze, "BASE", folder):
+                with self.assertRaisesRegex(ValueError, "Architecture source or artwork changed"):
+                    analyze.load_architecture()
+
     def test_pipeline_outputs_share_the_same_evidence_without_touching_inputs(self):
         before = {name: hashlib.sha256((Path(analyze.BASE) / name).read_bytes()).hexdigest() for name in analyze.INPUT_FILES}
         with tempfile.TemporaryDirectory() as folder:

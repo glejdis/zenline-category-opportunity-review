@@ -4,6 +4,10 @@
 
 [Published dashboard](https://glejdis.github.io/zenline-category-opportunity-review/) · [Readable review](outputs/category_review.md)
 
+**Stakeholder briefing:** [PowerPoint](outputs/business_review.pptx) · [PDF preview](outputs/business_review.pdf)
+
+**Production proposal:** use the dashboard's **Architecture** icon, or open the [editable Mermaid source](architecture/production.mmd).
+
 A small review for the fictional retailer **ZenBeauty Retail**. The customer question is:
 **Which products need attention, what should we do next, and what evidence supports that decision?**
 
@@ -34,6 +38,8 @@ The published site reflects the last deployed commit, not uncommitted local chan
 2. **View evidence:** inspect status, stock, seasonality, raw metrics, source file/record/row, comparator observations and scenario calculations.
 3. **Build a review plan:** add relevant decisions, record an owner, due date, accept/defer decision, progress and notes; export for the review meeting.
 4. **Explore when needed:** filter by action, category, brand, supplier or private label; inspect the lower-priority charts and assortment watchlist.
+5. **Inspect the production path:** the Architecture icon opens the Azure proposal, service responsibilities,
+   security/operations considerations and downloadable Mermaid/SVG. It is a design, not a deployed environment.
 
 Plan edits stay in this browser's local storage. They are **not shared or sent anywhere**. File URLs,
 the hosted site and other browsers may not share storage. Storage errors and changed snapshots require
@@ -104,6 +110,7 @@ The original CSVs are unchanged.
 
 `analyze.py` contains the stdlib analysis and rendering pipeline; `dashboard_template.html` contains
 the UI. Keeping them separate makes both easier to inspect while the generated HTML remains standalone.
+The architecture preview is bundled into the HTML, so viewing it needs no network or Mermaid runtime.
 
 Generated files: `index.html`, `outputs/dashboard.html`, `outputs/category_review.md`,
 `outputs/opportunities.csv`, `outputs/assortment_gaps.csv`, and `outputs/review.json` (full audit payload).
@@ -118,6 +125,40 @@ node --test test_dashboard.cjs
 Node 18+ is needed only for the optional dashboard logic tests, not to generate or use the artifact.
 Coverage focuses on commercial guardrails, exact scenario math, input errors, evidence provenance,
 CSV handling and the local decision workflow rather than merely freezing old recommendation counts.
+
+## Business presentation and production design
+
+The ten-slide executive briefing covers the customer problem, the evidence-first approach, the five
+selected decisions, scenario limitations, stakeholder responsibilities and a controlled path to production.
+Source IDs and talk tracks are in the PowerPoint's speaker notes. No realised sales uplift or ROI is claimed.
+
+The proposed production design uses **App Service** for an authenticated dashboard/API,
+**Container Apps Jobs** for scheduled analysis, **private Blob containers** for raw inputs and
+versioned reviews, and **PostgreSQL Flexible Server** for shared plans/audit history.
+**Entra ID**, managed identities, **Monitor/Application Insights/Log Analytics**, and
+**Container Registry** support access, operation and delivery. Key Vault is conditional on
+external sources that require secrets. Official sources and implementation gaps are listed in
+`architecture\production.json` and in the dashboard's architecture panel.
+
+This does **not** implement or provision those services. The production API, row-level scope checks,
+shared plan schema, private networking, ingestion adapters and deployment process still need building.
+No Azure subscription, budget, region, availability target or retention policy is assumed.
+
+Optional authoring tools live in `presentation` and do not change the zero-dependency dashboard runtime.
+To rebuild artwork and the presentation (Node 22+, a local Edge/Chromium browser):
+
+```powershell
+$env:PUPPETEER_SKIP_DOWNLOAD = "true"
+npm --prefix presentation ci --no-audit --no-fund
+npm --prefix presentation run architecture
+python analyze.py --as-of 2026-09-20
+npm --prefix presentation run deck
+```
+
+Set `MERMAID_BROWSER` if the browser executable is not in a standard location. `production.render.json`
+ties the generated SVG/PNG to the Mermaid source; the pipeline rejects mismatched artwork instead of
+silently displaying an outdated diagram. PDF creation additionally needs LibreOffice or PowerPoint.
+The deck is a dated briefing: regenerate it after changing the underlying review snapshot.
 
 ## Tradeoffs and next improvements
 

@@ -112,6 +112,15 @@
     li + li { margin-top: 8px; }
     .page { width: min(1400px, 100%); margin: auto; padding: 32px; }
     .page-header { padding: 8px 0 16px; }
+    .header-tools { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .header-tools .eyebrow { margin-bottom: 0; }
+    .architecture-trigger { display: inline-flex; align-items: center; gap: 8px; }
+    .architecture-trigger svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+    dialog.architecture-dialog { width: min(1480px, calc(100% - 32px)); }
+    .architecture-viewport { overflow: auto; max-width: 100%; border: 1px solid var(--cp-border); border-radius: 0.625rem; margin: 16px 0; }
+    .architecture-viewport img { display: block; width: 100%; height: auto; }
+    .architecture-viewport.enlarged img { width: 1800px; max-width: none; }
+    .architecture-source { overflow: auto; max-height: 360px; white-space: pre; padding: 16px; background: var(--cp-surface-soft); color: var(--cp-text); border: 1px solid var(--cp-border); border-radius: 0.625rem; }
     .eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; color: var(--cp-accent); margin-bottom: 12px; }
     .muted, .small { color: var(--cp-text-muted); }
     .small { font-size: 0.875rem; }
@@ -227,7 +236,18 @@
   <a class="skip-link" href="#recommendations-heading">Skip to decisions</a>
   <div class="page">
     <header class="page-header">
-      <p class="eyebrow">CATEGORY REVIEW / 12-WEEK SNAPSHOT</p>
+      <div class="header-tools">
+        <p class="eyebrow">CATEGORY REVIEW / 12-WEEK SNAPSHOT</p>
+        <button type="button" id="open-architecture" class="architecture-trigger" aria-haspopup="dialog" aria-controls="architecture-dialog" title="View the proposed Azure production architecture">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="8.5" y="2" width="7" height="5" rx="1"></rect>
+            <path d="M12 7v5M4.5 17v-5h15v5"></path>
+            <rect x="1" y="17" width="7" height="5" rx="1"></rect>
+            <rect x="16" y="17" width="7" height="5" rx="1"></rect>
+          </svg>
+          Architecture
+        </button>
+      </div>
       <h1 id="headline">Start here: decisions for the category review</h1>
       <p class="muted">A short review queue, the evidence behind each decision, and a plan that stays in your browser.</p>
       <p id="generated-label" class="small"></p>
@@ -337,6 +357,16 @@
     </div>
     <div id="evidence-body" class="dialog-body"></div>
     <div id="evidence-footer" class="dialog-footer"></div>
+  </dialog>
+  <dialog id="architecture-dialog" class="architecture-dialog" aria-labelledby="architecture-title">
+    <div class="dialog-head">
+      <div>
+        <h2 id="architecture-title">Proposed Azure production architecture</h2>
+        <p class="small">Design proposal only. No Azure services have been deployed by this artifact.</p>
+      </div>
+      <button type="button" id="close-architecture" autofocus>Close architecture</button>
+    </div>
+    <div id="architecture-body" class="dialog-body"></div>
   </dialog>
   <script id="review-data" type="application/json">__DATA__</script>
   <script id="review-core">
@@ -821,6 +851,83 @@
           catch (error) { showError("Export failed: " + C.text(error.message) + ". No changes to your plan were made."); }
         }
 
+        function openArchitecture() {
+          try {
+            const architecture = data.architecture;
+            if (!architecture || typeof architecture.diagram_data_uri !== "string" ||
+                !architecture.diagram_data_uri.startsWith("data:image/svg+xml;base64,") ||
+                typeof architecture.mermaid_source !== "string") {
+              throw new Error("Architecture content is missing. Regenerate the dashboard from the repository.");
+            }
+            const intro = el("div", "notice");
+            intro.append(
+              el("strong", "", architecture.status),
+              el("p", "", architecture.scope),
+              el("p", "small", "Today: " + architecture.today)
+            );
+            const viewport = el("div", "architecture-viewport");
+            viewport.tabIndex = 0;
+            viewport.setAttribute("role", "region");
+            viewport.setAttribute("aria-label", "Proposed Azure architecture diagram; enlarge for detailed inspection");
+            const image = el("img");
+            image.src = architecture.diagram_data_uri;
+            image.alt = "Proposed production path: retail exports in private Azure Blob Storage; Container Apps Jobs validate and publish snapshots; Entra-authenticated App Service serves the dashboard and API; PostgreSQL holds shared plans and audit history. Monitor, Container Registry, CI and optional Key Vault support operation.";
+            viewport.append(image);
+            const actions = el("div", "actions");
+            let enlarged = false;
+            const zoom = button("Enlarge diagram", () => {
+              enlarged = !enlarged;
+              viewport.className = "architecture-viewport" + (enlarged ? " enlarged" : "");
+              zoom.textContent = enlarged ? "Fit diagram" : "Enlarge diagram";
+              zoom.setAttribute("aria-pressed", String(enlarged));
+            });
+            zoom.setAttribute("aria-pressed", "false");
+            actions.append(
+              zoom,
+              button("Download Mermaid source", () => download(architecture.mermaid_source, "azure-production-architecture.mmd", "text/plain;charset=utf-8")),
+              button("Download diagram SVG", () => download(architecture.diagram_svg, "azure-production-architecture.svg", "image/svg+xml;charset=utf-8"))
+            );
+            const flow = el("ol");
+            for (const step of architecture.flow) flow.append(el("li", "", step));
+            const source = el("details", "panel");
+            source.append(el("summary", "", "Editable Mermaid source"));
+            const code = el("pre", "architecture-source");
+            code.append(el("code", "", architecture.mermaid_source));
+            source.append(code);
+            const references = el("ul");
+            for (const reference of architecture.references) {
+              if (!reference.url.startsWith("https://learn.microsoft.com/")) {
+                throw new Error("Architecture references must use official Microsoft Learn URLs.");
+              }
+              const link = el("a", "", reference.label);
+              link.href = reference.url;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              const row = el("li");
+              row.append(link);
+              references.append(row);
+            }
+            byId("architecture-body").replaceChildren(
+              intro, actions, viewport,
+              evidenceSection("How production data would flow", [flow]),
+              evidenceSection("Service choices and work still required", [
+                table(["Service", "Business purpose", "Implementation still required"], architecture.services.map(service => [
+                  service.name, service.purpose, service.change_needed
+                ]), "Proposed Azure services and implementation gaps")
+              ]),
+              evidenceSection("Security, reliability and human approval", [bulletList(architecture.controls)]),
+              evidenceSection("Suggested rollout gates", [bulletList(architecture.rollout)]),
+              el("p", "notice", architecture.not_required),
+              source,
+              evidenceSection("First-party design references", [references])
+            );
+            byId("architecture-dialog").showModal();
+            byId("close-architecture").focus();
+          } catch (error) {
+            showError("Architecture view could not open: " + C.text(error.message));
+          }
+        }
+
         function updateAddButtons() {
           const ids = new Set(plan.entries.map(entry => entry.id));
           for (const node of document.querySelectorAll("[data-add-id]")) {
@@ -1246,6 +1353,9 @@
             : el("p", "empty", "No subcategory observations supplied."));
         }
 
+        byId("open-architecture").addEventListener("click", openArchitecture);
+        byId("close-architecture").addEventListener("click", () => byId("architecture-dialog").close());
+        byId("architecture-dialog").addEventListener("close", () => byId("open-architecture").focus());
         byId("close-evidence").addEventListener("click", () => byId("evidence-dialog").close());
         byId("evidence-dialog").addEventListener("close", () => {
           if (evidenceReturnFocus && evidenceReturnFocus.isConnected && !evidenceReturnFocus.disabled) evidenceReturnFocus.focus();

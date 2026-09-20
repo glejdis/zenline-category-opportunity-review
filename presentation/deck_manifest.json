@@ -1,0 +1,2524 @@
+{
+  "title": "From a product snapshot to five decisions",
+  "input": {
+    "file": "outputs\\review.json",
+    "snapshot_id": "a772921f8ac4c1194db8",
+    "sha256": "7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2",
+    "generated": "2026-09-20"
+  },
+  "build_command": "node presentation\\build_deck.cjs",
+  "authoring_dependency": "PptxGenJS 4.0.1; build-time only",
+  "editable_content": "Native text/shapes on every slide; the shared architecture is the single image.",
+  "layout": {
+    "name": "LAYOUT_WIDE",
+    "width_inches": 13.333333,
+    "height_inches": 7.5
+  },
+  "palette": {
+    "ink": "30282E",
+    "dark": "2C252B",
+    "berry": "6D2E46",
+    "berryDark": "502737",
+    "rose": "BD8192",
+    "roseLight": "E6BFCA",
+    "blush": "F0DFE3",
+    "ivory": "FAF6EF",
+    "paper": "FFFDFA",
+    "taupe": "E4DAD4",
+    "muted": "6F6268",
+    "darkMuted": "D1BFC6"
+  },
+  "fonts": {
+    "heading": "Georgia",
+    "body": "Calibri"
+  },
+  "selected_product_ids": [
+    "HC0070",
+    "HC0002",
+    "HC0101",
+    "HC0024",
+    "HC0083"
+  ],
+  "summary": {
+    "action_counts": {
+      "Confirm exit": 19,
+      "Fix availability": 33,
+      "Investigate zero sales": 2,
+      "Review delist / markdown": 7,
+      "Review margin": 11,
+      "Review price benchmark": 23,
+      "Review reactivation": 19,
+      "Review seasonal range": 3,
+      "Test promotion": 17
+    },
+    "availability_low_stock": 24,
+    "availability_out_of_stock": 9,
+    "channel_rev": 1387129.76,
+    "channel_to_market_ratio_pct": 6.291360581808698,
+    "gross_profit_scenario_eur": 24923.66,
+    "market_rev": 22048168.15,
+    "n_flagged": 134,
+    "n_skus": 235,
+    "reactivation_count": 19,
+    "revenue_scenario_eur": 93026.53,
+    "zero_sales_count": 2
+  },
+  "slide_count": 10,
+  "suggested_talk_seconds": 635,
+  "output": {
+    "pptx": "outputs\\business_review.pptx",
+    "pptx_sha256": "db9834b1586f20c3fc781686643dc77eb36202a9bd460f11b75002289ff1f50f",
+    "pdf": "outputs\\business_review.pdf",
+    "pdf_sha256": "29516382a30232670be7d9f70c614acf74ceb76e4139c6dfa37d5b6fb7011c36"
+  },
+  "preview": {
+    "status": "rendered",
+    "pdf_pages": 10,
+    "pptx_slides": 10,
+    "notes_slides": 10,
+    "source_id_on_every_slide": true,
+    "source_id_in_every_notes_page": true,
+    "text_boundary_warnings": [],
+    "text_overlap_warnings": [],
+    "visual_review": "Rendered for initial author inspection and independent parent-arranged QA.",
+    "default_qa_directory": "presentation\\.preview",
+    "qa_directory_overridden": true,
+    "qa_artifact_names": {
+      "contact_sheet": "contact-sheet.png",
+      "slide_pngs": [
+        "slide-01.png",
+        "slide-02.png",
+        "slide-03.png",
+        "slide-04.png",
+        "slide-05.png",
+        "slide-06.png",
+        "slide-07.png",
+        "slide-08.png",
+        "slide-09.png",
+        "slide-10.png"
+      ]
+    }
+  },
+  "slides": [
+    {
+      "number": 1,
+      "title": "From a product snapshot to five decisions",
+      "source": "Synthetic inputs · review.json",
+      "dark": true,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Synthetic inputs · review.json  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "01 / 10"
+        },
+        {
+          "kind": "shape",
+          "x": 7.66,
+          "y": 0,
+          "w": 5.6733329999999995,
+          "h": 6.66
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 0.63,
+          "w": 6.4,
+          "h": 0.26,
+          "text": "ZENBEAUTY RETAIL"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 1.4,
+          "w": 6.95,
+          "h": 2.38,
+          "text": "From a product\nsnapshot to\nfive decisions"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 4.18,
+          "w": 6.2,
+          "h": 0.38,
+          "text": "Hair-colour category opportunity review"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 4.78,
+          "w": 6.1,
+          "h": 0.8,
+          "text": "What to examine. Who should own the check.\nWhat evidence would justify the next step."
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 6.12,
+          "w": 6.2,
+          "h": 0.28,
+          "text": "Synthetic snapshot  /  20 September 2026"
+        },
+        {
+          "kind": "text",
+          "x": 8.15,
+          "y": 0.7,
+          "w": 4.4,
+          "h": 0.23,
+          "text": "A FOCUSED REVIEW"
+        },
+        {
+          "kind": "shape",
+          "x": 8.83,
+          "y": 1.37,
+          "w": 3.03,
+          "h": 3.03
+        },
+        {
+          "kind": "text",
+          "x": 8.83,
+          "y": 2.03,
+          "w": 3.03,
+          "h": 0.85,
+          "text": "235"
+        },
+        {
+          "kind": "text",
+          "x": 8.83,
+          "y": 3.03,
+          "w": 3.03,
+          "h": 0.35,
+          "text": "products"
+        },
+        {
+          "kind": "shape",
+          "x": 10.09,
+          "y": 4.5,
+          "w": 0.53,
+          "h": 0.47
+        },
+        {
+          "kind": "shape",
+          "x": 8.07,
+          "y": 5.23,
+          "w": 0.76,
+          "h": 0.84
+        },
+        {
+          "kind": "text",
+          "x": 8.07,
+          "y": 5.44,
+          "w": 0.76,
+          "h": 0.3,
+          "text": "01"
+        },
+        {
+          "kind": "shape",
+          "x": 9.030000000000001,
+          "y": 5.23,
+          "w": 0.76,
+          "h": 0.84
+        },
+        {
+          "kind": "text",
+          "x": 9.030000000000001,
+          "y": 5.44,
+          "w": 0.76,
+          "h": 0.3,
+          "text": "02"
+        },
+        {
+          "kind": "shape",
+          "x": 9.99,
+          "y": 5.23,
+          "w": 0.76,
+          "h": 0.84
+        },
+        {
+          "kind": "text",
+          "x": 9.99,
+          "y": 5.44,
+          "w": 0.76,
+          "h": 0.3,
+          "text": "03"
+        },
+        {
+          "kind": "shape",
+          "x": 10.95,
+          "y": 5.23,
+          "w": 0.76,
+          "h": 0.84
+        },
+        {
+          "kind": "text",
+          "x": 10.95,
+          "y": 5.44,
+          "w": 0.76,
+          "h": 0.3,
+          "text": "04"
+        },
+        {
+          "kind": "shape",
+          "x": 11.91,
+          "y": 5.23,
+          "w": 0.76,
+          "h": 0.84
+        },
+        {
+          "kind": "text",
+          "x": 11.91,
+          "y": 5.44,
+          "w": 0.76,
+          "h": 0.3,
+          "text": "05"
+        },
+        {
+          "kind": "text",
+          "x": 8,
+          "y": 6.25,
+          "w": 4.65,
+          "h": 0.3,
+          "text": "5 chosen decisions"
+        }
+      ],
+      "seconds": 45,
+      "speaker_notes": "1. From a product snapshot to five decisions\nSuggested speaking time: 45 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThis is a review for a fictional retailer, using 235 synthetic products. The goal is not to put every metric on a slide. It is to arrive at five specific, defensible decisions, show the evidence and uncertainties behind them, and agree who should validate the next step. None of the proposed actions or financial scenarios is a measured outcome.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\n{\n  \"fields\": [\n    \"summary.n_skus\",\n    \"recommendations\",\n    \"generated\",\n    \"snapshot_id\"\n  ],\n  \"product_count\": 235,\n  \"selected_ids\": [\n    \"HC0070\",\n    \"HC0002\",\n    \"HC0101\",\n    \"HC0024\",\n    \"HC0083\"\n  ],\n  \"disclaimer\": \"Synthetic data, not a deployed or approved commercial programme.\"\n}"
+    },
+    {
+      "number": 2,
+      "title": "The issue: decisions are buried in separate data",
+      "source": "Sources: three supplied CSVs · review.json",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Sources: three supplied CSVs · review.json  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "02 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.5,
+          "w": 10.5,
+          "h": 0.19,
+          "text": "ZENBEAUTY RETAIL  /  CATEGORY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.89,
+          "w": 12.23,
+          "h": 0.66,
+          "text": "The issue: decisions are buried in separate data"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.67,
+          "w": 12.13,
+          "h": 0.4,
+          "text": "A snapshot can point to questions. It cannot explain every cause."
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 2.4,
+          "w": 2.55,
+          "h": 2.45
+        },
+        {
+          "kind": "shape",
+          "x": 0.77,
+          "y": 2.66,
+          "w": 0.68,
+          "h": 0.68
+        },
+        {
+          "kind": "text",
+          "x": 0.77,
+          "y": 2.66,
+          "w": 0.68,
+          "h": 0.68,
+          "text": ""
+        },
+        {
+          "kind": "shape",
+          "x": 0.93,
+          "y": 2.97,
+          "w": 0.085,
+          "h": 0.18
+        },
+        {
+          "kind": "shape",
+          "x": 1.06,
+          "y": 2.8500000000000005,
+          "w": 0.085,
+          "h": 0.3
+        },
+        {
+          "kind": "shape",
+          "x": 1.19,
+          "y": 2.72,
+          "w": 0.085,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 0.77,
+          "y": 3.62,
+          "w": 2.15,
+          "h": 0.36,
+          "text": "SKU performance"
+        },
+        {
+          "kind": "text",
+          "x": 0.77,
+          "y": 4.12,
+          "w": 2.15,
+          "h": 0.54,
+          "text": "Sales, units, margin,\nstatus and stock"
+        },
+        {
+          "kind": "shape",
+          "x": 3.37,
+          "y": 2.4,
+          "w": 2.55,
+          "h": 2.45
+        },
+        {
+          "kind": "shape",
+          "x": 3.5900000000000003,
+          "y": 2.66,
+          "w": 0.68,
+          "h": 0.68
+        },
+        {
+          "kind": "text",
+          "x": 3.5900000000000003,
+          "y": 2.66,
+          "w": 0.68,
+          "h": 0.68,
+          "text": ""
+        },
+        {
+          "kind": "shape",
+          "x": 3.7950000000000004,
+          "y": 2.7800000000000002,
+          "w": 0.27,
+          "h": 0.43
+        },
+        {
+          "kind": "shape",
+          "x": 3.8550000000000004,
+          "y": 2.75,
+          "w": 0.15,
+          "h": 0.06
+        },
+        {
+          "kind": "shape",
+          "x": 3.845,
+          "y": 2.96,
+          "w": 0.17,
+          "h": 0.075
+        },
+        {
+          "kind": "text",
+          "x": 3.5900000000000003,
+          "y": 3.62,
+          "w": 2.15,
+          "h": 0.36,
+          "text": "Product metadata"
+        },
+        {
+          "kind": "text",
+          "x": 3.5900000000000003,
+          "y": 4.12,
+          "w": 2.15,
+          "h": 0.54,
+          "text": "Brand, shade, supplier\nand seasonality"
+        },
+        {
+          "kind": "shape",
+          "x": 6.1899999999999995,
+          "y": 2.4,
+          "w": 2.55,
+          "h": 2.45
+        },
+        {
+          "kind": "shape",
+          "x": 6.409999999999999,
+          "y": 2.66,
+          "w": 0.68,
+          "h": 0.68
+        },
+        {
+          "kind": "text",
+          "x": 6.409999999999999,
+          "y": 2.66,
+          "w": 0.68,
+          "h": 0.68,
+          "text": ""
+        },
+        {
+          "kind": "shape",
+          "x": 6.544999999999999,
+          "y": 2.9400000000000004,
+          "w": 0.13,
+          "h": 0.13
+        },
+        {
+          "kind": "shape",
+          "x": 6.6949999999999985,
+          "y": 2.9000000000000004,
+          "w": 0.13,
+          "h": 0.13
+        },
+        {
+          "kind": "shape",
+          "x": 6.844999999999999,
+          "y": 2.8600000000000003,
+          "w": 0.13,
+          "h": 0.13
+        },
+        {
+          "kind": "line",
+          "x": 6.6,
+          "y": 3.12,
+          "w": 0.33,
+          "h": 0
+        },
+        {
+          "kind": "text",
+          "x": 6.409999999999999,
+          "y": 3.62,
+          "w": 2.15,
+          "h": 0.36,
+          "text": "Competitor signals"
+        },
+        {
+          "kind": "text",
+          "x": 6.409999999999999,
+          "y": 4.12,
+          "w": 2.15,
+          "h": 0.54,
+          "text": "Observed products,\nprices and trends"
+        },
+        {
+          "kind": "shape",
+          "x": 9.2,
+          "y": 2.4,
+          "w": 3.58,
+          "h": 3.93
+        },
+        {
+          "kind": "text",
+          "x": 9.47,
+          "y": 2.73,
+          "w": 3.05,
+          "h": 0.77,
+          "text": "Competing\nquestions"
+        },
+        {
+          "kind": "shape",
+          "x": 9.49,
+          "y": 3.81,
+          "w": 0.3,
+          "h": 0.3
+        },
+        {
+          "kind": "text",
+          "x": 9.49,
+          "y": 3.81,
+          "w": 0.3,
+          "h": 0.3,
+          "text": "1"
+        },
+        {
+          "kind": "text",
+          "x": 9.98,
+          "y": 3.79,
+          "w": 2.45,
+          "h": 0.34,
+          "text": "Availability"
+        },
+        {
+          "kind": "shape",
+          "x": 9.49,
+          "y": 4.32,
+          "w": 0.3,
+          "h": 0.3
+        },
+        {
+          "kind": "text",
+          "x": 9.49,
+          "y": 4.32,
+          "w": 0.3,
+          "h": 0.3,
+          "text": "2"
+        },
+        {
+          "kind": "text",
+          "x": 9.98,
+          "y": 4.3,
+          "w": 2.45,
+          "h": 0.34,
+          "text": "Listing"
+        },
+        {
+          "kind": "shape",
+          "x": 9.49,
+          "y": 4.83,
+          "w": 0.3,
+          "h": 0.3
+        },
+        {
+          "kind": "text",
+          "x": 9.49,
+          "y": 4.83,
+          "w": 0.3,
+          "h": 0.3,
+          "text": "3"
+        },
+        {
+          "kind": "text",
+          "x": 9.98,
+          "y": 4.8100000000000005,
+          "w": 2.45,
+          "h": 0.34,
+          "text": "Range"
+        },
+        {
+          "kind": "shape",
+          "x": 9.49,
+          "y": 5.34,
+          "w": 0.3,
+          "h": 0.3
+        },
+        {
+          "kind": "text",
+          "x": 9.49,
+          "y": 5.34,
+          "w": 0.3,
+          "h": 0.3,
+          "text": "4"
+        },
+        {
+          "kind": "text",
+          "x": 9.98,
+          "y": 5.32,
+          "w": 2.45,
+          "h": 0.34,
+          "text": "Margins"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 5.18,
+          "w": 8.19,
+          "h": 1.15
+        },
+        {
+          "kind": "text",
+          "x": 0.8,
+          "y": 5.4,
+          "w": 3.84,
+          "h": 0.32,
+          "text": "Inactive ≠ unwanted"
+        },
+        {
+          "kind": "text",
+          "x": 4.58,
+          "y": 5.4,
+          "w": 3.8,
+          "h": 0.32,
+          "text": "Weak sales ≠ a stock cause"
+        },
+        {
+          "kind": "text",
+          "x": 0.8,
+          "y": 5.89,
+          "w": 7.66,
+          "h": 0.26,
+          "text": "Needed: a short, defensible action list—not a causal verdict."
+        }
+      ],
+      "seconds": 60,
+      "speaker_notes": "2. The issue: decisions are buried in separate data\nSuggested speaking time: 60 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThe source files answer different questions. Performance tells us what was sold and the current flags; metadata adds product context; competitor observations add signals to investigate. They do not tell us why a product is inactive, how long stock has been missing or whether products are genuinely comparable. So the business issue is to connect these sources without turning correlation or a status flag into a commercial conclusion.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\nSources: sku_performance.csv; product_metadata.csv; competitor_market_signals.csv.\nSnapshot only = direct fields support an investigation, not a causal conclusion. Needs context = lifecycle, zero-sales or seasonal reasons are unknown. Limited comparison = category/shade matches with unverified product comparability. These labels describe evidence, not probability of success.\nSynthetic dataset: product names, classifications and suppliers need validation before real commercial use.\nThe performance window is 12 weeks, but its end date and the date of the stock snapshot are not supplied.\nMarket revenue is a demand proxy. Channel / market is a descriptive ratio, not verified market share or proof of poor execution.\n4 popularity scores are outside 0-100 and excluded from popularity calculations; raw values remain visible.\nOldest competitor observations are 81 days old as of 2026-09-20. The 60-day refresh threshold is an explicit review assumption, not a freshness guarantee.\nRevenue/units zero-state mismatch; validate the sales feed for: HC0202."
+    },
+    {
+      "number": 3,
+      "title": "Our approach: facts first, action second",
+      "source": "Source: review.json · methodology; README workflow",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Source: review.json · methodology; README workflow  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "03 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.5,
+          "w": 10.5,
+          "h": 0.19,
+          "text": "ZENBEAUTY RETAIL  /  CATEGORY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.89,
+          "w": 12.23,
+          "h": 0.66,
+          "text": "Our approach: facts first, action second"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.67,
+          "w": 12.13,
+          "h": 0.4,
+          "text": "Operational prerequisites come before the biggest-looking number."
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 2.42,
+          "w": 2.24,
+          "h": 2.76
+        },
+        {
+          "kind": "shape",
+          "x": 0.77,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5
+        },
+        {
+          "kind": "text",
+          "x": 0.77,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5,
+          "text": "01"
+        },
+        {
+          "kind": "text",
+          "x": 0.77,
+          "y": 3.5,
+          "w": 1.9,
+          "h": 0.78,
+          "text": "Validate\nsources"
+        },
+        {
+          "kind": "text",
+          "x": 0.77,
+          "y": 4.4,
+          "w": 1.9,
+          "h": 0.56,
+          "text": "Fields, IDs,\nvalues and dates."
+        },
+        {
+          "kind": "shape",
+          "x": 2.8499999999999996,
+          "y": 3.47,
+          "w": 0.13,
+          "h": 0.28
+        },
+        {
+          "kind": "shape",
+          "x": 3.05,
+          "y": 2.42,
+          "w": 2.24,
+          "h": 2.76
+        },
+        {
+          "kind": "shape",
+          "x": 3.27,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5
+        },
+        {
+          "kind": "text",
+          "x": 3.27,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5,
+          "text": "02"
+        },
+        {
+          "kind": "text",
+          "x": 3.27,
+          "y": 3.5,
+          "w": 1.9,
+          "h": 0.78,
+          "text": "Apply explicit\nrules"
+        },
+        {
+          "kind": "text",
+          "x": 3.27,
+          "y": 4.4,
+          "w": 1.9,
+          "h": 0.56,
+          "text": "Visible logic,\nopen to review."
+        },
+        {
+          "kind": "shape",
+          "x": 5.35,
+          "y": 3.47,
+          "w": 0.13,
+          "h": 0.28
+        },
+        {
+          "kind": "shape",
+          "x": 5.55,
+          "y": 2.42,
+          "w": 2.24,
+          "h": 2.76
+        },
+        {
+          "kind": "shape",
+          "x": 5.77,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5
+        },
+        {
+          "kind": "text",
+          "x": 5.77,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5,
+          "text": "03"
+        },
+        {
+          "kind": "text",
+          "x": 5.77,
+          "y": 3.5,
+          "w": 1.9,
+          "h": 0.78,
+          "text": "Rank\nprerequisites"
+        },
+        {
+          "kind": "text",
+          "x": 5.77,
+          "y": 4.4,
+          "w": 1.9,
+          "h": 0.56,
+          "text": "Supply and listing\nbefore spend."
+        },
+        {
+          "kind": "shape",
+          "x": 7.85,
+          "y": 3.47,
+          "w": 0.13,
+          "h": 0.28
+        },
+        {
+          "kind": "shape",
+          "x": 8.05,
+          "y": 2.42,
+          "w": 2.24,
+          "h": 2.76
+        },
+        {
+          "kind": "shape",
+          "x": 8.270000000000001,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5
+        },
+        {
+          "kind": "text",
+          "x": 8.270000000000001,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5,
+          "text": "04"
+        },
+        {
+          "kind": "text",
+          "x": 8.270000000000001,
+          "y": 3.5,
+          "w": 1.9,
+          "h": 0.78,
+          "text": "Select five\nproducts"
+        },
+        {
+          "kind": "text",
+          "x": 8.270000000000001,
+          "y": 4.4,
+          "w": 1.9,
+          "h": 0.56,
+          "text": "Named products,\nnot generic levers."
+        },
+        {
+          "kind": "shape",
+          "x": 10.350000000000001,
+          "y": 3.47,
+          "w": 0.13,
+          "h": 0.28
+        },
+        {
+          "kind": "shape",
+          "x": 10.55,
+          "y": 2.42,
+          "w": 2.24,
+          "h": 2.76
+        },
+        {
+          "kind": "shape",
+          "x": 10.770000000000001,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5
+        },
+        {
+          "kind": "text",
+          "x": 10.770000000000001,
+          "y": 2.69,
+          "w": 0.5,
+          "h": 0.5,
+          "text": "05"
+        },
+        {
+          "kind": "text",
+          "x": 10.770000000000001,
+          "y": 3.5,
+          "w": 1.9,
+          "h": 0.78,
+          "text": "Link evidence\nto the plan"
+        },
+        {
+          "kind": "text",
+          "x": 10.770000000000001,
+          "y": 4.4,
+          "w": 1.9,
+          "h": 0.56,
+          "text": "Owner, decision\nand next measure."
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 5.71,
+          "w": 0.75,
+          "h": 0.3,
+          "text": "Built"
+        },
+        {
+          "kind": "text",
+          "x": 1.43,
+          "y": 5.7,
+          "w": 11,
+          "h": 0.34,
+          "text": "Repeatable analysis + a self-contained local dashboard"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.25,
+          "w": 12.1,
+          "h": 0.28,
+          "text": "Explicit rules, not machine learning. Human approval, not automated commercial execution."
+        }
+      ],
+      "seconds": 60,
+      "speaker_notes": "3. Our approach: facts first, action second\nSuggested speaking time: 60 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThe approach separates facts from action. We validate first, apply explicit commercial rules, then rank operational checks before experiments. Selection produces five concrete products to discuss, with a proposed owner and success measure. The implementation is deliberately modest: a Python standard-library pipeline and a portable, standalone dashboard. There is no learned forecast and no automatic replenishment, pricing or range execution.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\n{\n  \"source_files\": [\n    \"analyze.py\",\n    \"README.md\",\n    \"dashboard_template.html\",\n    \"outputs\\\\review.json\"\n  ],\n  \"selection_rule\": \"Operational checks come first, then lifecycle validation and commercial tests. Select up to five concrete items, taking the first item per primary action before adding repeats only when fewer than three decisions are available. No empty cards or mandatory one-per-lever recommendations.\",\n  \"explicit_thresholds\": {\n    \"chan_rev_low\": 1395.96,\n    \"margin_low\": 0.2666,\n    \"mkt_rev_strong\": 95238.13720000004,\n    \"volume_seller\": 5554.085999999998\n  },\n  \"implementation_limit\": \"Deterministic stdlib analysis; no ML model; no live commercial-system writes.\"\n}"
+    },
+    {
+      "number": 4,
+      "title": "The analysis creates a focused review agenda",
+      "source": "Source: review.json · summary, opportunities, assortment_gaps",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Source: review.json · summary, opportunities, assortment_gaps  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "04 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.5,
+          "w": 10.5,
+          "h": 0.19,
+          "text": "ZENBEAUTY RETAIL  /  CATEGORY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.89,
+          "w": 12.23,
+          "h": 0.66,
+          "text": "The analysis creates a focused review agenda"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.67,
+          "w": 12.13,
+          "h": 0.4,
+          "text": "Rule matches identify what to examine—not proven problems."
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 2.33,
+          "w": 3.27,
+          "h": 3.35
+        },
+        {
+          "kind": "text",
+          "x": 0.84,
+          "y": 2.72,
+          "w": 2.7,
+          "h": 1.03,
+          "text": "134"
+        },
+        {
+          "kind": "text",
+          "x": 0.84,
+          "y": 3.88,
+          "w": 2.68,
+          "h": 0.34,
+          "text": "of 235 products"
+        },
+        {
+          "kind": "text",
+          "x": 0.84,
+          "y": 4.43,
+          "w": 2.68,
+          "h": 0.7,
+          "text": "Matched at least\none review rule"
+        },
+        {
+          "kind": "shape",
+          "x": 0.85,
+          "y": 5.34,
+          "w": 2.66,
+          "h": 0.12
+        },
+        {
+          "kind": "shape",
+          "x": 0.85,
+          "y": 5.34,
+          "w": 1.5167659574468084,
+          "h": 0.12
+        },
+        {
+          "kind": "shape",
+          "x": 4.17,
+          "y": 2.33,
+          "w": 4.17,
+          "h": 1.53
+        },
+        {
+          "kind": "text",
+          "x": 4.4,
+          "y": 2.52,
+          "w": 0.93,
+          "h": 0.71,
+          "text": "33"
+        },
+        {
+          "kind": "text",
+          "x": 5.45,
+          "y": 2.5700000000000003,
+          "w": 2.67,
+          "h": 0.6,
+          "text": "Availability reviews"
+        },
+        {
+          "kind": "text",
+          "x": 4.4,
+          "y": 3.37,
+          "w": 3.72,
+          "h": 0.26,
+          "text": "9 out of stock + 24 low stock"
+        },
+        {
+          "kind": "shape",
+          "x": 8.61,
+          "y": 2.33,
+          "w": 4.17,
+          "h": 1.53
+        },
+        {
+          "kind": "text",
+          "x": 8.84,
+          "y": 2.52,
+          "w": 0.93,
+          "h": 0.71,
+          "text": "2"
+        },
+        {
+          "kind": "text",
+          "x": 9.889999999999999,
+          "y": 2.5700000000000003,
+          "w": 2.67,
+          "h": 0.6,
+          "text": "Zero-sales checks"
+        },
+        {
+          "kind": "text",
+          "x": 8.84,
+          "y": 3.37,
+          "w": 3.72,
+          "h": 0.26,
+          "text": "Listing, mapping or feed validation"
+        },
+        {
+          "kind": "shape",
+          "x": 4.17,
+          "y": 4.15,
+          "w": 4.17,
+          "h": 1.53
+        },
+        {
+          "kind": "text",
+          "x": 4.4,
+          "y": 4.340000000000001,
+          "w": 0.93,
+          "h": 0.71,
+          "text": "19"
+        },
+        {
+          "kind": "text",
+          "x": 5.45,
+          "y": 4.390000000000001,
+          "w": 2.67,
+          "h": 0.6,
+          "text": "Reactivation reviews"
+        },
+        {
+          "kind": "text",
+          "x": 4.4,
+          "y": 5.19,
+          "w": 3.72,
+          "h": 0.26,
+          "text": "Understand the reason for inactivity"
+        },
+        {
+          "kind": "shape",
+          "x": 8.61,
+          "y": 4.15,
+          "w": 4.17,
+          "h": 1.53
+        },
+        {
+          "kind": "text",
+          "x": 8.84,
+          "y": 4.340000000000001,
+          "w": 0.93,
+          "h": 0.71,
+          "text": "17"
+        },
+        {
+          "kind": "text",
+          "x": 9.889999999999999,
+          "y": 4.390000000000001,
+          "w": 2.67,
+          "h": 0.6,
+          "text": "Promotion-test candidates"
+        },
+        {
+          "kind": "text",
+          "x": 8.84,
+          "y": 5.19,
+          "w": 3.72,
+          "h": 0.26,
+          "text": "Validate economics before a small test"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 5.93,
+          "w": 0.44,
+          "h": 0.44
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 5.93,
+          "w": 0.44,
+          "h": 0.44,
+          "text": "18"
+        },
+        {
+          "kind": "text",
+          "x": 1.21,
+          "y": 5.92,
+          "w": 5.1,
+          "h": 0.32,
+          "text": "Separate assortment follow-up cells"
+        },
+        {
+          "kind": "text",
+          "x": 6.4,
+          "y": 5.94,
+          "w": 6.34,
+          "h": 0.29,
+          "text": "Subcategory × shade comparisons—not product counts."
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.4,
+          "w": 12.1,
+          "h": 0.29,
+          "text": "Selected primary-action groups shown; not a full breakdown of all matched SKUs."
+        }
+      ],
+      "seconds": 65,
+      "speaker_notes": "4. The analysis creates a focused review agenda\nSuggested speaking time: 65 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThe rules match 134 of 235 products. That is an investigation agenda, not a count of proven commercial failures. Availability has 33 primary cases: 9 out of stock and 24 low stock. The other highlighted groups are checks and test candidates, not guaranteed opportunities. The 18 assortment cells are a different unit of analysis and must not be added to SKU counts.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\n{\n  \"summary\": {\n    \"action_counts\": {\n      \"Confirm exit\": 19,\n      \"Fix availability\": 33,\n      \"Investigate zero sales\": 2,\n      \"Review delist / markdown\": 7,\n      \"Review margin\": 11,\n      \"Review price benchmark\": 23,\n      \"Review reactivation\": 19,\n      \"Review seasonal range\": 3,\n      \"Test promotion\": 17\n    },\n    \"availability_low_stock\": 24,\n    \"availability_out_of_stock\": 9,\n    \"channel_rev\": 1387129.76,\n    \"channel_to_market_ratio_pct\": 6.291360581808698,\n    \"gross_profit_scenario_eur\": 24923.66,\n    \"market_rev\": 22048168.15,\n    \"n_flagged\": 134,\n    \"n_skus\": 235,\n    \"reactivation_count\": 19,\n    \"revenue_scenario_eur\": 93026.53,\n    \"zero_sales_count\": 2\n  },\n  \"highlighted_groups\": \"Four selected primary-action groups, not the complete decomposition of n_flagged.\",\n  \"counting_rule\": \"One primary action per flagged SKU. Secondary flags are not additional SKUs or incremental audiences.\",\n  \"assortment_cell_count\": 18,\n  \"assortment_ids\": [\n    \"gap-1eaa065089c7\",\n    \"gap-48066dd82bc6\",\n    \"gap-1b07bb020c0c\",\n    \"gap-4ddd5e7c9a9a\",\n    \"gap-1d9b9a7f15c7\",\n    \"gap-21fc144762a7\",\n    \"gap-b6f50cf99981\",\n    \"gap-88421ba8880f\",\n    \"gap-6547995fcab1\",\n    \"gap-3a3cd87f4674\",\n    \"gap-83a1063d5331\",\n    \"gap-2309b4ab0b3f\",\n    \"gap-d1c3b51d1491\",\n    \"gap-edf3991e8f07\",\n    \"gap-b1cfbb3f58d0\",\n    \"gap-199182d70e08\",\n    \"gap-1ee9479df4d2\",\n    \"gap-5f5273963197\"\n  ],\n  \"assortment_definition\": \"Subcategory × shade follow-up comparisons; not missing-SKU or monetary opportunity counts.\"\n}"
+    },
+    {
+      "number": 5,
+      "title": "Five decisions for the next category review",
+      "source": "Source: review.json · recommendations; full record IDs and rows in notes",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Source: review.json · recommendations; full record IDs and rows in notes  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "05 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.5,
+          "w": 10.5,
+          "h": 0.19,
+          "text": "ZENBEAUTY RETAIL  /  CATEGORY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.89,
+          "w": 12.23,
+          "h": 0.66,
+          "text": "Five decisions for the next category review"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.63,
+          "w": 12.1,
+          "h": 0.28,
+          "text": "Proposed owners and next checks—not approved commercial actions."
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 2.04,
+          "w": 3.33,
+          "h": 0.21,
+          "text": "PRODUCT"
+        },
+        {
+          "kind": "text",
+          "x": 4.2,
+          "y": 2.04,
+          "w": 4.09,
+          "h": 0.21,
+          "text": "WHY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 2.04,
+          "w": 3.8,
+          "h": 0.21,
+          "text": "NEXT CHECK / PROPOSED OWNER"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 2.39,
+          "w": 12.23,
+          "h": 0.77
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 2.49,
+          "w": 3.24,
+          "h": 0.32,
+          "text": "Wella Blondor · Light Blonde"
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 2.87,
+          "w": 3.2,
+          "h": 0.21,
+          "text": "HC0070"
+        },
+        {
+          "kind": "text",
+          "x": 4.2,
+          "y": 2.5100000000000002,
+          "w": 4.25,
+          "h": 0.53,
+          "text": "Out of stock · €269.2k market proxy\nMarket trend +26.3%"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 2.5,
+          "w": 3.82,
+          "h": 0.3,
+          "text": "Validate stock and lead time"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 2.8400000000000003,
+          "w": 3.82,
+          "h": 0.26,
+          "text": "Supply planner"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 3.16,
+          "w": 12.23,
+          "h": 0.77
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 3.2600000000000002,
+          "w": 3.24,
+          "h": 0.32,
+          "text": "Private label · Sunlit Peach"
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 3.64,
+          "w": 3.2,
+          "h": 0.21,
+          "text": "HC0002"
+        },
+        {
+          "kind": "text",
+          "x": 4.2,
+          "y": 3.2800000000000002,
+          "w": 4.25,
+          "h": 0.53,
+          "text": "In stock · €0 sales / 0 units\n€64.2k market proxy · +31.0% · Summer"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 3.27,
+          "w": 3.82,
+          "h": 0.3,
+          "text": "Check listing, feed and season"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 3.6100000000000003,
+          "w": 3.82,
+          "h": 0.26,
+          "text": "E-commerce / category ops"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 3.93,
+          "w": 12.23,
+          "h": 0.77
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 4.03,
+          "w": 3.24,
+          "h": 0.32,
+          "text": "Bleach London · White Toner"
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 4.41,
+          "w": 3.2,
+          "h": 0.21,
+          "text": "HC0101"
+        },
+        {
+          "kind": "text",
+          "x": 4.2,
+          "y": 4.05,
+          "w": 4.25,
+          "h": 0.53,
+          "text": "Inactive · €332.0k market proxy\nMarket trend +17.8% · reason unknown"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 4.04,
+          "w": 3.82,
+          "h": 0.3,
+          "text": "Understand inactivity first"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 4.38,
+          "w": 3.82,
+          "h": 0.26,
+          "text": "Category manager"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 4.7,
+          "w": 12.23,
+          "h": 0.77
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 4.8,
+          "w": 3.24,
+          "h": 0.32,
+          "text": "Herbatint · Natural Black"
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 5.18,
+          "w": 3.2,
+          "h": 0.21,
+          "text": "HC0024"
+        },
+        {
+          "kind": "text",
+          "x": 4.2,
+          "y": 4.82,
+          "w": 4.25,
+          "h": 0.53,
+          "text": "24.6% margin · €30.5k revenue\nAlso out of stock—check supply first"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 4.8100000000000005,
+          "w": 3.82,
+          "h": 0.3,
+          "text": "Validate cost / terms and supply"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 5.15,
+          "w": 3.82,
+          "h": 0.26,
+          "text": "Buyer / commercial finance"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 5.470000000000001,
+          "w": 12.23,
+          "h": 0.77
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 5.57,
+          "w": 3.24,
+          "h": 0.32,
+          "text": "Madison Reed · Root Touch Up"
+        },
+        {
+          "kind": "text",
+          "x": 0.76,
+          "y": 5.950000000000001,
+          "w": 3.2,
+          "h": 0.21,
+          "text": "HC0083"
+        },
+        {
+          "kind": "text",
+          "x": 4.2,
+          "y": 5.590000000000001,
+          "w": 4.25,
+          "h": 0.53,
+          "text": "In stock · channel / proxy 4.93%\nPeer ratio 7.33%—comparison, not share"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 5.580000000000001,
+          "w": 3.82,
+          "h": 0.3,
+          "text": "Small test with baseline / control"
+        },
+        {
+          "kind": "text",
+          "x": 8.72,
+          "y": 5.920000000000001,
+          "w": 3.82,
+          "h": 0.26,
+          "text": "Category / merchandising"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.45,
+          "w": 12.1,
+          "h": 0.22,
+          "text": "Market figures are demand proxies. Inactivity reasons and stock duration remain unknown."
+        }
+      ],
+      "seconds": 105,
+      "speaker_notes": "5. Five decisions for the next category review\nSuggested speaking time: 105 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nRead these as five real product conversations. Wella starts with a supply check. Sunlit Peach has stock but no recorded sales, so listing and feed validation come first, with a Summer caution. Bleach London needs an explanation for inactivity before any reactivation trial. Herbatint has a margin question, but is also out of stock: validate supply before making volume assumptions. Madison Reed is a candidate for a small, controlled merchandising test, not a promise that a peer ratio is attainable. The proposed owners have not been assigned automatically.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\nHC0070 — Wella Blondor Light Blonde\nPrimary action: Fix availability; also flagged: Review margin\nProposed owner: Supply planner\nNext step: Confirm physical and online availability, stock-feed accuracy and supplier lead time; replenish if feasible before considering promotion.\nSuccess measure: Availability, units sold and gross profit after the supply check.\nCurrent status: aktiv; stock: out_of_stock; seasonality: Evergreen\n12-week revenue €14,892.82; units 1,172; margin 19.6%\n12-week market proxy €269,228.58; market trend +26.3%\nChannel/proxy ratio 5.53166384%; peer ratio 7.21665887%; peer margin 39.100%\nPeers (50; subject excluded): HC0001, HC0008, HC0011, HC0013, HC0015, HC0017, HC0018, HC0025, HC0028, HC0032, HC0037, HC0040, HC0041, HC0048, HC0049, HC0051, HC0064, HC0083, HC0094, HC0096, HC0099, HC0105, HC0106, HC0110, HC0112, HC0120, HC0123, HC0131, HC0132, HC0142, HC0146, HC0159, HC0167, HC0170, HC0172, HC0176, HC0177, HC0179, HC0182, HC0184, HC0190, HC0191, HC0195, HC0201, HC0206, HC0207, HC0211, HC0212, HC0222, HC0231\nScenario: {\"assumptions\":[\"Benchmark: median channel / market-demand-proxy ratio of 50 other active, in-stock, selling SKUs in this subcategory.\",\"Assumes the peer ratio is a relevant comparison; it does not prove stock or promotion caused the distance.\",\"Snapshot benchmark distance, not forecast, guaranteed gain or upper bound; stock duration and distribution coverage are unknown.\",\"No annualisation, elasticity, promotional cost or cannibalisation is modelled.\"],\"formula\":\"max(0, €269,228.58 x 0.07216658873886855 - €14,892.82) = €4,536.49\",\"period\":\"12 weeks\",\"value_eur\":4536.49,\"value_type\":\"Revenue\"}\nCaveats: One 12-week aggregate and current status/stock fields; the period end and stock duration are not supplied. Market revenue is a demand proxy, not a verified addressable sales pool.\nSource records:\nsku_performance.csv: HC0070, CSV row 71\nproduct_metadata.csv: HC0070, CSV row 71\ncompetitor_market_signals.csv: CM009, CSV row 10\ncompetitor_market_signals.csv: CM054, CSV row 55\ncompetitor_market_signals.csv: CM056, CSV row 57\ncompetitor_market_signals.csv: CM058, CSV row 59\n\nHC0002 — ZenBeauty Private Label Color Studio Sunlit Peach\nPrimary action: Investigate zero sales; also flagged: none\nProposed owner: E-commerce / category operations\nNext step: Check listing visibility, barcode mapping, distribution and sales-feed completeness. Check the selling season before allocating promotional spend.\nSuccess measure: Validated listing and sales feed; first confirmed sales, units and gross profit.\nCurrent status: aktiv; stock: in_stock; seasonality: Summer\n12-week revenue €0.00; units 0; margin 57.0%\n12-week market proxy €64,200.00; market trend +31.0%\nChannel/proxy ratio 0.00000000%; peer ratio 4.21597294%; peer margin 36.300%\nPeers (27; subject excluded): HC0038, HC0055, HC0057, HC0059, HC0061, HC0068, HC0074, HC0077, HC0078, HC0080, HC0088, HC0102, HC0113, HC0115, HC0133, HC0149, HC0154, HC0171, HC0180, HC0186, HC0197, HC0208, HC0209, HC0215, HC0219, HC0224, HC0228\nScenario: {\"assumptions\":[\"An investigation is recommended; financial impact is not established.\"],\"formula\":\"No defensible monetary estimate from the supplied data.\",\"period\":\"12 weeks\",\"value_eur\":null,\"value_type\":\"Not estimated\"}\nCaveats: One 12-week aggregate and current status/stock fields; the period end and stock duration are not supplied. Market revenue is a demand proxy, not a verified addressable sales pool. Summer item: verify the selling calendar before promotion, reactivation or clearance; the performance-window end is unknown.\nSource records:\nsku_performance.csv: HC0002, CSV row 3\nproduct_metadata.csv: HC0002, CSV row 3\ncompetitor_market_signals.csv: CM023, CSV row 24\n\nHC0101 — Bleach London White Toner Cool Ash Blonde\nPrimary action: Review reactivation; also flagged: none\nProposed owner: Category manager\nNext step: Establish why the item is inactive and whether the demand signal is relevant. Check supply, product role and commercial terms before a reactivation trial.\nSuccess measure: Documented range decision; if trialled, units and gross profit against an agreed baseline.\nCurrent status: inaktiv; stock: in_stock; seasonality: Evergreen\n12-week revenue €33,543.34; units 2,024; margin 36.0%\n12-week market proxy €332,008.70; market trend +17.8%\nChannel/proxy ratio 10.10315091%; peer ratio 7.21665887%; peer margin 39.100%\nPeers (50; subject excluded): HC0001, HC0008, HC0011, HC0013, HC0015, HC0017, HC0018, HC0025, HC0028, HC0032, HC0037, HC0040, HC0041, HC0048, HC0049, HC0051, HC0064, HC0083, HC0094, HC0096, HC0099, HC0105, HC0106, HC0110, HC0112, HC0120, HC0123, HC0131, HC0132, HC0142, HC0146, HC0159, HC0167, HC0170, HC0172, HC0176, HC0177, HC0179, HC0182, HC0184, HC0190, HC0191, HC0195, HC0201, HC0206, HC0207, HC0211, HC0212, HC0222, HC0231\nScenario: {\"assumptions\":[\"An investigation is recommended; financial impact is not established.\"],\"formula\":\"No defensible monetary estimate from the supplied data.\",\"period\":\"12 weeks\",\"value_eur\":null,\"value_type\":\"Not estimated\"}\nCaveats: One 12-week aggregate and current status/stock fields; the period end and stock duration are not supplied. Market revenue is a demand proxy, not a verified addressable sales pool.\nSource records:\nsku_performance.csv: HC0101, CSV row 102\nproduct_metadata.csv: HC0101, CSV row 102\ncompetitor_market_signals.csv: CM053, CSV row 54\n\nHC0024 — Herbatint Permanent Herbal Color Natural Black\nPrimary action: Review margin; also flagged: none\nProposed owner: Buyer / commercial finance\nNext step: Also verify current availability before making a volume-dependent commercial change. Validate cost and margin definitions and discuss supplier terms. Assess volume risk before any price change; the peer median is not a price target.\nSuccess measure: Gross profit and units sold, not margin percentage alone.\nCurrent status: aktiv; stock: out_of_stock; seasonality: Evergreen\n12-week revenue €30,499.52; units 5,462; margin 24.6%\n12-week market proxy €522,888.84; market trend -11.1%\nChannel/proxy ratio 5.83288792%; peer ratio 7.21665887%; peer margin 39.100%\nPeers (50; subject excluded): HC0001, HC0008, HC0011, HC0013, HC0015, HC0017, HC0018, HC0025, HC0028, HC0032, HC0037, HC0040, HC0041, HC0048, HC0049, HC0051, HC0064, HC0083, HC0094, HC0096, HC0099, HC0105, HC0106, HC0110, HC0112, HC0120, HC0123, HC0131, HC0132, HC0142, HC0146, HC0159, HC0167, HC0170, HC0172, HC0176, HC0177, HC0179, HC0182, HC0184, HC0190, HC0191, HC0195, HC0201, HC0206, HC0207, HC0211, HC0212, HC0222, HC0231\nScenario: {\"assumptions\":[\"Benchmark: margin median of 50 other active, in-stock, selling SKUs in the subcategory.\",\"Holds current revenue constant; changing price may alter demand. A peer margin is not an achievable supplier concession.\",\"Additional gross profit, not additional revenue or net profit; costs of implementing the action are not supplied.\"],\"formula\":\"max(0, €30,499.52 x (0.391 - 0.246)) = €4,422.43\",\"period\":\"12 weeks\",\"value_eur\":4422.43,\"value_type\":\"Gross profit\"}\nCaveats: One 12-week aggregate and current status/stock fields; the period end and stock duration are not supplied. Market revenue is a demand proxy, not a verified addressable sales pool. Current stock is out of stock. Verify supply before assuming the historical sales volume can continue.\nSource records:\nsku_performance.csv: HC0024, CSV row 25\nproduct_metadata.csv: HC0024, CSV row 25\ncompetitor_market_signals.csv: CM043, CSV row 44\n\nHC0083 — Madison Reed Root Touch Up Pearl Blonde\nPrimary action: Test promotion; also flagged: none\nProposed owner: Category / merchandising manager\nNext step: Verify availability, product visibility and promotional economics. Run a small, time-bounded merchandising test with a baseline or control.\nSuccess measure: Incremental units and gross profit net of promotional costs and cannibalisation.\nCurrent status: aktiv; stock: in_stock; seasonality: Evergreen\n12-week revenue €11,148.18; units 468; margin 36.8%\n12-week market proxy €226,316.30; market trend +14.7%\nChannel/proxy ratio 4.92592889%; peer ratio 7.33387023%; peer margin 39.400%\nPeers (49; subject excluded): HC0001, HC0008, HC0011, HC0013, HC0015, HC0017, HC0018, HC0025, HC0028, HC0032, HC0037, HC0040, HC0041, HC0048, HC0049, HC0051, HC0064, HC0094, HC0096, HC0099, HC0105, HC0106, HC0110, HC0112, HC0120, HC0123, HC0131, HC0132, HC0142, HC0146, HC0159, HC0167, HC0170, HC0172, HC0176, HC0177, HC0179, HC0182, HC0184, HC0190, HC0191, HC0195, HC0201, HC0206, HC0207, HC0211, HC0212, HC0222, HC0231\nScenario: {\"assumptions\":[\"Benchmark: median channel / market-demand-proxy ratio of 49 other active, in-stock, selling SKUs in this subcategory.\",\"Assumes the peer ratio is a relevant comparison; it does not prove stock or promotion caused the distance.\",\"Snapshot benchmark distance, not forecast, guaranteed gain or upper bound; stock duration and distribution coverage are unknown.\",\"No annualisation, elasticity, promotional cost or cannibalisation is modelled.\"],\"formula\":\"max(0, €226,316.30 x 0.07333870233961558 - €11,148.18) = €5,449.56\",\"period\":\"12 weeks\",\"value_eur\":5449.56,\"value_type\":\"Revenue\"}\nCaveats: One 12-week aggregate and current status/stock fields; the period end and stock duration are not supplied. Market revenue is a demand proxy, not a verified addressable sales pool.\nSource records:\nsku_performance.csv: HC0083, CSV row 84\nproduct_metadata.csv: HC0083, CSV row 84\ncompetitor_market_signals.csv: CM053, CSV row 54"
+    },
+    {
+      "number": 6,
+      "title": "Financial scenarios guide questions, not promises",
+      "source": "Source: review.json · summary and primary-action SKU scenarios",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Source: review.json · summary and primary-action SKU scenarios  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "06 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.5,
+          "w": 10.5,
+          "h": 0.19,
+          "text": "ZENBEAUTY RETAIL  /  CATEGORY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.89,
+          "w": 12.23,
+          "h": 0.66,
+          "text": "Financial scenarios guide questions, not promises"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.67,
+          "w": 12.13,
+          "h": 0.4,
+          "text": "Supplied 12-week window · all primary-action SKU cases, not just the five decisions."
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 2.25,
+          "w": 12.23,
+          "h": 0.47
+        },
+        {
+          "kind": "text",
+          "x": 0.77,
+          "y": 2.35,
+          "w": 11.79,
+          "h": 0.25,
+          "text": "NO REALISED BENEFIT MEASURED"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 3.01,
+          "w": 5.95,
+          "h": 2.67
+        },
+        {
+          "kind": "text",
+          "x": 0.81,
+          "y": 3.28,
+          "w": 5.43,
+          "h": 0.33,
+          "text": "Revenue benchmark-distance scenario"
+        },
+        {
+          "kind": "text",
+          "x": 0.79,
+          "y": 3.78,
+          "w": 5.4,
+          "h": 0.8,
+          "text": "€93k"
+        },
+        {
+          "kind": "text",
+          "x": 0.81,
+          "y": 4.72,
+          "w": 5.4,
+          "h": 0.59,
+          "text": "Distance to a typical peer ratio\nin the same subcategory."
+        },
+        {
+          "kind": "text",
+          "x": 0.81,
+          "y": 5.34,
+          "w": 5.4,
+          "h": 0.22,
+          "text": "Not a sales forecast."
+        },
+        {
+          "kind": "shape",
+          "x": 6.83,
+          "y": 3.01,
+          "w": 5.95,
+          "h": 2.67
+        },
+        {
+          "kind": "text",
+          "x": 7.09,
+          "y": 3.28,
+          "w": 5.43,
+          "h": 0.33,
+          "text": "Gross-profit benchmark scenario"
+        },
+        {
+          "kind": "text",
+          "x": 7.07,
+          "y": 3.78,
+          "w": 5.4,
+          "h": 0.8,
+          "text": "€24.9k"
+        },
+        {
+          "kind": "text",
+          "x": 7.09,
+          "y": 4.72,
+          "w": 5.4,
+          "h": 0.59,
+          "text": "Current revenue held constant;\nmargin moved to the peer median."
+        },
+        {
+          "kind": "text",
+          "x": 7.09,
+          "y": 5.34,
+          "w": 5.4,
+          "h": 0.22,
+          "text": "Not additional revenue or net profit."
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 5.98,
+          "w": 12.2,
+          "h": 0.36,
+          "text": "Separate measures. Do not add them. No annualisation."
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.46,
+          "w": 12.2,
+          "h": 0.22,
+          "text": "Not guarantees or upper bounds. Costs, elasticity and cannibalisation are not modelled; period end unknown."
+        }
+      ],
+      "seconds": 75,
+      "speaker_notes": "6. Financial scenarios guide questions, not promises\nSuggested speaking time: 75 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThese are deliberately separate scenario measures. €93,026.53 is the total distance to subcategory peer ratios across applicable primary-action SKU cases. €24,923.66 is a margin scenario holding current revenue constant. Neither is actual uplift, ROI, a forecast, a conservative ceiling or an upper bound. We cannot annualise the snapshot, and costs, elasticity and cannibalisation are not modelled. The numbers guide which questions to validate; the pilot would have to measure the benefit.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\nExact revenue scenario: €93,026.53.\nExact gross-profit scenario: €24,923.66.\nScope: all opportunities with a primary-action SKU scenario, not recommendations only; no secondary-flag double counting.\nRevenue formula per eligible SKU: max(0, market_revenue_eur_12w × peer_ratio_pct / 100 − channel_revenue_eur_12w).\nGross-profit formula per eligible SKU: max(0, channel_revenue_eur_12w × (peer_margin_pct − channel_margin_pct)).\nPeers: other active, in-stock, selling SKUs in the same subcategory; subject SKU excluded. No usable peers means not estimated.\nAll scenario inputs are for the supplied 12-week window. Its end date is not provided. No annualisation.\nZero-sales, lifecycle and assortment investigations have no defensible monetary estimate from these data.\nDescriptive channel / market-demand-proxy ratio: 6.29136058%. This is not verified market share or evidence of execution quality.\nRevenue scenarios are distances to a subcategory peer ratio; gross-profit scenarios hold current revenue constant and change margin to a peer median. Neither is a forecast, guaranteed gain or statistical upper bound. Do not add revenue to gross profit. No annualisation; promotion cost, elasticity and cannibalisation are not modelled.\n\nPer-case source IDs and calculations:\nHC0070 | Revenue | max(0, €269,228.58 x 0.07216658873886855 - €14,892.82) = €4,536.49 | sku_performance.csv: HC0070, CSV row 71; product_metadata.csv: HC0070, CSV row 71; competitor_market_signals.csv: CM009, CSV row 10; competitor_market_signals.csv: CM054, CSV row 55; competitor_market_signals.csv: CM056, CSV row 57; competitor_market_signals.csv: CM058, CSV row 59\nHC0006 | Revenue | max(0, €238,000.00 x 0.07216658873886855 - €16,400.00) = €775.65 | sku_performance.csv: HC0006, CSV row 7; product_metadata.csv: HC0006, CSV row 7; competitor_market_signals.csv: CM003, CSV row 4; competitor_market_signals.csv: CM019, CSV row 20; competitor_market_signals.csv: CM073, CSV row 74\nHC0053 | Revenue | max(0, €132,930.60 x 0.07216658873886855 - €16,742.67) = €0.00 | sku_performance.csv: HC0053, CSV row 54; product_metadata.csv: HC0053, CSV row 54; competitor_market_signals.csv: CM029, CSV row 30\nHC0043 | Revenue | max(0, €109,929.08 x 0.07216658873886855 - €7,330.80) = €602.41 | sku_performance.csv: HC0043, CSV row 44; product_metadata.csv: HC0043, CSV row 44; competitor_market_signals.csv: CM043, CSV row 44\nHC0229 | Revenue | max(0, €49,019.36 x 0.05143053591957583 - €2,370.67) = €150.42 | sku_performance.csv: HC0229, CSV row 230; product_metadata.csv: HC0229, CSV row 230; competitor_market_signals.csv: CM041, CSV row 42\nHC0111 | Revenue | max(0, €34,818.64 x 0.04158778905071245 - €846.66) = €601.37 | sku_performance.csv: HC0111, CSV row 112; product_metadata.csv: HC0111, CSV row 112\nHC0135 | Revenue | max(0, €23,935.84 x 0.07216658873886855 - €189.30) = €1,538.07 | sku_performance.csv: HC0135, CSV row 136; product_metadata.csv: HC0135, CSV row 136\nHC0119 | Revenue | max(0, €23,358.69 x 0.05440241102241644 - €2,434.79) = €0.00 | sku_performance.csv: HC0119, CSV row 120; product_metadata.csv: HC0119, CSV row 120; competitor_market_signals.csv: CM011, CSV row 12\nHC0165 | Revenue | max(0, €17,403.48 x 0.05143053591957583 - €438.43) = €456.64 | sku_performance.csv: HC0165, CSV row 166; product_metadata.csv: HC0165, CSV row 166; competitor_market_signals.csv: CM002, CSV row 3\nHC0143 | Revenue | max(0, €761,015.38 x 0.07216658873886855 - €32,316.38) = €22,603.50 | sku_performance.csv: HC0143, CSV row 144; product_metadata.csv: HC0143, CSV row 144; competitor_market_signals.csv: CM029, CSV row 30\nHC0004 | Revenue | max(0, €134,000.00 x 0.05143053591957583 - €220.00) = €6,671.69 | sku_performance.csv: HC0004, CSV row 5; product_metadata.csv: HC0004, CSV row 5; competitor_market_signals.csv: CM002, CSV row 3\nHC0089 | Revenue | max(0, €433,515.65 x 0.05440241102241644 - €18,055.52) = €5,528.78 | sku_performance.csv: HC0089, CSV row 90; product_metadata.csv: HC0089, CSV row 90; competitor_market_signals.csv: CM070, CSV row 71\nHC0029 | Revenue | max(0, €197,544.64 x 0.07216658873886855 - €8,747.53) = €5,508.59 | sku_performance.csv: HC0029, CSV row 30; product_metadata.csv: HC0029, CSV row 30; competitor_market_signals.csv: CM065, CSV row 66\nHC0216 | Revenue | max(0, €82,945.82 x 0.07216658873886855 - €3,954.45) = €2,031.47 | sku_performance.csv: HC0216, CSV row 217; product_metadata.csv: HC0216, CSV row 217; competitor_market_signals.csv: CM053, CSV row 54\nHC0188 | Revenue | max(0, €18,876.69 x 0.07216658873886855 - €65.61) = €1,296.66 | sku_performance.csv: HC0188, CSV row 189; product_metadata.csv: HC0188, CSV row 189\nHC0022 | Revenue | max(0, €54,053.15 x 0.05143053591957583 - €2,148.67) = €631.31 | sku_performance.csv: HC0022, CSV row 23; product_metadata.csv: HC0022, CSV row 23; competitor_market_signals.csv: CM041, CSV row 42\nHC0137 | Revenue | max(0, €6,763.58 x 0.07216658873886855 - €0.00) = €488.10 | sku_performance.csv: HC0137, CSV row 138; product_metadata.csv: HC0137, CSV row 138; competitor_market_signals.csv: CM053, CSV row 54\nHC0035 | Revenue | max(0, €81,023.35 x 0.04215972941094782 - €2,935.23) = €480.69 | sku_performance.csv: HC0035, CSV row 36; product_metadata.csv: HC0035, CSV row 36\nHC0117 | Revenue | max(0, €7,064.76 x 0.04215972941094782 - €0.00) = €297.85 | sku_performance.csv: HC0117, CSV row 118; product_metadata.csv: HC0117, CSV row 118; competitor_market_signals.csv: CM001, CSV row 2; competitor_market_signals.csv: CM034, CSV row 35\nHC0194 | Revenue | max(0, €7,499.71 x 0.05440241102241644 - €198.60) = €209.40 | sku_performance.csv: HC0194, CSV row 195; product_metadata.csv: HC0194, CSV row 195; competitor_market_signals.csv: CM070, CSV row 71\nHC0221 | Revenue | max(0, €46,925.04 x 0.04158778905071245 - €1,816.15) = €135.36 | sku_performance.csv: HC0221, CSV row 222; product_metadata.csv: HC0221, CSV row 222\nHC0072 | Revenue | max(0, €29,560.44 x 0.05143053591957583 - €1,464.44) = €55.87 | sku_performance.csv: HC0072, CSV row 73; product_metadata.csv: HC0072, CSV row 73\nHC0073 | Revenue | max(0, €33,157.81 x 0.04158778905071245 - €1,356.22) = €22.74 | sku_performance.csv: HC0073, CSV row 74; product_metadata.csv: HC0073, CSV row 74\nHC0108 | Revenue | max(0, €213,564.79 x 0.05143053591957583 - €15,242.84) = €0.00 | sku_performance.csv: HC0108, CSV row 109; product_metadata.csv: HC0108, CSV row 109; competitor_market_signals.csv: CM042, CSV row 43\nHC0021 | Revenue | max(0, €164,441.87 x 0.07216658873886855 - €12,414.74) = €0.00 | sku_performance.csv: HC0021, CSV row 22; product_metadata.csv: HC0021, CSV row 22; competitor_market_signals.csv: CM010, CSV row 11; competitor_market_signals.csv: CM028, CSV row 29; competitor_market_signals.csv: CM044, CSV row 45\nHC0164 | Revenue | max(0, €122,995.98 x 0.05440241102241644 - €10,451.07) = €0.00 | sku_performance.csv: HC0164, CSV row 165; product_metadata.csv: HC0164, CSV row 165; competitor_market_signals.csv: CM070, CSV row 71\nHC0151 | Revenue | max(0, €68,945.20 x 0.04215972941094782 - €3,109.46) = €0.00 | sku_performance.csv: HC0151, CSV row 152; product_metadata.csv: HC0151, CSV row 152; competitor_market_signals.csv: CM039, CSV row 40\nHC0220 | Revenue | max(0, €48,860.17 x 0.04215972941094782 - €3,094.81) = €0.00 | sku_performance.csv: HC0220, CSV row 221; product_metadata.csv: HC0220, CSV row 221; competitor_market_signals.csv: CM001, CSV row 2; competitor_market_signals.csv: CM034, CSV row 35\nHC0118 | Revenue | max(0, €33,382.50 x 0.05143053591957583 - €2,236.93) = €0.00 | sku_performance.csv: HC0118, CSV row 119; product_metadata.csv: HC0118, CSV row 119; competitor_market_signals.csv: CM002, CSV row 3\nHC0027 | Revenue | max(0, €30,682.39 x 0.02624143922628283 - €1,822.41) = €0.00 | sku_performance.csv: HC0027, CSV row 28; product_metadata.csv: HC0027, CSV row 28\nHC0104 | Revenue | max(0, €30,171.15 x 0.05440241102241644 - €3,206.65) = €0.00 | sku_performance.csv: HC0104, CSV row 105; product_metadata.csv: HC0104, CSV row 105\nHC0065 | Revenue | max(0, €29,452.42 x 0.04215972941094782 - €1,518.45) = €0.00 | sku_performance.csv: HC0065, CSV row 66; product_metadata.csv: HC0065, CSV row 66; competitor_market_signals.csv: CM001, CSV row 2; competitor_market_signals.csv: CM034, CSV row 35\nHC0125 | Revenue | max(0, €18,136.39 x 0.02624143922628283 - €890.53) = €0.00 | sku_performance.csv: HC0125, CSV row 126; product_metadata.csv: HC0125, CSV row 126\nHC0024 | Gross profit | max(0, €30,499.52 x (0.391 - 0.246)) = €4,422.43 | sku_performance.csv: HC0024, CSV row 25; product_metadata.csv: HC0024, CSV row 25; competitor_market_signals.csv: CM043, CSV row 44\nHC0015 | Gross profit | max(0, €22,999.65 x (0.394 - 0.208)) = €4,277.93 | sku_performance.csv: HC0015, CSV row 16; product_metadata.csv: HC0015, CSV row 16; competitor_market_signals.csv: CM053, CSV row 54\nHC0096 | Gross profit | max(0, €17,170.56 x (0.394 - 0.211)) = €3,142.21 | sku_performance.csv: HC0096, CSV row 97; product_metadata.csv: HC0096, CSV row 97; competitor_market_signals.csv: CM029, CSV row 30\nHC0184 | Gross profit | max(0, €14,346.47 x (0.394 - 0.22)) = €2,496.29 | sku_performance.csv: HC0184, CSV row 185; product_metadata.csv: HC0184, CSV row 185; competitor_market_signals.csv: CM026, CSV row 27; competitor_market_signals.csv: CM063, CSV row 64\nHC0123 | Gross profit | max(0, €16,572.29 x (0.394 - 0.25)) = €2,386.41 | sku_performance.csv: HC0123, CSV row 124; product_metadata.csv: HC0123, CSV row 124; competitor_market_signals.csv: CM046, CSV row 47\nHC0016 | Gross profit | max(0, €11,161.19 x (0.391 - 0.198)) = €2,154.11 | sku_performance.csv: HC0016, CSV row 17; product_metadata.csv: HC0016, CSV row 17; competitor_market_signals.csv: CM026, CSV row 27; competitor_market_signals.csv: CM063, CSV row 64\nHC0174 | Gross profit | max(0, €12,704.24 x (0.37 - 0.217)) = €1,943.75 | sku_performance.csv: HC0174, CSV row 175; product_metadata.csv: HC0174, CSV row 175; competitor_market_signals.csv: CM011, CSV row 12\nHC0157 | Gross profit | max(0, €12,113.83 x (0.37 - 0.26)) = €1,332.52 | sku_performance.csv: HC0157, CSV row 158; product_metadata.csv: HC0157, CSV row 158; competitor_market_signals.csv: CM070, CSV row 71\nHC0076 | Gross profit | max(0, €6,232.48 x (0.37 - 0.188)) = €1,134.31 | sku_performance.csv: HC0076, CSV row 77; product_metadata.csv: HC0076, CSV row 77; competitor_market_signals.csv: CM074, CSV row 75\nHC0203 | Gross profit | max(0, €6,627.42 x (0.37 - 0.233)) = €907.96 | sku_performance.csv: HC0203, CSV row 204; product_metadata.csv: HC0203, CSV row 204; competitor_market_signals.csv: CM070, CSV row 71\nHC0161 | Gross profit | max(0, €6,256.35 x (0.37 - 0.254)) = €725.74 | sku_performance.csv: HC0161, CSV row 162; product_metadata.csv: HC0161, CSV row 162\nHC0083 | Revenue | max(0, €226,316.30 x 0.07333870233961558 - €11,148.18) = €5,449.56 | sku_performance.csv: HC0083, CSV row 84; product_metadata.csv: HC0083, CSV row 84; competitor_market_signals.csv: CM053, CSV row 54\nHC0064 | Revenue | max(0, €147,997.37 x 0.07333870233961558 - €6,802.52) = €4,051.42 | sku_performance.csv: HC0064, CSV row 65; product_metadata.csv: HC0064, CSV row 65; competitor_market_signals.csv: CM053, CSV row 54\nHC0051 | Revenue | max(0, €687,963.60 x 0.07333870233961558 - €47,004.95) = €3,449.41 | sku_performance.csv: HC0051, CSV row 52; product_metadata.csv: HC0051, CSV row 52; competitor_market_signals.csv: CM053, CSV row 54\nHC0120 | Revenue | max(0, €112,782.18 x 0.07333870233961558 - €4,968.10) = €3,303.20 | sku_performance.csv: HC0120, CSV row 121; product_metadata.csv: HC0120, CSV row 121; competitor_market_signals.csv: CM009, CSV row 10; competitor_market_signals.csv: CM054, CSV row 55; competitor_market_signals.csv: CM056, CSV row 57; competitor_market_signals.csv: CM058, CSV row 59\nHC0110 | Revenue | max(0, €111,971.10 x 0.07333870233961558 - €5,060.58) = €3,151.24 | sku_performance.csv: HC0110, CSV row 111; product_metadata.csv: HC0110, CSV row 111; competitor_market_signals.csv: CM022, CSV row 23; competitor_market_signals.csv: CM024, CSV row 25\nHC0099 | Revenue | max(0, €160,101.52 x 0.07333870233961558 - €8,778.58) = €2,963.06 | sku_performance.csv: HC0099, CSV row 100; product_metadata.csv: HC0099, CSV row 100; competitor_market_signals.csv: CM022, CSV row 23; competitor_market_signals.csv: CM024, CSV row 25\nHC0212 | Revenue | max(0, €112,885.61 x 0.07333870233961558 - €5,613.49) = €2,665.39 | sku_performance.csv: HC0212, CSV row 213; product_metadata.csv: HC0212, CSV row 213; competitor_market_signals.csv: CM065, CSV row 66\nHC0179 | Revenue | max(0, €121,579.47 x 0.07333870233961558 - €6,316.36) = €2,600.12 | sku_performance.csv: HC0179, CSV row 180; product_metadata.csv: HC0179, CSV row 180; competitor_market_signals.csv: CM043, CSV row 44\nHC0178 | Revenue | max(0, €139,919.73 x 0.05535199317993758 - €5,376.00) = €2,368.84 | sku_performance.csv: HC0178, CSV row 179; product_metadata.csv: HC0178, CSV row 179; competitor_market_signals.csv: CM025, CSV row 26; competitor_market_signals.csv: CM075, CSV row 76\nHC0159 | Revenue | max(0, €118,517.33 x 0.07333870233961558 - €6,461.99) = €2,229.92 | sku_performance.csv: HC0159, CSV row 160; product_metadata.csv: HC0159, CSV row 160; competitor_market_signals.csv: CM045, CSV row 46; competitor_market_signals.csv: CM052, CSV row 53\nHC0056 | Revenue | max(0, €138,925.59 x 0.05535199317993758 - €5,464.98) = €2,224.83 | sku_performance.csv: HC0056, CSV row 57; product_metadata.csv: HC0056, CSV row 57; competitor_market_signals.csv: CM070, CSV row 71\nHC0090 | Revenue | max(0, €104,387.62 x 0.05535199317993758 - €4,480.97) = €1,297.09 | sku_performance.csv: HC0090, CSV row 91; product_metadata.csv: HC0090, CSV row 91\nHC0013 | Revenue | max(0, €105,354.34 x 0.07333870233961558 - €6,807.24) = €919.31 | sku_performance.csv: HC0013, CSV row 14; product_metadata.csv: HC0013, CSV row 14; competitor_market_signals.csv: CM029, CSV row 30\nHC0050 | Revenue | max(0, €210,625.26 x 0.05384400272156941 - €10,832.57) = €508.34 | sku_performance.csv: HC0050, CSV row 51; product_metadata.csv: HC0050, CSV row 51; competitor_market_signals.csv: CM002, CSV row 3\nHC0211 | Revenue | max(0, €114,109.68 x 0.07333870233961558 - €7,903.02) = €465.64 | sku_performance.csv: HC0211, CSV row 212; product_metadata.csv: HC0211, CSV row 212; competitor_market_signals.csv: CM053, CSV row 54\nHC0001 | Revenue | max(0, €181,000.00 x 0.07333870233961558 - €12,850.00) = €424.31 | sku_performance.csv: HC0001, CSV row 2; product_metadata.csv: HC0001, CSV row 2; competitor_market_signals.csv: CM065, CSV row 66\nHC0154 | Revenue | max(0, €97,657.25 x 0.0436976984691773 - €3,935.61) = €331.79 | sku_performance.csv: HC0154, CSV row 155; product_metadata.csv: HC0154, CSV row 155; competitor_market_signals.csv: CM001, CSV row 2; competitor_market_signals.csv: CM034, CSV row 35"
+    },
+    {
+      "number": 7,
+      "title": "What changes for stakeholders",
+      "source": "Source: review.json · proposed owners and success measures; README workflow",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Source: review.json · proposed owners and success measures; README workflow  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "07 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.5,
+          "w": 10.5,
+          "h": 0.19,
+          "text": "ZENBEAUTY RETAIL  /  CATEGORY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.89,
+          "w": 12.23,
+          "h": 0.66,
+          "text": "What changes for stakeholders"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.67,
+          "w": 12.13,
+          "h": 0.4,
+          "text": "Traceability and accountability are built in. Commercial outcomes still need testing."
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 2.35,
+          "w": 3.38,
+          "h": 3.92
+        },
+        {
+          "kind": "text",
+          "x": 0.85,
+          "y": 2.65,
+          "w": 2.8,
+          "h": 0.4,
+          "text": "Before"
+        },
+        {
+          "kind": "text",
+          "x": 0.85,
+          "y": 3.36,
+          "w": 2.77,
+          "h": 2.04,
+          "text": "A signal can be\ndiscussed without\nan owner, a decision\nor a measured\nfollow-through."
+        },
+        {
+          "kind": "text",
+          "x": 4.31,
+          "y": 2.36,
+          "w": 8.43,
+          "h": 0.44,
+          "text": "Now: a proposed owner and a measurable next checkpoint"
+        },
+        {
+          "kind": "shape",
+          "x": 4.33,
+          "y": 3.04,
+          "w": 0.46,
+          "h": 0.46
+        },
+        {
+          "kind": "text",
+          "x": 4.33,
+          "y": 3.04,
+          "w": 0.46,
+          "h": 0.46,
+          "text": "CL"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 3.02,
+          "w": 3.28,
+          "h": 0.29,
+          "text": "Category lead"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 3.39,
+          "w": 3.32,
+          "h": 0.26,
+          "text": "Own review decisions"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 3.07,
+          "w": 3.88,
+          "h": 0.61,
+          "text": "Decision completeness:\naccept/defer, owner and date"
+        },
+        {
+          "kind": "shape",
+          "x": 4.33,
+          "y": 3.87,
+          "w": 0.46,
+          "h": 0.46
+        },
+        {
+          "kind": "text",
+          "x": 4.33,
+          "y": 3.87,
+          "w": 0.46,
+          "h": 0.46,
+          "text": "SP"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 3.85,
+          "w": 3.28,
+          "h": 0.29,
+          "text": "Supply planner"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 4.22,
+          "w": 3.32,
+          "h": 0.26,
+          "text": "Validate stock and feed"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 3.9,
+          "w": 3.88,
+          "h": 0.61,
+          "text": "Availability confirmed;\nthen units and gross profit"
+        },
+        {
+          "kind": "shape",
+          "x": 4.33,
+          "y": 4.7,
+          "w": 0.46,
+          "h": 0.46
+        },
+        {
+          "kind": "text",
+          "x": 4.33,
+          "y": 4.7,
+          "w": 0.46,
+          "h": 0.46,
+          "text": "EC"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 4.68,
+          "w": 3.28,
+          "h": 0.29,
+          "text": "E-commerce"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 5.05,
+          "w": 3.32,
+          "h": 0.26,
+          "text": "Validate listing and sales feed"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 4.73,
+          "w": 3.88,
+          "h": 0.61,
+          "text": "First confirmed sales;\nunits and gross profit"
+        },
+        {
+          "kind": "shape",
+          "x": 4.33,
+          "y": 5.53,
+          "w": 0.46,
+          "h": 0.46
+        },
+        {
+          "kind": "text",
+          "x": 4.33,
+          "y": 5.53,
+          "w": 0.46,
+          "h": 0.46,
+          "text": "BF"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 5.51,
+          "w": 3.28,
+          "h": 0.29,
+          "text": "Buyer + finance"
+        },
+        {
+          "kind": "text",
+          "x": 5,
+          "y": 5.88,
+          "w": 3.32,
+          "h": 0.26,
+          "text": "Check costs, terms and tests"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 5.5600000000000005,
+          "w": 3.88,
+          "h": 0.61,
+          "text": "Gross profit + units;\ninclude commercial costs"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.47,
+          "w": 12.13,
+          "h": 0.21,
+          "text": "Proposed responsibilities, not assigned tasks. No adoption or time-saving benefit has been measured."
+        }
+      ],
+      "seconds": 60,
+      "speaker_notes": "7. What changes for stakeholders\nSuggested speaking time: 60 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThe benefit delivered by the prototype is a capability: an evidence trail and an accountable review plan. The category lead owns the decision; supply and e-commerce validate the prerequisites; buyers and finance validate commercial economics. Each discussion should finish with an owner, a decision and a next checkpoint. We have not measured adoption, hours saved or commercial impact, so those must not be claimed as delivered benefits.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\n{\n  \"owner_and_measure_sources\": [\n    {\n      \"id\": \"HC0070\",\n      \"suggested_owner\": \"Supply planner\",\n      \"next_step\": \"Confirm physical and online availability, stock-feed accuracy and supplier lead time; replenish if feasible before considering promotion.\",\n      \"success_measure\": \"Availability, units sold and gross profit after the supply check.\"\n    },\n    {\n      \"id\": \"HC0002\",\n      \"suggested_owner\": \"E-commerce / category operations\",\n      \"next_step\": \"Check listing visibility, barcode mapping, distribution and sales-feed completeness. Check the selling season before allocating promotional spend.\",\n      \"success_measure\": \"Validated listing and sales feed; first confirmed sales, units and gross profit.\"\n    },\n    {\n      \"id\": \"HC0101\",\n      \"suggested_owner\": \"Category manager\",\n      \"next_step\": \"Establish why the item is inactive and whether the demand signal is relevant. Check supply, product role and commercial terms before a reactivation trial.\",\n      \"success_measure\": \"Documented range decision; if trialled, units and gross profit against an agreed baseline.\"\n    },\n    {\n      \"id\": \"HC0024\",\n      \"suggested_owner\": \"Buyer / commercial finance\",\n      \"next_step\": \"Also verify current availability before making a volume-dependent commercial change. Validate cost and margin definitions and discuss supplier terms. Assess volume risk before any price change; the peer median is not a price target.\",\n      \"success_measure\": \"Gross profit and units sold, not margin percentage alone.\"\n    },\n    {\n      \"id\": \"HC0083\",\n      \"suggested_owner\": \"Category / merchandising manager\",\n      \"next_step\": \"Verify availability, product visibility and promotional economics. Run a small, time-bounded merchandising test with a baseline or control.\",\n      \"success_measure\": \"Incremental units and gross profit net of promotional costs and cannibalisation.\"\n    }\n  ],\n  \"proposed_cross_cutting_measure\": \"Decision completeness: accepted/deferred decision plus explicit owner and due date.\",\n  \"limitation\": \"Role labels are proposed stakeholder responsibilities, not executed assignments.\"\n}"
+    },
+    {
+      "number": 8,
+      "title": "A usable workflow, with clear limits",
+      "source": "Source: dashboard workflow; review.json · data_quality",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Source: dashboard workflow; review.json · data_quality  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "08 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.5,
+          "w": 10.5,
+          "h": 0.19,
+          "text": "ZENBEAUTY RETAIL  /  CATEGORY REVIEW"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.89,
+          "w": 12.23,
+          "h": 0.66,
+          "text": "A usable workflow, with clear limits"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.67,
+          "w": 12.13,
+          "h": 0.4,
+          "text": "A browser-local plan supports the review. It is not yet a shared workflow system."
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 2.37,
+          "w": 2.81,
+          "h": 1.18
+        },
+        {
+          "kind": "shape",
+          "x": 0.75,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 0.75,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "01"
+        },
+        {
+          "kind": "text",
+          "x": 1.35,
+          "y": 2.65,
+          "w": 1.83,
+          "h": 0.49,
+          "text": "Review a decision"
+        },
+        {
+          "kind": "shape",
+          "x": 3.45,
+          "y": 2.84,
+          "w": 0.15,
+          "h": 0.25
+        },
+        {
+          "kind": "shape",
+          "x": 3.6900000000000004,
+          "y": 2.37,
+          "w": 2.81,
+          "h": 1.18
+        },
+        {
+          "kind": "shape",
+          "x": 3.8900000000000006,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 3.8900000000000006,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "02"
+        },
+        {
+          "kind": "text",
+          "x": 4.49,
+          "y": 2.65,
+          "w": 1.83,
+          "h": 0.49,
+          "text": "Inspect the evidence"
+        },
+        {
+          "kind": "shape",
+          "x": 6.59,
+          "y": 2.84,
+          "w": 0.15,
+          "h": 0.25
+        },
+        {
+          "kind": "shape",
+          "x": 6.83,
+          "y": 2.37,
+          "w": 2.81,
+          "h": 1.18
+        },
+        {
+          "kind": "shape",
+          "x": 7.03,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 7.03,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "03"
+        },
+        {
+          "kind": "text",
+          "x": 7.63,
+          "y": 2.65,
+          "w": 1.83,
+          "h": 0.49,
+          "text": "Accept or defer"
+        },
+        {
+          "kind": "shape",
+          "x": 9.73,
+          "y": 2.84,
+          "w": 0.15,
+          "h": 0.25
+        },
+        {
+          "kind": "shape",
+          "x": 9.97,
+          "y": 2.37,
+          "w": 2.81,
+          "h": 1.18
+        },
+        {
+          "kind": "shape",
+          "x": 10.17,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 10.17,
+          "y": 2.64,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "04"
+        },
+        {
+          "kind": "text",
+          "x": 10.770000000000001,
+          "y": 2.65,
+          "w": 1.83,
+          "h": 0.49,
+          "text": "Export the plan"
+        },
+        {
+          "kind": "shape",
+          "x": 0.55,
+          "y": 3.89,
+          "w": 5.93,
+          "h": 2.39
+        },
+        {
+          "kind": "shape",
+          "x": 6.85,
+          "y": 3.89,
+          "w": 5.93,
+          "h": 2.39
+        },
+        {
+          "kind": "text",
+          "x": 0.82,
+          "y": 4.13,
+          "w": 5.31,
+          "h": 0.36,
+          "text": "Ready to use locally"
+        },
+        {
+          "kind": "text",
+          "x": 0.84,
+          "y": 4.7,
+          "w": 5.22,
+          "h": 0.28,
+          "text": "Owners, due dates, progress and notes"
+        },
+        {
+          "kind": "text",
+          "x": 0.84,
+          "y": 5.07,
+          "w": 5.22,
+          "h": 0.28,
+          "text": "Source record / row drilldown"
+        },
+        {
+          "kind": "text",
+          "x": 0.84,
+          "y": 5.44,
+          "w": 5.22,
+          "h": 0.28,
+          "text": "CSV exports; no external UI dependency"
+        },
+        {
+          "kind": "text",
+          "x": 0.84,
+          "y": 5.86,
+          "w": 5.29,
+          "h": 0.3,
+          "text": "Plans stay in this browser. Export before moving."
+        },
+        {
+          "kind": "text",
+          "x": 7.13,
+          "y": 4.13,
+          "w": 5.31,
+          "h": 0.36,
+          "text": "Know the evidence limits"
+        },
+        {
+          "kind": "text",
+          "x": 7.14,
+          "y": 4.76,
+          "w": 5.31,
+          "h": 0.29,
+          "text": "1 Jul 2026 observations · 81 days old"
+        },
+        {
+          "kind": "text",
+          "x": 7.14,
+          "y": 5.24,
+          "w": 5.31,
+          "h": 0.29,
+          "text": "4 invalid popularity scores excluded"
+        },
+        {
+          "kind": "text",
+          "x": 7.14,
+          "y": 5.72,
+          "w": 5.31,
+          "h": 0.29,
+          "text": "12-week end and stock-snapshot date unknown"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.47,
+          "w": 12.1,
+          "h": 0.22,
+          "text": "Accepting a plan item does not change stock, prices or assortment."
+        }
+      ],
+      "seconds": 60,
+      "speaker_notes": "8. A usable workflow, with clear limits\nSuggested speaking time: 60 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThe working prototype supports a review loop: inspect a decision, open its evidence, accept or defer it and export the plan. Owners, due dates, status and notes are browser-local; they are not shared assignments. The diagram here is a stylised workflow, not a screenshot. Evidence dates are explicit: competitor observations are 81 days old at this review, 4 invalid popularity scores are excluded, and the end of the 12-week sales window is missing. Freshness and source validation remain prerequisites to commercial use.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\n{\n  \"current_capability_source\": \"README.md and dashboard_template.html\",\n  \"current_scope\": \"Standalone HTML; no external UI dependencies, server, login or shared storage.\",\n  \"plan_meaning\": \"Accept means accepted for review/action planning, not a change in operational retail systems.\",\n  \"storage_limit\": \"Local file URLs, public site origins and different browsers may have separate local storage.\",\n  \"data_quality\": {\n    \"competitor_age_days\": 81,\n    \"competitor_observed_from\": \"2026-07-01\",\n    \"competitor_observed_to\": \"2026-07-01\",\n    \"exclusions\": [\n      {\n        \"field\": \"signal_score_0_100\",\n        \"file\": \"competitor_market_signals.csv\",\n        \"reason\": \"Outside 0-100; excluded from popularity averages and popularity ranking. Price and trend retained as separate, unverified observations.\",\n        \"record_id\": \"CM014\",\n        \"row_number\": 15,\n        \"value\": 100.1\n      },\n      {\n        \"field\": \"signal_score_0_100\",\n        \"file\": \"competitor_market_signals.csv\",\n        \"reason\": \"Outside 0-100; excluded from popularity averages and popularity ranking. Price and trend retained as separate, unverified observations.\",\n        \"record_id\": \"CM044\",\n        \"row_number\": 45,\n        \"value\": 104.8\n      },\n      {\n        \"field\": \"signal_score_0_100\",\n        \"file\": \"competitor_market_signals.csv\",\n        \"reason\": \"Outside 0-100; excluded from popularity averages and popularity ranking. Price and trend retained as separate, unverified observations.\",\n        \"record_id\": \"CM051\",\n        \"row_number\": 52,\n        \"value\": 100.6\n      },\n      {\n        \"field\": \"signal_score_0_100\",\n        \"file\": \"competitor_market_signals.csv\",\n        \"reason\": \"Outside 0-100; excluded from popularity averages and popularity ranking. Price and trend retained as separate, unverified observations.\",\n        \"record_id\": \"CM056\",\n        \"row_number\": 57,\n        \"value\": 103\n      }\n    ],\n    \"invalid_signal_count\": 4,\n    \"warnings\": [\n      \"Synthetic dataset: product names, classifications and suppliers need validation before real commercial use.\",\n      \"The performance window is 12 weeks, but its end date and the date of the stock snapshot are not supplied.\",\n      \"Market revenue is a demand proxy. Channel / market is a descriptive ratio, not verified market share or proof of poor execution.\",\n      \"4 popularity scores are outside 0-100 and excluded from popularity calculations; raw values remain visible.\",\n      \"Oldest competitor observations are 81 days old as of 2026-09-20. The 60-day refresh threshold is an explicit review assumption, not a freshness guarantee.\",\n      \"Revenue/units zero-state mismatch; validate the sales feed for: HC0202.\"\n    ]\n  },\n  \"exclusions_definition\": \"Out-of-range scores excluded from popularity averages/ranking; their prices and trend observations remain separate and unverified.\"\n}"
+    },
+    {
+      "number": 9,
+      "title": "A production path on Azure — proposed, not deployed",
+      "source": "Source: architecture\\production.png + production.json; official URLs in notes",
+      "dark": false,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Source: architecture\\production.png + production.json; official URLs in notes  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "09 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 0.55,
+          "w": 12.23,
+          "h": 0.59,
+          "text": "A production path on Azure — proposed, not deployed"
+        },
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 1.23,
+          "w": 12.23,
+          "h": 0.27,
+          "text": "Today: local dashboard + browser storage. API, SSO and shared plans are not implemented."
+        },
+        {
+          "kind": "image",
+          "x": 0.5524695726256974,
+          "y": 1.57,
+          "w": 12.228393854748605,
+          "h": 5.19
+        }
+      ],
+      "architecture_image": {
+        "source": "architecture\\production.png",
+        "sha256": "8db457d15dd9c44a94fbbb9b3693967b7ae3ca9bf91c5bfb69d191845ae95f0c",
+        "pixel_width": 3374,
+        "pixel_height": 1432,
+        "slide_width_inches": 12.228393854748605,
+        "slide_height_inches": 5.19,
+        "shared_render_provenance": {
+          "source_sha256": "29e8e2fdf096df0f9511a865e65dc80c7206010953482eebf707a022dc357c93",
+          "svg_sha256": "2627e177410c83485d9026633ca531cf8c3fe8ca118e0c563e2b3059b8ef131f",
+          "png_sha256": "8db457d15dd9c44a94fbbb9b3693967b7ae3ca9bf91c5bfb69d191845ae95f0c",
+          "config_sha256": "298d38e5d430aa330a3c0e304673ee7b8fb1fa8262c6511f3a5b12efd538a219",
+          "renderer": "@mermaid-js/mermaid-cli 11.17.0"
+        }
+      },
+      "seconds": 60,
+      "speaker_notes": "9. A production path on Azure — proposed, not deployed\nSuggested speaking time: 60 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nNothing on this architecture slide is deployed by this prototype. The proposed evolution keeps the deterministic analysis, runs it on a schedule and serves the dashboard through an authenticated API. The shared database would hold plans and audit history, replacing browser-only collaboration. Supporting controls make failed or stale refreshes visible. API implementation, sign-in, authorisation and shared storage are future work, justified only after a validated pilot. Human approval remains mandatory; this architecture does not write inventory, pricing or range decisions to retail systems.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\nShared source diagram: architecture\\production.mmd; architecture\\production.png; architecture\\production.svg.\nPublic diagram reference: https://github.com/glejdis/zenline-category-opportunity-review/blob/main/architecture/production.svg\nArchitecture specification SHA-256: 8b0b0cdb55bd7858c22283a64e281a43706bcb4e1abb7d6793cdf256a6d05a54\nCurrent local UI also includes an offline architecture reference panel and source downloads; the cloud architecture itself remains proposed and not deployed.\nShared renderer and source/output hashes: {\"source_sha256\":\"29e8e2fdf096df0f9511a865e65dc80c7206010953482eebf707a022dc357c93\",\"svg_sha256\":\"2627e177410c83485d9026633ca531cf8c3fe8ca118e0c563e2b3059b8ef131f\",\"png_sha256\":\"8db457d15dd9c44a94fbbb9b3693967b7ae3ca9bf91c5bfb69d191845ae95f0c\",\"config_sha256\":\"298d38e5d430aa330a3c0e304673ee7b8fb1fa8262c6511f3a5b12efd538a219\",\"renderer\":\"@mermaid-js/mermaid-cli 11.17.0\"}\n{\n  \"title\": \"A production path for shared, governed category decisions\",\n  \"status\": \"Proposed architecture - not deployed\",\n  \"scope\": \"One internal retail organisation; scheduled batch refresh; authenticated browser access; a shared review-plan API. Service choice and capacity require customer validation.\",\n  \"today\": \"The shipped prototype is a deterministic Python pipeline and standalone HTML. Plans are stored in this browser. There is no hosted API, sign-in, shared database, ERP write-back or Azure deployment.\",\n  \"flow\": [\n    \"Land retailer exports in a private raw Blob container, using an agreed ingestion contract and workload identity.\",\n    \"Run the containerised analysis on an agreed UTC schedule with Azure Container Apps Jobs. Validate inputs before publication and use snapshot IDs to make retries idempotent.\",\n    \"Publish complete, versioned evidence and review artifacts to a private review container. On failure, retain the last successful snapshot and show a stale-data warning; alert the operator.\",\n    \"Serve the dashboard and authorised evidence through a Python API on Azure App Service. Microsoft Entra ID signs users in; the API must enforce app roles and retailer/category scope on every request.\",\n    \"Replace browser-only plan storage with PostgreSQL-backed plans, version checks, audit events and evidence-snapshot references. Browser storage may remain only an explicitly labelled draft cache.\"\n  ],\n  \"services\": [\n    {\n      \"name\": \"Azure App Service\",\n      \"purpose\": \"Host the dashboard and a new Python API together, with built-in Entra authentication.\",\n      \"change_needed\": \"Implement API endpoints, tenant/category authorisation, anti-CSRF protection for cookie-authenticated writes, concurrency control and controlled evidence downloads.\"\n    },\n    {\n      \"name\": \"Azure Container Apps Jobs\",\n      \"purpose\": \"Run the existing deterministic analysis as a finite, scheduled batch workload.\",\n      \"change_needed\": \"Package the Python job and input/output adapters, configure schedule/retries/timeouts, and publish only fully validated snapshots.\"\n    },\n    {\n      \"name\": \"Azure Blob Storage\",\n      \"purpose\": \"Store raw inputs and versioned review artifacts in separate private containers of a storage account.\",\n      \"change_needed\": \"Define retention, versioning, encryption/access policies and an atomic current-successful-review pointer. Do not expose raw or review containers anonymously.\"\n    },\n    {\n      \"name\": \"Azure Database for PostgreSQL Flexible Server\",\n      \"purpose\": \"Persist shared action plans, owners, due dates, decisions, row versions and audit history.\",\n      \"change_needed\": \"Create a scoped schema and least-privilege application role; configure Entra-based managed-identity access, backups and a tested restore process.\"\n    },\n    {\n      \"name\": \"Microsoft Entra ID and managed identities\",\n      \"purpose\": \"Separate user sign-in from service-to-service access without hardcoded cloud credentials.\",\n      \"change_needed\": \"Configure app roles and identity lifecycle. Grant the job Blob read/write permissions and the API only the Blob/database permissions it needs; authentication alone is not business authorisation.\"\n    },\n    {\n      \"name\": \"Azure Monitor, Application Insights and Log Analytics\",\n      \"purpose\": \"Make failed refreshes, validation errors, stale snapshots and API health visible to an accountable operator.\",\n      \"change_needed\": \"Instrument the new API and job, correlate logs with snapshot IDs, set retention/alerts and avoid sending raw commercial data or user notes to telemetry.\"\n    },\n    {\n      \"name\": \"Azure Container Registry and GitHub Actions\",\n      \"purpose\": \"Version the analysis image and deploy tested releases through workload identity federation (OIDC).\",\n      \"change_needed\": \"Create CI build/deploy stages and environment approval gates; pin released image digests. This does not imply a production deployment workflow exists today.\"\n    },\n    {\n      \"name\": \"Azure Key Vault - only if required\",\n      \"purpose\": \"Store external-source credentials that cannot use federated or managed identity.\",\n      \"change_needed\": \"Use managed identity to retrieve only required secrets. Omit this service if all connections can be passwordless.\"\n    }\n  ],\n  \"controls\": [\n    \"Private data tier: App Service VNet integration, a VNet-integrated Container Apps environment, private Blob endpoints and private PostgreSQL connectivity with private DNS. Network access paths and subnet capacity must be designed before deployment.\",\n    \"Authenticated HTTPS application ingress, with access restricted to the agreed workforce audience. A WAF or fully private ingress can be added if the customer's security standard requires it.\",\n    \"Separate managed identities and least-privilege data-plane permissions for the API and batch job; enforce app roles and category/retailer scope in API code.\",\n    \"Immutable logical review versions, evidence-linked decisions, optimistic concurrency, explicit retention and audit policies, and tested backup/restore.\",\n    \"Human approval remains mandatory before any replenishment, pricing or range change. This design does not write to operational retail systems.\"\n  ],\n  \"rollout\": [\n    \"Agree source contracts, ownership, data classification, review cadence, success metrics, RPO/RTO and an Azure region with the customer.\",\n    \"Build the authenticated API/shared-plan schema and batch adapters; test authorisation, simultaneous edits, failed refreshes and restored backups.\",\n    \"Pilot one category with a small user group and measure decision follow-through and commercial outcomes before expanding.\"\n  ],\n  \"not_required\": \"No Azure OpenAI/Foundry runtime, vector database, AKS cluster, event bus or data lake platform is needed for this batch rules-based scope. No costs, capacities or production SLAs are asserted without workload requirements.\",\n  \"references\": [\n    {\n      \"label\": \"App Service built-in authentication and its authorisation responsibilities\",\n      \"url\": \"https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization\"\n    },\n    {\n      \"label\": \"Container Apps Jobs and scheduled finite workloads\",\n      \"url\": \"https://learn.microsoft.com/en-us/azure/container-apps/jobs\"\n    },\n    {\n      \"label\": \"Blob data access with Entra ID, RBAC and managed identity\",\n      \"url\": \"https://learn.microsoft.com/en-us/azure/storage/blobs/authorize-access-azure-active-directory\"\n    },\n    {\n      \"label\": \"PostgreSQL Flexible Server Entra authentication\",\n      \"url\": \"https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts\"\n    },\n    {\n      \"label\": \"Managed identities for Container Apps and registry access\",\n      \"url\": \"https://learn.microsoft.com/en-us/azure/container-apps/managed-identity\"\n    }\n  ]\n}\n\nOfficial service references supplied with the shared architecture:\nApp Service built-in authentication and its authorisation responsibilities: https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization\nContainer Apps Jobs and scheduled finite workloads: https://learn.microsoft.com/en-us/azure/container-apps/jobs\nBlob data access with Entra ID, RBAC and managed identity: https://learn.microsoft.com/en-us/azure/storage/blobs/authorize-access-azure-active-directory\nPostgreSQL Flexible Server Entra authentication: https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts\nManaged identities for Container Apps and registry access: https://learn.microsoft.com/en-us/azure/container-apps/managed-identity"
+    },
+    {
+      "number": 10,
+      "title": "Leadership decision: validate, pilot, measure",
+      "source": "Synthetic case study · proposed next steps · review.json",
+      "dark": true,
+      "elements": [
+        {
+          "kind": "text",
+          "x": 0.55,
+          "y": 6.815,
+          "w": 11.58,
+          "h": 0.2,
+          "text": "Synthetic case study · proposed next steps · review.json  |  a772921f8ac4c1194db8"
+        },
+        {
+          "kind": "text",
+          "x": 12.2,
+          "y": 6.815,
+          "w": 0.58,
+          "h": 0.2,
+          "text": "10 / 10"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 0.62,
+          "w": 7,
+          "h": 0.24,
+          "text": "THE LEADERSHIP DECISION"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 1.31,
+          "w": 7.1,
+          "h": 1.55,
+          "text": "Validate,\npilot, measure."
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 3.13,
+          "w": 6.71,
+          "h": 0.97,
+          "text": "Sponsor a controlled pilot,\nnot a promised uplift."
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 4.55,
+          "w": 6.75,
+          "h": 1.16,
+          "text": "Name the category owner.\nConfirm source access and freshness.\nAgree success criteria before testing."
+        },
+        {
+          "kind": "shape",
+          "x": 8.02,
+          "y": 1.12,
+          "w": 4.68,
+          "h": 1.07
+        },
+        {
+          "kind": "shape",
+          "x": 8.24,
+          "y": 1.37,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 8.24,
+          "y": 1.37,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "1"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 1.25,
+          "w": 3.58,
+          "h": 0.32,
+          "text": "Define"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 1.6500000000000001,
+          "w": 3.55,
+          "h": 0.32,
+          "text": "Owners + agreed data definitions"
+        },
+        {
+          "kind": "shape",
+          "x": 8.02,
+          "y": 2.35,
+          "w": 4.68,
+          "h": 1.07
+        },
+        {
+          "kind": "shape",
+          "x": 8.24,
+          "y": 2.6,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 8.24,
+          "y": 2.6,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "2"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 2.48,
+          "w": 3.58,
+          "h": 0.32,
+          "text": "Validate"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 2.88,
+          "w": 3.55,
+          "h": 0.32,
+          "text": "Supply, listing and range checks"
+        },
+        {
+          "kind": "shape",
+          "x": 8.02,
+          "y": 3.58,
+          "w": 4.68,
+          "h": 1.07
+        },
+        {
+          "kind": "shape",
+          "x": 8.24,
+          "y": 3.83,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 8.24,
+          "y": 3.83,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "3"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 3.71,
+          "w": 3.58,
+          "h": 0.32,
+          "text": "Pilot"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 4.11,
+          "w": 3.55,
+          "h": 0.32,
+          "text": "Time-bounded test with a baseline"
+        },
+        {
+          "kind": "shape",
+          "x": 8.02,
+          "y": 4.8100000000000005,
+          "w": 4.68,
+          "h": 1.07
+        },
+        {
+          "kind": "shape",
+          "x": 8.24,
+          "y": 5.0600000000000005,
+          "w": 0.43,
+          "h": 0.43
+        },
+        {
+          "kind": "text",
+          "x": 8.24,
+          "y": 5.0600000000000005,
+          "w": 0.43,
+          "h": 0.43,
+          "text": "4"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 4.94,
+          "w": 3.58,
+          "h": 0.32,
+          "text": "Only then scale"
+        },
+        {
+          "kind": "text",
+          "x": 8.88,
+          "y": 5.340000000000001,
+          "w": 3.55,
+          "h": 0.32,
+          "text": "Shared Azure workflow, if justified"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 6.05,
+          "w": 2.9,
+          "h": 0.31,
+          "text": "Open the live demo"
+        },
+        {
+          "kind": "text",
+          "x": 3.78,
+          "y": 6.05,
+          "w": 3.44,
+          "h": 0.31,
+          "text": "Explore the repository"
+        },
+        {
+          "kind": "text",
+          "x": 0.65,
+          "y": 6.48,
+          "w": 11.93,
+          "h": 0.2,
+          "text": "Public links reflect the last deployed commit; local changes are not automatically live."
+        }
+      ],
+      "seconds": 45,
+      "speaker_notes": "10. Leadership decision: validate, pilot, measure\nSuggested speaking time: 45 seconds. Whole deck: approximately 10–11 minutes.\n\nTALK TRACK\nThe leadership ask is deliberately limited: name a category owner, secure source access and freshness ownership, and agree what successful validation or a test would look like. First settle definitions and check the highlighted supply, listing and lifecycle questions. Then run time-bounded commercial tests with a baseline or control and measure units and gross profit after costs. Only if that workflow proves useful should we invest in shared Azure deployment. These are proposed phases, not commitments, dated delivery promises or realised benefits.\n\nSOURCE AND REPRODUCIBILITY\nAuthoritative build input: outputs\\review.json (local file; public main may lag).\nSnapshot ID: a772921f8ac4c1194db8\nReview generated/as-of date: 2026-09-20\nreview.json SHA-256: 7b1e7ce25d06107be412f1709b91e75443dcfd0cfd4976ada2f92e5cbce7d9a2\nInputs are synthetic. No result, task assignment or commercial action is approved or executed by this deck.\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic dashboard (last deployed commit): https://glejdis.github.io/zenline-category-opportunity-review/\n\nEVIDENCE, DEFINITIONS AND LIMITS\nPublic demo: https://glejdis.github.io/zenline-category-opportunity-review/\nPublic repository: https://github.com/glejdis/zenline-category-opportunity-review\nPublic links refer to the last published/deployed commit; the local deck may be ahead.\nSynthetic-data disclaimer: the retailer, inputs and opportunity review are a fictional case study.\nProposed sponsor decisions: category owner, data access/freshness owner, agreed test and decision-success criteria.\nNo fixed costs, timeline, ROI, adoption level or measured time savings are asserted.\nArchitecture rollout proposal: [\"Agree source contracts, ownership, data classification, review cadence, success metrics, RPO/RTO and an Azure region with the customer.\",\"Build the authenticated API/shared-plan schema and batch adapters; test authorisation, simultaneous edits, failed refreshes and restored backups.\",\"Pilot one category with a small user group and measure decision follow-through and commercial outcomes before expanding.\"]"
+    }
+  ]
+}

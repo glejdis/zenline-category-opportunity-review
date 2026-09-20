@@ -97,6 +97,26 @@ function payload() {
   });
   return {
     schema_version: 2, snapshot_id: "snapshot-one", generated: "2026-09-20",
+    architecture: {
+      title: "Proposed production architecture",
+      status: "Proposed architecture - not deployed",
+      scope: "One internal retailer; no resources provisioned.",
+      today: "Standalone dashboard and browser-local plan only.",
+      flow: ["Validate source inputs before publishing a review."],
+      services: [
+        { name: "Azure App Service", purpose: "Authenticated dashboard and API", change_needed: "Build the API and enforce scope." },
+        { name: "Azure Database for PostgreSQL Flexible Server", purpose: "Shared plans", change_needed: "Replace local storage with approved server persistence." }
+      ],
+      controls: ["Use managed identity and least privilege."],
+      rollout: ["Validate data definitions before piloting."],
+      not_required: "No AI inference or Azure OpenAI runtime is required.",
+      references: [
+        { label: "Official authentication guidance", url: "https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization" }
+      ],
+      mermaid_source: "flowchart LR\n  APP[Azure App Service] --> DB[PostgreSQL]",
+      diagram_svg: '<svg xmlns="http://www.w3.org/2000/svg"><text>Proposed only</text></svg>',
+      diagram_data_uri: "data:image/svg+xml;base64,PHN2Zy8+"
+    },
     data_quality: {
       competitor_observed_from: "2026-01-02", competitor_observed_to: "2026-01-03", competitor_age_days: 260,
       invalid_signal_count: 1, warnings: ["Historical observations; verify freshness."],
@@ -660,6 +680,57 @@ test("real DOM renderer starts with the shortlist, separated dates and honest ze
   assert.equal(app.writes.length, 0);
 });
 
+test("architecture icon opens an offline proposal without touching the review plan", () => {
+  const app = boot();
+  const state = app.stored();
+  app.get("open-architecture").click();
+  assert.equal(app.get("app-error").hidden, true, app.get("app-error").textContent);
+  assert.equal(app.get("architecture-dialog").open, true);
+  assert.equal(app.document.activeElement, app.get("close-architecture"));
+  const body = app.get("architecture-body").textContent;
+  assert.match(body, /Proposed architecture - not deployed/);
+  assert.match(body, /browser-local plan only/);
+  assert.match(body, /Azure App Service/);
+  assert.match(body, /Build the API and enforce scope/);
+  assert.match(body, /No AI inference/);
+  assert.equal(app.all("img").length, 1);
+  assert.ok(app.all("img")[0].src.startsWith("data:image/svg+xml;base64,"));
+  assert.equal(app.writes.length, 0);
+  assert.equal(app.stored(), state);
+  const enlarge = descendants(app.get("architecture-body")).find(node => node.tagName === "BUTTON" && node.textContent === "Enlarge diagram");
+  enlarge.click();
+  assert.equal(enlarge.getAttribute("aria-pressed"), "true");
+  assert.equal(enlarge.textContent, "Fit diagram");
+  enlarge.click();
+  assert.equal(enlarge.getAttribute("aria-pressed"), "false");
+  app.get("architecture-dialog").fire("cancel");
+  assert.equal(app.get("architecture-dialog").open, false);
+  assert.equal(app.document.activeElement, app.get("open-architecture"));
+});
+
+test("architecture exports the exact editable Mermaid and static SVG without network requests", async () => {
+  const app = boot();
+  app.get("open-architecture").click();
+  const buttons = descendants(app.get("architecture-body")).filter(node => node.tagName === "BUTTON");
+  buttons.find(node => node.textContent === "Download Mermaid source").click();
+  buttons.find(node => node.textContent === "Download diagram SVG").click();
+  assert.equal(app.document.downloads[0].filename, "azure-production-architecture.mmd");
+  assert.equal(app.document.downloads[1].filename, "azure-production-architecture.svg");
+  assert.equal(await app.blobs[0].text(), payload().architecture.mermaid_source);
+  assert.equal(await app.blobs[1].text(), payload().architecture.diagram_svg);
+  assert.equal(app.writes.length, 0);
+});
+
+test("missing architecture is an explicit error, not a fictitious Azure deployment", () => {
+  const data = payload();
+  delete data.architecture;
+  const app = boot({ data });
+  assert.equal(app.get("app-error").hidden, true);
+  app.get("open-architecture").click();
+  assert.match(app.get("app-error").textContent, /Architecture content is missing/);
+  assert.equal(app.get("architecture-dialog").open, false);
+  assert.equal(app.writes.length, 0);
+});
 test("scenario totals stay explicitly global across flagged primary actions, independently of the shortlist, plan and filters", () => {
   const data = payload();
   const app = boot({ data });

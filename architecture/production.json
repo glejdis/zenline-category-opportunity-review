@@ -1,0 +1,90 @@
+{
+  "title": "A production path for shared, governed category decisions",
+  "status": "Proposed architecture - not deployed",
+  "scope": "One internal retail organisation; scheduled batch refresh; authenticated browser access; a shared review-plan API. Service choice and capacity require customer validation.",
+  "today": "The shipped prototype is a deterministic Python pipeline and standalone HTML. Plans are stored in this browser. There is no hosted API, sign-in, shared database, ERP write-back or Azure deployment.",
+  "flow": [
+    "Land retailer exports in a private raw Blob container, using an agreed ingestion contract and workload identity.",
+    "Run the containerised analysis on an agreed UTC schedule with Azure Container Apps Jobs. Validate inputs before publication and use snapshot IDs to make retries idempotent.",
+    "Publish complete, versioned evidence and review artifacts to a private review container. On failure, retain the last successful snapshot and show a stale-data warning; alert the operator.",
+    "Serve the dashboard and authorised evidence through a Python API on Azure App Service. Microsoft Entra ID signs users in; the API must enforce app roles and retailer/category scope on every request.",
+    "Replace browser-only plan storage with PostgreSQL-backed plans, version checks, audit events and evidence-snapshot references. Browser storage may remain only an explicitly labelled draft cache."
+  ],
+  "services": [
+    {
+      "name": "Azure App Service",
+      "purpose": "Host the dashboard and a new Python API together, with built-in Entra authentication.",
+      "change_needed": "Implement API endpoints, tenant/category authorisation, anti-CSRF protection for cookie-authenticated writes, concurrency control and controlled evidence downloads."
+    },
+    {
+      "name": "Azure Container Apps Jobs",
+      "purpose": "Run the existing deterministic analysis as a finite, scheduled batch workload.",
+      "change_needed": "Package the Python job and input/output adapters, configure schedule/retries/timeouts, and publish only fully validated snapshots."
+    },
+    {
+      "name": "Azure Blob Storage",
+      "purpose": "Store raw inputs and versioned review artifacts in separate private containers of a storage account.",
+      "change_needed": "Define retention, versioning, encryption/access policies and an atomic current-successful-review pointer. Do not expose raw or review containers anonymously."
+    },
+    {
+      "name": "Azure Database for PostgreSQL Flexible Server",
+      "purpose": "Persist shared action plans, owners, due dates, decisions, row versions and audit history.",
+      "change_needed": "Create a scoped schema and least-privilege application role; configure Entra-based managed-identity access, backups and a tested restore process."
+    },
+    {
+      "name": "Microsoft Entra ID and managed identities",
+      "purpose": "Separate user sign-in from service-to-service access without hardcoded cloud credentials.",
+      "change_needed": "Configure app roles and identity lifecycle. Grant the job Blob read/write permissions and the API only the Blob/database permissions it needs; authentication alone is not business authorisation."
+    },
+    {
+      "name": "Azure Monitor, Application Insights and Log Analytics",
+      "purpose": "Make failed refreshes, validation errors, stale snapshots and API health visible to an accountable operator.",
+      "change_needed": "Instrument the new API and job, correlate logs with snapshot IDs, set retention/alerts and avoid sending raw commercial data or user notes to telemetry."
+    },
+    {
+      "name": "Azure Container Registry and GitHub Actions",
+      "purpose": "Version the analysis image and deploy tested releases through workload identity federation (OIDC).",
+      "change_needed": "Create CI build/deploy stages and environment approval gates; pin released image digests. This does not imply a production deployment workflow exists today."
+    },
+    {
+      "name": "Azure Key Vault - only if required",
+      "purpose": "Store external-source credentials that cannot use federated or managed identity.",
+      "change_needed": "Use managed identity to retrieve only required secrets. Omit this service if all connections can be passwordless."
+    }
+  ],
+  "controls": [
+    "Private data tier: App Service VNet integration, a VNet-integrated Container Apps environment, private Blob endpoints and private PostgreSQL connectivity with private DNS. Network access paths and subnet capacity must be designed before deployment.",
+    "Authenticated HTTPS application ingress, with access restricted to the agreed workforce audience. A WAF or fully private ingress can be added if the customer's security standard requires it.",
+    "Separate managed identities and least-privilege data-plane permissions for the API and batch job; enforce app roles and category/retailer scope in API code.",
+    "Immutable logical review versions, evidence-linked decisions, optimistic concurrency, explicit retention and audit policies, and tested backup/restore.",
+    "Human approval remains mandatory before any replenishment, pricing or range change. This design does not write to operational retail systems."
+  ],
+  "rollout": [
+    "Agree source contracts, ownership, data classification, review cadence, success metrics, RPO/RTO and an Azure region with the customer.",
+    "Build the authenticated API/shared-plan schema and batch adapters; test authorisation, simultaneous edits, failed refreshes and restored backups.",
+    "Pilot one category with a small user group and measure decision follow-through and commercial outcomes before expanding."
+  ],
+  "not_required": "No Azure OpenAI/Foundry runtime, vector database, AKS cluster, event bus or data lake platform is needed for this batch rules-based scope. No costs, capacities or production SLAs are asserted without workload requirements.",
+  "references": [
+    {
+      "label": "App Service built-in authentication and its authorisation responsibilities",
+      "url": "https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization"
+    },
+    {
+      "label": "Container Apps Jobs and scheduled finite workloads",
+      "url": "https://learn.microsoft.com/en-us/azure/container-apps/jobs"
+    },
+    {
+      "label": "Blob data access with Entra ID, RBAC and managed identity",
+      "url": "https://learn.microsoft.com/en-us/azure/storage/blobs/authorize-access-azure-active-directory"
+    },
+    {
+      "label": "PostgreSQL Flexible Server Entra authentication",
+      "url": "https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts"
+    },
+    {
+      "label": "Managed identities for Container Apps and registry access",
+      "url": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity"
+    }
+  ]
+}

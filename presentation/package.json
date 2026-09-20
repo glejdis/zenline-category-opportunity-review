@@ -1,0 +1,14 @@
+{
+  "name": "zenbeauty-business-review-authoring",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build-time tools for the business presentation and architecture artwork; not dashboard runtime dependencies.",
+  "scripts": {
+    "architecture": "node build_architecture.cjs",
+    "deck": "node build_deck.cjs"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "11.17.0",
+    "pptxgenjs": "4.0.1"
+  }
+}

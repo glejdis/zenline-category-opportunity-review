@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import hashlib
 import json
@@ -13,6 +14,7 @@ import re
 from collections import Counter
 from datetime import date
 from pathlib import Path
+from xml.etree import ElementTree
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "outputs")
@@ -843,11 +845,47 @@ def render_markdown(payload):
     return "\n".join(lines)
 
 
+def load_architecture():
+    directory = Path(BASE) / "architecture"
+    proposal = json.loads((directory / "production.json").read_text(encoding="utf-8"))
+    mermaid = (directory / "production.mmd").read_text(encoding="utf-8")
+    svg = (directory / "production.svg").read_text(encoding="utf-8")
+    provenance = json.loads((directory / "production.render.json").read_text(encoding="utf-8"))
+    for filename, field in (
+        ("production.mmd", "source_sha256"), ("production.svg", "svg_sha256"),
+        ("production.png", "png_sha256"),
+    ):
+        if hashlib.sha256((directory / filename).read_bytes()).hexdigest() != provenance[field]:
+            raise ValueError("Architecture source or artwork changed. Run 'npm --prefix presentation run architecture' before regenerating the dashboard.")
+    if hashlib.sha256((Path(BASE) / "presentation" / "mermaid.config.json").read_bytes()).hexdigest() != provenance["config_sha256"]:
+        raise ValueError("Architecture rendering configuration changed; rebuild the Mermaid preview.")
+    try:
+        root = ElementTree.fromstring(svg)
+    except ElementTree.ParseError as exc:
+        raise ValueError("The architecture SVG is malformed; rebuild the Mermaid preview.") from exc
+    if root.tag != "{http://www.w3.org/2000/svg}svg":
+        raise ValueError("The architecture preview must be a rendered SVG diagram.")
+    for element in root.iter():
+        if element.tag.rsplit("}", 1)[-1] in {"script", "foreignObject"}:
+            raise ValueError("The architecture preview must not contain scripts or external HTML.")
+    if not mermaid.lstrip().startswith("flowchart"):
+        raise ValueError("The architecture source must contain a Mermaid flowchart.")
+    return {
+        **proposal,
+        "mermaid_source": mermaid,
+        "diagram_svg": svg,
+        "diagram_data_uri": "data:image/svg+xml;base64," + base64.b64encode(svg.encode("utf-8")).decode("ascii"),
+    }
+
+
 def render_dashboard(payload):
     template = (Path(BASE) / "dashboard_template.html").read_text(encoding="utf-8")
     if template.count("__DATA__") != 1:
         raise ValueError("dashboard_template.html must contain exactly one __DATA__ placeholder")
-    data = json.dumps(payload, ensure_ascii=False, allow_nan=False, sort_keys=True)
+    data = json.dumps(
+        {**payload, "architecture": load_architecture()},
+        ensure_ascii=False, allow_nan=False, sort_keys=True,
+    )
     for char, escaped in (("<", r"\u003c"), (">", r"\u003e"), ("&", r"\u0026"), ("\u2028", r"\u2028"), ("\u2029", r"\u2029")):
         data = data.replace(char, escaped)
     return template.replace("__DATA__", data)
