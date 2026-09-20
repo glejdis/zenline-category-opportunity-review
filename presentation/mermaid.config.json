@@ -1,5 +1,6 @@
 {
   "theme": "base",
+  "layout": "elk",
   "securityLevel": "strict",
   "htmlLabels": false,
   "deterministicIds": true,
@@ -18,11 +19,16 @@
     "clusterBorder": "#dedede",
     "edgeLabelBackground": "#ffffff"
   },
+  "elk": {
+    "mergeEdges": false,
+    "cycleBreakingStrategy": "DEPTH_FIRST",
+    "considerModelOrder": "NODES_AND_EDGES"
+  },
   "flowchart": {
     "htmlLabels": false,
-    "curve": "stepAfter",
-    "nodeSpacing": 28,
-    "rankSpacing": 50,
+    "curve": "linear",
+    "nodeSpacing": 42,
+    "rankSpacing": 80,
     "padding": 16,
     "useMaxWidth": true
   }
