@@ -12,6 +12,7 @@ const { spawnSync } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 const assert = require('node:assert/strict');
 const PptxGenJS = require('pptxgenjs');
+const artifactSha256 = require('./artifact_sha256.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const REVIEW = path.join(ROOT, 'outputs', 'review.json');
@@ -87,12 +88,14 @@ assert.equal(Object.values(summary.action_counts).reduce((a, b) => a + b, 0),
 assert.ok(fs.existsSync(ARCH_IMAGE),
   'Render the shared architecture\\production.png before building the deck.');
 if (archRender) {
+  assert.equal(archRender.text_hash_normalization, 'utf8-lf',
+    'Rebuild the architecture to use checkout-independent text fingerprints.');
   for (const [field, file] of [
     ['source_sha256', 'production.mmd'],
     ['svg_sha256', 'production.svg'],
     ['png_sha256', 'production.png'],
   ]) {
-    assert.equal(sha256(path.join(ROOT, 'architecture', file)), archRender[field],
+    assert.equal(artifactSha256(path.join(ROOT, 'architecture', file)), archRender[field],
       `Shared architecture ${file} differs from production.render.json; rebuild the shared diagram.`);
   }
 }

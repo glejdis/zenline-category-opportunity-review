@@ -157,7 +157,9 @@ npm --prefix presentation run deck
 
 Set `MERMAID_BROWSER` if the browser executable is not in a standard location. `production.render.json`
 ties the generated SVG/PNG to the Mermaid source; the pipeline rejects mismatched artwork instead of
-silently displaying an outdated diagram. PDF creation additionally needs LibreOffice or PowerPoint.
+silently displaying an outdated diagram. Text fingerprints normalise UTF-8 line endings across
+Windows and Linux checkouts; PNG fingerprints remain byte-exact.
+PDF creation additionally needs LibreOffice or PowerPoint.
 The deck is a dated briefing: regenerate it after changing the underlying review snapshot.
 
 ## Tradeoffs and next improvements

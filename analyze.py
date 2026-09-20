@@ -845,19 +845,29 @@ def render_markdown(payload):
     return "\n".join(lines)
 
 
+def artifact_sha256(filename):
+    path = Path(filename)
+    content = path.read_bytes()
+    if path.suffix.lower() in {".mmd", ".svg", ".json"}:
+        content = content.decode("utf-8-sig").replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return hashlib.sha256(content).hexdigest()
+
+
 def load_architecture():
     directory = Path(BASE) / "architecture"
-    proposal = json.loads((directory / "production.json").read_text(encoding="utf-8"))
-    mermaid = (directory / "production.mmd").read_text(encoding="utf-8")
-    svg = (directory / "production.svg").read_text(encoding="utf-8")
-    provenance = json.loads((directory / "production.render.json").read_text(encoding="utf-8"))
+    proposal = json.loads((directory / "production.json").read_text(encoding="utf-8-sig"))
+    mermaid = (directory / "production.mmd").read_text(encoding="utf-8-sig")
+    svg = (directory / "production.svg").read_text(encoding="utf-8-sig")
+    provenance = json.loads((directory / "production.render.json").read_text(encoding="utf-8-sig"))
+    if provenance.get("text_hash_normalization") != "utf8-lf":
+        raise ValueError("Architecture provenance needs checkout-independent text fingerprints; rebuild the Mermaid preview.")
     for filename, field in (
         ("production.mmd", "source_sha256"), ("production.svg", "svg_sha256"),
         ("production.png", "png_sha256"),
     ):
-        if hashlib.sha256((directory / filename).read_bytes()).hexdigest() != provenance[field]:
+        if artifact_sha256(directory / filename) != provenance[field]:
             raise ValueError("Architecture source or artwork changed. Run 'npm --prefix presentation run architecture' before regenerating the dashboard.")
-    if hashlib.sha256((Path(BASE) / "presentation" / "mermaid.config.json").read_bytes()).hexdigest() != provenance["config_sha256"]:
+    if artifact_sha256(Path(BASE) / "presentation" / "mermaid.config.json") != provenance["config_sha256"]:
         raise ValueError("Architecture rendering configuration changed; rebuild the Mermaid preview.")
     try:
         root = ElementTree.fromstring(svg)

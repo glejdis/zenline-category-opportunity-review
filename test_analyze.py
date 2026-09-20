@@ -602,6 +602,22 @@ class TestOutputs(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "Architecture source or artwork changed"):
                     analyze.load_architecture()
 
+    def test_architecture_fingerprints_survive_windows_and_linux_line_endings(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            shutil.copytree(Path(analyze.BASE) / "architecture", root / "architecture")
+            (root / "presentation").mkdir()
+            shutil.copyfile(
+                Path(analyze.BASE) / "presentation" / "mermaid.config.json",
+                root / "presentation" / "mermaid.config.json",
+            )
+            for newline in (b"\n", b"\r\n"):
+                for path in [*(root / "architecture").glob("*.mmd"), *(root / "architecture").glob("*.svg"), root / "presentation" / "mermaid.config.json"]:
+                    content = path.read_bytes().replace(b"\r\n", b"\n")
+                    path.write_bytes(content.replace(b"\n", newline))
+                with patch.object(analyze, "BASE", folder):
+                    self.assertIn("not deployed", analyze.load_architecture()["status"])
+
     def test_pipeline_outputs_share_the_same_evidence_without_touching_inputs(self):
         before = {name: hashlib.sha256((Path(analyze.BASE) / name).read_bytes()).hexdigest() for name in analyze.INPUT_FILES}
         with tempfile.TemporaryDirectory() as folder:

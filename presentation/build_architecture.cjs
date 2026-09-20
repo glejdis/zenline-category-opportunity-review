@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
-const { createHash } = require("node:crypto");
+const artifactSha256 = require("./artifact_sha256.cjs");
 
 const root = path.resolve(__dirname, "..");
 const browser = process.env.MERMAID_BROWSER || [
@@ -32,8 +32,9 @@ try {
     ], { stdio: "inherit", cwd: root });
     if (result.status !== 0) throw new Error(`Architecture ${format} render failed with exit code ${result.status}.`);
   }
-  const hash = relative => createHash("sha256").update(fs.readFileSync(path.join(root, relative))).digest("hex");
+  const hash = relative => artifactSha256(path.join(root, relative));
   fs.writeFileSync(path.join(root, "architecture", "production.render.json"), JSON.stringify({
+    text_hash_normalization: "utf8-lf",
     source_sha256: hash(path.join("architecture", "production.mmd")),
     svg_sha256: hash(path.join("architecture", "production.svg")),
     png_sha256: hash(path.join("architecture", "production.png")),

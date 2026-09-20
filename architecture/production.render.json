@@ -1,7 +1,8 @@
 {
-  "source_sha256": "29e8e2fdf096df0f9511a865e65dc80c7206010953482eebf707a022dc357c93",
+  "text_hash_normalization": "utf8-lf",
+  "source_sha256": "1abf37b2befec5216fe2851d18fa2a8b193269d6ed3f6ab51cd867bee6b9ef25",
   "svg_sha256": "2627e177410c83485d9026633ca531cf8c3fe8ca118e0c563e2b3059b8ef131f",
   "png_sha256": "8db457d15dd9c44a94fbbb9b3693967b7ae3ca9bf91c5bfb69d191845ae95f0c",
-  "config_sha256": "298d38e5d430aa330a3c0e304673ee7b8fb1fa8262c6511f3a5b12efd538a219",
+  "config_sha256": "8c69d157c7a7397b4b774902c2df4d02c696f3afeeddcae783461fae8ca4de11",
   "renderer": "@mermaid-js/mermaid-cli 11.17.0"
 }

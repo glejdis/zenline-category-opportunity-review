@@ -7,6 +7,28 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const os = require("node:os");
+const artifactSha256 = require("./presentation/artifact_sha256.cjs");
+
+test("authoring fingerprints ignore text line endings but preserve binary bytes", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "architecture-hashes-"));
+  try {
+    const textFile = path.join(directory, "diagram.mmd");
+    fs.writeFileSync(textFile, "flowchart LR\n  A --> B\n");
+    const baseline = artifactSha256(textFile);
+    fs.writeFileSync(textFile, "\ufeffflowchart LR\r\n  A --> B\r\n");
+    assert.equal(artifactSha256(textFile), baseline);
+    fs.writeFileSync(textFile, "flowchart LR\n  A --> C\n");
+    assert.notEqual(artifactSha256(textFile), baseline);
+    const image = path.join(directory, "diagram.png");
+    fs.writeFileSync(image, Buffer.from([1, 13, 10, 2]));
+    const before = artifactSha256(image);
+    fs.writeFileSync(image, Buffer.from([1, 10, 2]));
+    assert.notEqual(artifactSha256(image), before);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
 
 const html = fs.readFileSync(path.join(__dirname, "dashboard_template.html"), "utf8");
 const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map(match => ({ attributes: match[1], body: match[2] }));
