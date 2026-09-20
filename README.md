@@ -167,6 +167,8 @@ Set `MERMAID_BROWSER` if the browser executable is not in a standard location. `
 ties the generated SVG/PNG to the Mermaid source; the pipeline rejects mismatched artwork instead of
 silently displaying an outdated diagram. Text fingerprints normalise UTF-8 line endings across
 Windows and Linux checkouts; PNG fingerprints remain byte-exact.
+The rendering configuration uses ELK with separate edge routes and cycle-aware ordering to keep
+read/write and monitoring connections distinct; avoid applying stepped curves to its routed paths.
 PDF creation additionally needs LibreOffice or PowerPoint.
 The deck is a dated briefing: regenerate it after changing the underlying review snapshot.
 
