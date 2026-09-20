@@ -1,157 +1,130 @@
-# Category Opportunity Review — Hair Coloration
+# Hair Coloration: category decision review
 
 [![tests](https://github.com/glejdis/zenline-category-opportunity-review/actions/workflows/tests.yml/badge.svg)](https://github.com/glejdis/zenline-category-opportunity-review/actions/workflows/tests.yml)
 
-### ▶ [**Open the live interactive dashboard**](https://glejdis.github.io/zenline-category-opportunity-review/) — no install, opens in your browser
+[Published dashboard](https://glejdis.github.io/zenline-category-opportunity-review/) · [Readable review](outputs/category_review.md)
 
-A small, reproducible **category opportunity review** for *ZenBeauty Retail* (fictional German
-drugstore), category **Beauty > Hair Coloration**.
+A small review for the fictional retailer **ZenBeauty Retail**. The customer question is:
+**Which products need attention, what should we do next, and what evidence supports that decision?**
 
-**Customer question:** *"Which products or subcategories need attention, and what should we do next?"*
+The artifact prioritises a handful of concrete decisions, not an automatic recommendation for every
+business lever. The full list remains available for exploration. Inputs are synthetic; no recommendation
+is an approved order, price change, range decision or task assignment.
 
-The pipeline turns the three source CSVs into **five evidence-backed action lists** that map 1:1 to
-the customer's in-scope levers — **fix availability, promote, delist/markdown, price/margin review,
-assortment gap / supplier follow-up** — and ships them as a one-page interactive dashboard (with
-confidence grades, named competitor products to source, brand/supplier/private-label filters, and
-one-click CSV export) plus a readable Markdown brief. Every recommendation traces back to specific
-SKUs and their raw metrics.
+## Run and inspect
 
----
+Python 3.9+; no third-party dependencies or network access:
 
-## TL;DR — what the data says
-
-- The retailer captures only **6.3%** of wider-market demand in this category (€1.39M channel vs
-  €22.0M market, 12 weeks). **The story is execution, not demand.**
-- **31** active SKUs are out/low on stock while demand is *rising* → up to **€52k** recoverable.
-- **10** in-stock SKUs have strong, growing demand but below-median share → **promote**.
-- **47** SKUs are inactive or dead weight → **delist/markdown**, freeing **~321 cm** of shelf.
-- Thin-margin volume sellers → **~€33k** margin-repair upside.
-- **19** competitor demand cells where we hold ≤1 active SKU → **supplier follow-up watchlist**.
-
-Full ranked detail: [`outputs/category_review.md`](outputs/category_review.md) ·
-interactive: **[live dashboard](https://glejdis.github.io/zenline-category-opportunity-review/)**
-(or `outputs/dashboard.html` locally).
-
----
-
-## Run it
-
-Zero third-party dependencies — standard-library Python 3.8+ only.
-
-```bash
+```console
 python analyze.py
 ```
 
-This regenerates everything in `outputs/`. Then **open `outputs/dashboard.html`** in any browser
-(double-click — data is inlined, no server needed).
+Open **`index.html`** or **`outputs/dashboard.html`** locally. Both are self-contained; no server is
+needed. To reproduce a review with fixed freshness calculations:
 
-- Inspect the ranked SKUs directly in `outputs/opportunities.csv` (Excel / any tool).
-- No install, no network, deterministic: same input → identical output.
-
-### Tests
-
-```bash
-python -m unittest test_analyze -v
+```console
+python analyze.py --as-of 2026-09-20
 ```
 
-24 stdlib `unittest` cases (no dependencies) covering the rule engine three ways: exact helper
-math, **each business rule in isolation** on synthetic fixtures, cell-level gap detection/ranking,
-and **regression locks** against the shipped dataset (action counts + known anchor SKUs). Runs in
-~0.03 s.
+The published site reflects the last deployed commit, not uncommitted local changes.
 
----
+## A category manager's walkthrough
 
-## What's in the box
+1. **Start here:** read the selected product-level decisions, proposed owners, next actions and success measures.
+2. **View evidence:** inspect status, stock, seasonality, raw metrics, source file/record/row, comparator observations and scenario calculations.
+3. **Build a review plan:** add relevant decisions, record an owner, due date, accept/defer decision, progress and notes; export for the review meeting.
+4. **Explore when needed:** filter by action, category, brand, supplier or private label; inspect the lower-priority charts and assortment watchlist.
 
+Plan edits stay in this browser's local storage. They are **not shared or sent anywhere**. File URLs,
+the hosted site and other browsers may not share storage. Storage errors and changed snapshots require
+attention; export the plan before moving browsers or origins. Accepted means accepted for review/action
+planning, not that an inventory or pricing system has been changed.
+
+## Business judgment and guardrails
+
+| Situation | Proposed review, not an automatic commercial action |
+|---|---|
+| Active, out/low stock, growing market proxy | Check availability first. Out-of-stock is distinct from low-stock; neither proves the amount of lost sales. |
+| Active, in stock, zero revenue or units, growing market proxy | Investigate listing, distribution, barcode or sales-feed issues, even below the high-demand threshold. Check seasonality before promotion. |
+| Inactive, growing market proxy | Review the reason for inactivity and possible reactivation; do not automatically delist. |
+| Inactive without a growing signal | Confirm the existing range decision and residual stock before any clearance. |
+| In-stock seller below its subcategory peer ratio, strong growing demand | Consider a small merchandising test after checking economics and product visibility. |
+| Low margin on material sales | Validate cost and supplier terms; keep the gross-profit scenario separate from revenue. |
+| Weak active sales with declining demand | Review product role. Seasonal items go to a seasonal review rather than an automatic exit. |
+| Price/assortment comparator signal | Validate product form, pack, source freshness and supply before pricing or ranging decisions. |
+
+Operational prerequisites take precedence over monetary size. Secondary flags remain visible, so
+a stock problem cannot disappear behind a margin opportunity. Recommendations select up to five
+real items in the documented review order, first taking one per primary action. Empty action types
+do not generate cards.
+
+## Evidence and financial assumptions
+
+**Channel / market is a descriptive ratio, not verified market share.** The supplied market figures
+are demand proxies. A low ratio alone does not establish poor execution, addressable demand or causation.
+
+**Revenue scenario:** `max(0, market proxy × peer median ratio − channel revenue)`.
+Peers are other active, in-stock SKUs with positive revenue, units and market proxy in the same
+subcategory. The subject SKU is excluded. Peer IDs/counts and the calculation are visible.
+No usable peer group means **not estimated**, not a fabricated zero or category-wide fallback.
+
+**Gross-profit scenario:** `max(0, current revenue × (peer median margin − current margin))`.
+This holds revenue constant; it is neither additional revenue nor net profit.
+
+Both are **benchmark scenarios, not forecasts, guaranteed gains or statistical upper bounds**.
+No annualisation, elasticity, promotional-cost or cannibalisation model is supported by this snapshot.
+Zero and not estimated are displayed differently. Lifecycle and zero-sales investigations have no
+monetary estimate.
+
+Raw margin/trend `_pct` fields are fractional rates (`0.31` means 31%); derived
+`channel_to_market_ratio_pct` and `peer_ratio_pct` values are percentage points. The dashboard formats
+these separately and rounds displays for readability; calculations and exports retain their inputs.
+
+Evidence labels describe limitations, not probability of success:
+**Snapshot only**, **Needs context**, and **Limited comparison**. Thresholds remain explicit
+heuristics in `CFG`, including top-third demand, bottom-quartile revenue, bottom-quintile margin,
+and a 60-day competitor-refresh review threshold; these are not statistically learned cut-offs.
+
+## Data quality and provenance
+
+Inputs: 235 SKU rows, matching product metadata, and 75 competitor observations.
+The original CSVs are unchanged.
+
+- Competitor observations are dated **2026-07-01**. The review generation date is shown separately.
+- The 12-week performance-window end and stock-snapshot date are **not supplied**.
+- Four popularity scores exceed their stated 0–100 range. Raw values and record IDs remain visible,
+  but those scores are excluded from popularity averages/ranking, not capped. Their price and trend
+  fields remain separate, unverified observations.
+- Source rows, IDs, observed dates and peer/comparator detail are carried into the dashboard,
+  report and exports. Row counts are not assumed to be independent corroboration.
+- Missing required columns, invalid numeric values, duplicate IDs and missing metadata fail with
+  source context rather than silently becoming zero.
+
+## Files and verification
+
+`analyze.py` contains the stdlib analysis and rendering pipeline; `dashboard_template.html` contains
+the UI. Keeping them separate makes both easier to inspect while the generated HTML remains standalone.
+
+Generated files: `index.html`, `outputs/dashboard.html`, `outputs/category_review.md`,
+`outputs/opportunities.csv`, `outputs/assortment_gaps.csv`, and `outputs/review.json` (full audit payload).
+Regeneration replaces these artifacts, not a user's browser-local action plan. Snapshot IDs include
+the source files and rule configuration; a fixed `--as-of` date makes generation reproducible.
+
+```console
+python -m unittest -v
+node --test test_dashboard.cjs
 ```
-TakeHome/
-├── analyze.py                     # the whole pipeline (pure stdlib, ~1 file)
-├── test_analyze.py                # 22 unit tests (stdlib unittest, no deps)
-├── README.md                      # this file
-├── sku_performance.csv            # INPUT — 235 SKUs, channel + market performance
-├── product_metadata.csv           # INPUT — attributes, shelf space, supplier, EAN
-├── competitor_market_signals.csv  # INPUT — 75 competitor / market signal rows
-├── data_dictionary.md             # INPUT — column definitions
-├── customer_context.md            # INPUT — customer brief
-└── outputs/                       # GENERATED by analyze.py
-    ├── dashboard.html             # ⭐ interactive artifact for the stakeholder
-    ├── category_review.md         # readable review + ranked recommendations
-    ├── opportunities.csv          # every flagged SKU: action, value, full evidence
-    └── assortment_gaps.csv        # cell-level (subcategory × shade) gaps
-```
 
----
+Node 18+ is needed only for the optional dashboard logic tests, not to generate or use the artifact.
+Coverage focuses on commercial guardrails, exact scenario math, input errors, evidence provenance,
+CSV handling and the local decision workflow rather than merely freezing old recommendation counts.
 
-## Methodology (so every number is auditable)
+## Tradeoffs and next improvements
 
-**Core execution metric.** `channel_share = channel_revenue / market_revenue` — how much of the
-wider-market demand the retailer actually captures for each SKU. Low share on high, rising demand =
-opportunity.
+This deliberately stops short of a shared workflow system, live ERP integration or learned forecast.
+With customer access, validate data definitions and product roles first, then add stock-duration and
+inventory history, verified like-for-like comparators, test costs/control groups, and outcome snapshots.
+Shared assignments, authentication and cross-user synchronisation would require a backend.
 
-**Modeled opportunity value (€).**
-`potential = market_revenue × subcategory-median channel share`, and
-`value = max(0, potential − current channel_revenue)`.
-It answers *"if this SKU executed like a typical SKU in its subcategory, what would it earn?"*
-Because `market_*` is a demand **proxy**, this is a **prioritisation ceiling, not a forecast** — and
-median (not top-quartile) share is used deliberately to stay conservative.
-
-**The five rules** (thresholds are percentiles computed from the data at runtime — see `CFG` in
-`analyze.py`):
-
-| # | Action | Fires when… |
-|---|---|---|
-| 1 | **Fix availability** | `aktiv` **and** stock is out/low **and** market trend > 0 |
-| 2 | **Promote** | `aktiv`, in stock, market revenue in top third, market trend > 5%, channel share below median |
-| 3 | **Delist / markdown** | `inaktiv`, **or** bottom-quartile channel revenue with falling market **and** channel trend |
-| 4 | **Price / margin** | bottom-quintile margin on a volume seller (→ margin repair), **or** priced >1.15× the competitor benchmark while declining |
-| 5 | **Assortment gap** | competitor cell with popularity ≥60 **or** trend ≥25%, where we hold ≤1 active SKU |
-
-A SKU can trip several rules; the **highest-value revenue action** becomes its *primary* action and
-the rest are kept in `also_flagged`. Assortment gaps are evaluated at the (subcategory × shade)
-**cell** level and ranked by a blended `gap_score = popularity × (1 + bounded trend)`.
-
----
-
-## Assumptions
-
-- `market_*` columns represent addressable category demand the retailer could compete for — used as
-  a relative demand signal, not an absolute revenue pool.
-- `aktiv`/`inaktiv` is the current assortment decision; `inaktiv` SKUs are treated as delist-confirmed.
-- All figures are **12-week** windows, consistent across channel, market and competitor data.
-- The competitor benchmark for a SKU is the **median competitor price** in its (subcategory × shade)
-  cell; `comp_rows` is surfaced everywhere so thin cells can be spotted.
-- Data is synthetic and brand names are illustrative; nothing here is a real commercial claim.
-
-## Limitations & honest caveats
-
-- **Modeled € is a ceiling, not a plan.** Near-term capture from a stock fix or promo is a fraction of it.
-- **Thin competitor coverage.** Many benchmark/gap cells have only 1–3 competitor rows — flagged, not hidden. Price-index outliers (e.g. a premium salon gloss vs a mass permanent) need a human sanity-check before action.
-- **No time series / elasticity.** We see one 12-week snapshot, so trends are point-in-time; there is no price-elasticity or cannibalisation modelling.
-- **Availability upside** assumes replenishment is feasible at current cost — a supply constraint would cap it.
-
-## Next improvements (with more time)
-
-1. **Sensitivity band** on modeled value (median vs top-quartile share) to show a range, not a point.
-2. **Confidence in ranking** — the dashboard already grades each item (High/Medium/Low by data support); next is to *weight* the sort by it and by channel-vs-market unit consistency.
-3. **Elasticity-aware pricing** once historical price/volume is available, replacing the benchmark heuristic.
-4. **Config file + CLI flags** for thresholds so a category manager can tune without editing code.
-5. **Workflow layer** — assign an owner, due date, and status per action so the review becomes a tracked to-do list (belongs in a proper tool, not this artifact).
-6. **Scheduled refresh** writing a dated snapshot per review cycle to track whether actions moved share.
-7. ~~Unit tests + CI~~ — **done** (`test_analyze.py`, 24 cases; GitHub Actions runs them on 3 Python versions per push).
-
----
-
-## Interview handoff notes
-
-- **Setup:** one file, stdlib only. `python analyze.py` → open `outputs/dashboard.html`.
-- **Design choice:** pure-stdlib + inlined-data HTML so the reviewer can run and open it with **zero
-  friction**; the pipeline is deterministic and the report/CSVs are the same source of truth the
-  dashboard reads.
-- **Judgment I'd defend:** leading with **availability + execution** (not price cuts) because a 6.3%
-  share of a healthy market says the fastest, lowest-risk money is *converting demand we already
-  have*, then trimming dead SKUs to fund the winners.
-- **Where I'd push back on the data:** the 3–5× price-index outliers and single-row gap cells — I'd
-  validate those with the category manager before acting.
-
-_AI tools were used as part of the workflow; all recommendations are traceable to the provided data
-via `outputs/opportunities.csv` and `outputs/assortment_gaps.csv`._
+AI tools assisted exploration and implementation. Every proposed decision is traceable to the supplied
+data; assumptions and missing evidence are exposed rather than filled with invented certainty.

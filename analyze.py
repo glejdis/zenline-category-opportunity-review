@@ -1,952 +1,914 @@
 #!/usr/bin/env python3
-"""
-Category Opportunity Review - analysis pipeline
-================================================
-
-Customer: ZenBeauty Retail (fictional German drugstore) | Category: Beauty > Hair Coloration
-
-Reads the three source CSVs, derives execution/pricing signals, and applies five
-deterministic, evidence-backed rules that map 1:1 to the customer's in-scope
-business actions:
-
-    1. FIX AVAILABILITY   active SKUs that are out/low on stock while demand rises
-    2. PROMOTE            in-stock SKUs with strong, growing demand we under-capture
-    3. DELIST / MARKDOWN  inactive or dead SKUs with no traction and falling demand
-    4. PRICE / MARGIN      thin-margin volume sellers + SKUs priced far above benchmark
-    5. ASSORTMENT GAP     competitor demand cells where we are absent or thin (supplier follow-up)
-
-Outputs (written to ./outputs and ./outputs/dashboard.html):
-    - opportunities.csv       one row per flagged SKU with action, value and evidence
-    - assortment_gaps.csv     cell-level (subcategory x shade) gaps
-    - category_review.md      readable review with the ranked recommendations
-    - dashboard.html          self-contained interactive artifact (data inlined)
-
-No third-party dependencies. Deterministic: same input -> same output.
-Run:  python analyze.py
-"""
+"""Build an auditable, decision-focused category review using only the standard library."""
 
 from __future__ import annotations
+
+import argparse
 import csv
+import hashlib
 import json
+import math
 import os
+import re
+from collections import Counter
 from datetime import date
+from pathlib import Path
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "outputs")
-
-# --------------------------------------------------------------------------------------
-# Tunable thresholds. Percentile-based ones are computed from the data at runtime; the
-# few absolute cut-offs below are documented in the README so every rule is auditable.
-# --------------------------------------------------------------------------------------
+INPUT_FILES = (
+    "sku_performance.csv",
+    "product_metadata.csv",
+    "competitor_market_signals.csv",
+)
+RULE_VERSION = "decision-review-2"
 CFG = {
-    "mkt_rev_strong_pctl": 0.66,   # "strong market demand" = top third of market revenue
-    "chan_rev_low_pctl": 0.25,     # "no channel traction" = bottom quartile of channel revenue
-    "margin_low_pctl": 0.20,       # "thin margin" = bottom quintile of channel margin
-    "volume_seller_pctl": 0.60,    # "volume seller" = top 40% of channel revenue
-    "promote_min_mkt_trend": 0.05, # market must be growing >5% to justify promotion
-    "price_index_flag": 1.15,      # priced >15% above competitor benchmark = review
-    "gap_signal_min": 60.0,        # competitor popularity score that marks a demand cell
-    "gap_trend_min": 0.25,         # or competitor trend that marks a demand cell
-    "gap_max_active_cover": 1,     # we hold <=1 active SKU in that cell -> assortment gap
+    "mkt_rev_strong_pctl": 0.66,
+    "chan_rev_low_pctl": 0.25,
+    "margin_low_pctl": 0.20,
+    "volume_seller_pctl": 0.60,
+    "promote_min_mkt_trend": 0.05,
+    "price_index_flag": 1.15,
+    "gap_signal_min": 60.0,
+    "gap_trend_min": 0.25,
+    "gap_max_active_cover": 1,
+    "competitor_refresh_days": 60,
+}
+
+SKU_FIELDS = {
+    "product_id", "product_name", "brand", "category", "subcategory", "shade_group",
+    "seasonality", "status", "stock_status", "private_label", "price_eur", "pack_size",
+    "attributes", "channel_revenue_eur_12w", "channel_units_sold_12w",
+    "channel_margin_pct", "channel_sales_trend_12w_pct", "market_revenue_eur_12w",
+    "market_units_sold_12w", "market_sales_trend_12w_pct",
+}
+META_FIELDS = {
+    "product_id", "product_name", "brand", "category", "subcategory", "price_eur",
+    "pack_size", "private_label", "shade_group", "seasonality", "attributes",
+    "launch_season", "shelf_space_cm", "supplier", "ean",
+}
+COMP_FIELDS = {
+    "competitor_product_id", "competitor_product_name", "brand", "category",
+    "subcategory", "shade_group", "price_eur", "rank_or_popularity_signal",
+    "signal_score_0_100", "source", "trend_score_12w_pct", "observed_date",
+}
+
+ACTION_DETAILS = {
+    "Fix availability": {
+        "order": 0, "tier": "Now", "verb": "Check supply for",
+        "owner": "Supply planner",
+        "step": "Confirm physical and online availability, stock-feed accuracy and supplier lead time; replenish if feasible before considering promotion.",
+        "measure": "Availability, units sold and gross profit after the supply check.",
+    },
+    "Investigate zero sales": {
+        "order": 2, "tier": "Now", "verb": "Investigate zero sales for",
+        "owner": "E-commerce / category operations",
+        "step": "Check listing visibility, barcode mapping, distribution and sales-feed completeness. Check the selling season before allocating promotional spend.",
+        "measure": "Validated listing and sales feed; first confirmed sales, units and gross profit.",
+    },
+    "Review reactivation": {
+        "order": 3, "tier": "Validate first", "verb": "Review reactivation of",
+        "owner": "Category manager",
+        "step": "Establish why the item is inactive and whether the demand signal is relevant. Check supply, product role and commercial terms before a reactivation trial.",
+        "measure": "Documented range decision; if trialled, units and gross profit against an agreed baseline.",
+    },
+    "Review margin": {
+        "order": 4, "tier": "Next", "verb": "Review margin on",
+        "owner": "Buyer / commercial finance",
+        "step": "Validate cost and margin definitions and discuss supplier terms. Assess volume risk before any price change; the peer median is not a price target.",
+        "measure": "Gross profit and units sold, not margin percentage alone.",
+    },
+    "Test promotion": {
+        "order": 5, "tier": "Next", "verb": "Test merchandising for",
+        "owner": "Category / merchandising manager",
+        "step": "Verify availability, product visibility and promotional economics. Run a small, time-bounded merchandising test with a baseline or control.",
+        "measure": "Incremental units and gross profit net of promotional costs and cannibalisation.",
+    },
+    "Review price benchmark": {
+        "order": 6, "tier": "Validate first", "verb": "Validate price comparators for",
+        "owner": "Buyer / pricing analyst",
+        "step": "Refresh the observations and match product form, pack size and positioning before drawing a pricing conclusion. Do not automatically cut price.",
+        "measure": "Verified like-for-like comparators and an approved pricing hypothesis.",
+    },
+    "Review seasonal range": {
+        "order": 7, "tier": "Validate first", "verb": "Review the selling season for",
+        "owner": "Category manager",
+        "step": "Confirm the performance-window dates and seasonal selling plan before deciding whether to retain, reposition or clear the product.",
+        "measure": "A documented seasonal range decision rather than an automatic exit.",
+    },
+    "Review delist / markdown": {
+        "order": 8, "tier": "Validate first", "verb": "Review the range role of",
+        "owner": "Category manager",
+        "step": "Check product role, distribution and residual stock. Consider exit only after validation; consider markdown only if stock and clearance economics justify it.",
+        "measure": "Category gross profit and customer coverage after any approved range change.",
+    },
+    "Confirm exit": {
+        "order": 9, "tier": "Validate first", "verb": "Confirm the inactive range decision for",
+        "owner": "Category manager",
+        "step": "Confirm why the product is inactive, its seasonal role and any remaining physical stock or shelf allocation. Inactive status alone does not justify markdown.",
+        "measure": "Documented exit or retain decision; any clearance based on verified residual units.",
+    },
+}
+
+METHODOLOGY = {
+    "selection": (
+        "Operational checks come first, then lifecycle validation and commercial tests. "
+        "Select up to five concrete items, taking the first item per primary action before "
+        "adding repeats only when fewer than three decisions are available. No empty cards "
+        "or mandatory one-per-lever recommendations."
+    ),
+    "scenario": (
+        "Revenue scenarios are distances to a subcategory peer ratio; gross-profit scenarios "
+        "hold current revenue constant and change margin to a peer median. Neither is a forecast, "
+        "guaranteed gain or statistical upper bound. Do not add revenue to gross profit. "
+        "No annualisation; promotion cost, elasticity and cannibalisation are not modelled."
+    ),
+    "evidence": (
+        "Snapshot only = direct fields support an investigation, not a causal conclusion. "
+        "Needs context = lifecycle, zero-sales or seasonal reasons are unknown. "
+        "Limited comparison = category/shade matches with unverified product comparability. "
+        "These labels describe evidence, not probability of success."
+    ),
 }
 
 
-# ----------------------------------------- IO -----------------------------------------
-def read_csv(path):
-    with open(path, newline="", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+def to_float(value):
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError(f"Expected a finite number, received {value!r}")
+    return number
 
 
-def to_float(v, default=0.0):
-    try:
-        return float(v)
-    except (TypeError, ValueError):
-        return default
+def to_int(value):
+    number = to_float(value)
+    if not number.is_integer():
+        raise ValueError(f"Expected whole units, received {value!r}")
+    return int(number)
 
 
-def to_int(v, default=0):
-    try:
-        return int(float(v))
-    except (TypeError, ValueError):
-        return default
-
-
-def to_bool(v):
-    return str(v).strip().lower() in ("true", "1", "yes")
+def to_bool(value):
+    normalised = str(value).strip().lower()
+    if normalised not in {"true", "false", "1", "0", "yes", "no"}:
+        raise ValueError(f"Expected a boolean, received {value!r}")
+    return normalised in {"true", "1", "yes"}
 
 
 def percentile(values, q):
-    """Linear-interpolation percentile (matches numpy's default)."""
+    """Linear interpolation, with an explicit missing result for an empty cohort."""
+    if not 0 <= q <= 1:
+        raise ValueError("Percentile must lie between 0 and 1")
     xs = sorted(values)
     if not xs:
-        return 0.0
-    if q <= 0:
-        return xs[0]
-    if q >= 1:
-        return xs[-1]
-    pos = q * (len(xs) - 1)
-    lo = int(pos)
-    frac = pos - lo
-    if lo + 1 < len(xs):
-        return xs[lo] + frac * (xs[lo + 1] - xs[lo])
-    return xs[lo]
+        return None
+    position = q * (len(xs) - 1)
+    lower = int(position)
+    fraction = position - lower
+    return xs[lower] + fraction * (xs[min(lower + 1, len(xs) - 1)] - xs[lower])
 
 
 def median(values):
     return percentile(values, 0.5)
 
 
-def eur(x):
-    return f"€{x:,.0f}"
+def eur(value):
+    return "Not estimated" if value is None else f"€{value:,.2f}"
 
 
-# ------------------------------------- Load & derive ----------------------------------
-def load():
-    sku = read_csv(os.path.join(BASE, "sku_performance.csv"))
-    meta = read_csv(os.path.join(BASE, "product_metadata.csv"))
-    comp = read_csv(os.path.join(BASE, "competitor_market_signals.csv"))
+def read_csv(path, required_fields=None):
+    with open(path, newline="", encoding="utf-8-sig") as stream:
+        reader = csv.DictReader(stream)
+        missing = (required_fields or set()) - set(reader.fieldnames or [])
+        if missing:
+            raise ValueError(f"{Path(path).name}: missing columns: {', '.join(sorted(missing))}")
+        rows = []
+        for row in reader:
+            if None in row or any(value is None for value in row.values()):
+                raise ValueError(f"{Path(path).name}:{reader.line_num}: malformed CSV row")
+            row["_source_row"] = reader.line_num
+            rows.append(row)
+        return rows
 
-    meta_by_id = {m["product_id"]: m for m in meta}
 
-    num_sku = ("price_eur", "channel_revenue_eur_12w", "channel_units_sold_12w",
-               "channel_margin_pct", "channel_sales_trend_12w_pct",
-               "market_revenue_eur_12w", "market_units_sold_12w", "market_sales_trend_12w_pct")
-    for r in sku:
-        for c in num_sku:
-            r[c] = to_float(r[c])
-        r["private_label"] = to_bool(r["private_label"])
-        m = meta_by_id.get(r["product_id"], {})
-        r["shelf_space_cm"] = to_float(m.get("shelf_space_cm"), 0.0)
-        r["supplier"] = m.get("supplier", "")
-        # execution efficiency: share of wider-market demand we actually capture
-        r["chan_share"] = (r["channel_revenue_eur_12w"] / r["market_revenue_eur_12w"]
-                           if r["market_revenue_eur_12w"] > 0 else 0.0)
+def _validate_ids(rows, key, filename):
+    seen = set()
+    for row in rows:
+        identifier = row[key].strip()
+        if not identifier or identifier in seen:
+            raise ValueError(f"{filename}:{row['_source_row']}: empty or duplicate {key}: {identifier!r}")
+        seen.add(identifier)
 
-    for c in comp:
-        for k in ("price_eur", "rank_or_popularity_signal", "signal_score_0_100", "trend_score_12w_pct"):
-            c[k] = to_float(c[k])
+
+def _number(row, field, filename, minimum=None, maximum=None, integer=False):
+    try:
+        value = to_int(row[field]) if integer else to_float(row[field])
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{filename}:{row['_source_row']}: invalid {field}: {row[field]!r}") from exc
+    if (minimum is not None and value < minimum) or (maximum is not None and value > maximum):
+        raise ValueError(f"{filename}:{row['_source_row']}: out-of-range {field}: {value}")
+    row[field] = value
+
+
+def load(base=BASE):
+    sku = read_csv(Path(base) / INPUT_FILES[0], SKU_FIELDS)
+    meta = read_csv(Path(base) / INPUT_FILES[1], META_FIELDS)
+    comp = read_csv(Path(base) / INPUT_FILES[2], COMP_FIELDS)
+    for rows, key, filename in (
+        (sku, "product_id", INPUT_FILES[0]),
+        (meta, "product_id", INPUT_FILES[1]),
+        (comp, "competitor_product_id", INPUT_FILES[2]),
+    ):
+        _validate_ids(rows, key, filename)
+    if not sku:
+        raise ValueError("sku_performance.csv: no products to review")
+    meta_by_id = {row["product_id"]: row for row in meta}
+    missing_meta = sorted({row["product_id"] for row in sku} - set(meta_by_id))
+    if missing_meta:
+        raise ValueError(f"product_metadata.csv: missing product IDs: {', '.join(missing_meta)}")
+    for row in meta:
+        _number(row, "shelf_space_cm", INPUT_FILES[1], minimum=0)
+        _number(row, "price_eur", INPUT_FILES[1], minimum=0)
+        if not row["supplier"].strip():
+            raise ValueError(f"product_metadata.csv:{row['_source_row']}: missing supplier")
+    for row in sku:
+        for field in ("price_eur", "channel_revenue_eur_12w", "market_revenue_eur_12w"):
+            _number(row, field, INPUT_FILES[0], minimum=0)
+        for field in ("channel_units_sold_12w", "market_units_sold_12w"):
+            _number(row, field, INPUT_FILES[0], minimum=0, integer=True)
+        _number(row, "channel_margin_pct", INPUT_FILES[0], minimum=0, maximum=1)
+        for field in ("channel_sales_trend_12w_pct", "market_sales_trend_12w_pct"):
+            _number(row, field, INPUT_FILES[0], minimum=-1)
+        for field in ("product_name", "brand", "category", "subcategory", "shade_group", "pack_size"):
+            if not row[field].strip():
+                raise ValueError(f"sku_performance.csv:{row['_source_row']}: missing {field}")
+        if row["status"] not in {"aktiv", "inaktiv"}:
+            raise ValueError(f"sku_performance.csv:{row['_source_row']}: unknown status")
+        if row["stock_status"] not in {"in_stock", "low_stock", "out_of_stock"}:
+            raise ValueError(f"sku_performance.csv:{row['_source_row']}: unknown stock_status")
+        if row["seasonality"] not in {"Evergreen", "Summer", "Winter"}:
+            raise ValueError(f"sku_performance.csv:{row['_source_row']}: unknown seasonality")
+        try:
+            row["private_label"] = to_bool(row["private_label"])
+        except ValueError as exc:
+            raise ValueError(f"sku_performance.csv:{row['_source_row']}: invalid private_label") from exc
+        metadata = meta_by_id[row["product_id"]]
+        row.update({
+            "supplier": metadata["supplier"],
+            "shelf_space_cm": metadata["shelf_space_cm"],
+            "launch_season": metadata["launch_season"],
+            "ean": metadata["ean"],
+            "_metadata_row": metadata["_source_row"],
+            "chan_share": (
+                row["channel_revenue_eur_12w"] / row["market_revenue_eur_12w"]
+                if row["market_revenue_eur_12w"] > 0 else None
+            ),
+        })
+    for row in comp:
+        for field in ("competitor_product_name", "brand", "subcategory", "shade_group", "source"):
+            if not row[field].strip():
+                raise ValueError(f"competitor_market_signals.csv:{row['_source_row']}: missing {field}")
+        for field in ("price_eur", "rank_or_popularity_signal"):
+            _number(row, field, INPUT_FILES[2], minimum=0)
+        _number(row, "signal_score_0_100", INPUT_FILES[2])
+        _number(row, "trend_score_12w_pct", INPUT_FILES[2], minimum=-1)
+        try:
+            date.fromisoformat(row["observed_date"])
+        except ValueError as exc:
+            raise ValueError(
+                f"competitor_market_signals.csv:{row['_source_row']}: invalid observed_date"
+            ) from exc
     return sku, comp
 
 
-def competitor_benchmarks(comp):
-    """Median competitor price and mean demand signals per (subcategory, shade_group)."""
-    cells = {}
-    for c in comp:
-        key = (c["subcategory"], c["shade_group"])
-        cells.setdefault(key, {"prices": [], "signal": [], "trend": []})
-        cells[key]["prices"].append(c["price_eur"])
-        cells[key]["signal"].append(c["signal_score_0_100"])
-        cells[key]["trend"].append(c["trend_score_12w_pct"])
-    bench = {}
-    for key, d in cells.items():
-        bench[key] = {
-            "comp_med_price": median(d["prices"]),
-            "comp_signal": sum(d["signal"]) / len(d["signal"]),
-            "comp_trend": sum(d["trend"]) / len(d["trend"]),
-            "comp_n": len(d["prices"]),
-        }
-    return bench
+def valid_signal(row):
+    return 0 <= row["signal_score_0_100"] <= 100
 
 
-# ------------------------------------- Classification ---------------------------------
-def classify(sku, bench):
-    rev = [s["channel_revenue_eur_12w"] for s in sku]
-    mkt = [s["market_revenue_eur_12w"] for s in sku]
-    margin = [s["channel_margin_pct"] for s in sku]
-
-    T = {
-        "mkt_rev_strong": percentile(mkt, CFG["mkt_rev_strong_pctl"]),
-        "chan_rev_low": percentile(rev, CFG["chan_rev_low_pctl"]),
-        "margin_low": percentile(margin, CFG["margin_low_pctl"]),
-        "volume_seller": percentile(rev, CFG["volume_seller_pctl"]),
+def competitor_example(row):
+    return {
+        "record_id": row.get("competitor_product_id", "Not supplied"),
+        "name": row.get("competitor_product_name", "Not supplied"),
+        "brand": row.get("brand", "Not supplied"),
+        "price_eur": row["price_eur"],
+        "source": row.get("source", "Not supplied"),
+        "observed_date": row.get("observed_date"),
+        "signal_score_0_100": row["signal_score_0_100"],
+        "signal_valid": valid_signal(row),
+        "trend_score_12w_pct": row["trend_score_12w_pct"],
     }
-    active = [s for s in sku if s["status"] == "aktiv" and s["stock_status"] != "out_of_stock"]
-    chan_share_med = median([s["chan_share"] for s in active]) or median([s["chan_share"] for s in sku])
 
-    # per-subcategory benchmarks used to model "what typical execution would yield"
-    subcats = sorted({s["subcategory"] for s in sku})
-    sub_share, sub_margin = {}, {}
-    for sc in subcats:
-        act = [s for s in active if s["subcategory"] == sc]
-        allsc = [s for s in sku if s["subcategory"] == sc]
-        sub_share[sc] = median([s["chan_share"] for s in act]) if act else chan_share_med
-        sub_margin[sc] = median([s["channel_margin_pct"] for s in allsc])
 
-    def potential_and_gap(s):
-        pot = s["market_revenue_eur_12w"] * sub_share[s["subcategory"]]
-        return pot, max(0.0, pot - s["channel_revenue_eur_12w"])
+def competitor_benchmarks(comp):
+    cells = {}
+    for row in comp:
+        cells.setdefault((row["subcategory"], row["shade_group"]), []).append(row)
+    benchmarks = {}
+    for key, rows in sorted(cells.items()):
+        scores = [row["signal_score_0_100"] for row in rows if valid_signal(row)]
+        benchmarks[key] = {
+            "comp_med_price": median([row["price_eur"] for row in rows if row["price_eur"] > 0]),
+            "comp_signal": sum(scores) / len(scores) if scores else None,
+            "comp_trend": sum(row["trend_score_12w_pct"] for row in rows) / len(rows),
+            "comp_n": len(rows),
+            "valid_signal_rows": len(scores),
+            "rows": sorted(rows, key=lambda row: row.get("competitor_product_id", "")),
+        }
+    return benchmarks
 
+
+def data_quality(sku, comp, as_of):
+    observations = [date.fromisoformat(row["observed_date"]) for row in comp]
+    exclusions = [
+        {
+            "file": INPUT_FILES[2], "record_id": row["competitor_product_id"],
+            "row_number": row.get("_source_row"), "field": "signal_score_0_100",
+            "value": row["signal_score_0_100"],
+            "reason": "Outside 0-100; excluded from popularity averages and popularity ranking. Price and trend retained as separate, unverified observations.",
+        }
+        for row in comp if not valid_signal(row)
+    ]
+    warnings = [
+        "Synthetic dataset: product names, classifications and suppliers need validation before real commercial use.",
+        "The performance window is 12 weeks, but its end date and the date of the stock snapshot are not supplied.",
+        "Market revenue is a demand proxy. Channel / market is a descriptive ratio, not verified market share or proof of poor execution.",
+    ]
+    if exclusions:
+        warnings.append(
+            f"{len(exclusions)} popularity scores are outside 0-100 and excluded from popularity calculations; raw values remain visible."
+        )
+    if observations:
+        oldest_age = (as_of - min(observations)).days
+        if oldest_age > CFG["competitor_refresh_days"]:
+            warnings.append(
+                f"Oldest competitor observations are {oldest_age} days old as of {as_of.isoformat()}. "
+                f"The {CFG['competitor_refresh_days']}-day refresh threshold is an explicit review assumption, not a freshness guarantee."
+            )
+        if max(observations) > as_of:
+            warnings.append("Some competitor observations are later than the review date; validate the snapshot before using them.")
+    else:
+        warnings.append("No competitor observations are supplied; external price and assortment evidence is unavailable.")
+    inconsistent = [
+        row["product_id"] for row in sku
+        if (row["channel_revenue_eur_12w"] == 0) != (row["channel_units_sold_12w"] == 0)
+    ]
+    if inconsistent:
+        warnings.append(f"Revenue/units zero-state mismatch; validate the sales feed for: {', '.join(inconsistent)}.")
+    return {
+        "competitor_observed_from": min(observations).isoformat() if observations else None,
+        "competitor_observed_to": max(observations).isoformat() if observations else None,
+        "competitor_age_days": (as_of - max(observations)).days if observations else None,
+        "invalid_signal_count": len(exclusions),
+        "warnings": warnings,
+        "exclusions": exclusions,
+    }
+
+
+def _scenario(value=None, value_type="Not estimated", formula="No defensible monetary estimate from the supplied data.", assumptions=None):
+    return {
+        "value_eur": round(value, 2) if value is not None else None,
+        "value_type": value_type,
+        "period": "12 weeks",
+        "formula": formula,
+        "assumptions": assumptions or [
+            "An investigation is recommended; financial impact is not established.",
+        ],
+    }
+
+
+def _source_ref(filename, row, key="product_id"):
+    return {"file": filename, "record_id": row.get(key, "Not supplied"), "row_number": row.get("_source_row")}
+
+
+def _comparison_caveats(benchmark, as_of):
+    caveats = [
+        "Matching subcategory and shade does not establish like-for-like pricing or substitutability; competitor pack size and product form are not verified.",
+        "Competitor rows are observations, not necessarily independent corroboration. Refresh sources before a commercial decision.",
+    ]
+    if benchmark["comp_n"] == 1:
+        caveats.append("Only one competitor observation supports this comparison.")
+    if benchmark["valid_signal_rows"] < benchmark["comp_n"]:
+        caveats.append("Invalid popularity scores are excluded, not capped or silently corrected.")
+    dates = [
+        date.fromisoformat(row["observed_date"])
+        for row in benchmark["rows"] if row.get("observed_date")
+    ]
+    if dates and (as_of - min(dates)).days > CFG["competitor_refresh_days"]:
+        caveats.append(f"Competitor evidence is older than the {CFG['competitor_refresh_days']}-day review threshold.")
+    return caveats
+
+
+def classify(sku, bench, as_of=None):
+    as_of = as_of or date.today()
+    if not sku:
+        return [], {}, None
+    active = [row for row in sku if row["status"] == "aktiv"]
+    population = active or sku
+    thresholds = {
+        "mkt_rev_strong": percentile([row["market_revenue_eur_12w"] for row in population], CFG["mkt_rev_strong_pctl"]),
+        "chan_rev_low": percentile([row["channel_revenue_eur_12w"] for row in population], CFG["chan_rev_low_pctl"]),
+        "margin_low": percentile([row["channel_margin_pct"] for row in population], CFG["margin_low_pctl"]),
+        "volume_seller": percentile([row["channel_revenue_eur_12w"] for row in population], CFG["volume_seller_pctl"]),
+    }
+    sellers = [
+        row for row in active if row["stock_status"] == "in_stock"
+        and row["market_revenue_eur_12w"] > 0
+        and row["channel_revenue_eur_12w"] > 0 and row["channel_units_sold_12w"] > 0
+    ]
+    overall_ratio = median([row["channel_revenue_eur_12w"] / row["market_revenue_eur_12w"] for row in sellers])
     flagged = []
-    for s in sku:
-        b = bench.get((s["subcategory"], s["shade_group"]))
-        price_index = (s["price_eur"] / b["comp_med_price"]
-                       if b and b["comp_med_price"] > 0 else None)
-        pot, gap = potential_and_gap(s)
+    for row in sku:
+        peers = [
+            peer for peer in sellers
+            if peer["subcategory"] == row["subcategory"] and peer["product_id"] != row["product_id"]
+        ]
+        peer_ratio = median([peer["channel_revenue_eur_12w"] / peer["market_revenue_eur_12w"] for peer in peers])
+        peer_margin = median([peer["channel_margin_pct"] for peer in peers])
+        revenue = row["channel_revenue_eur_12w"]
+        market = row["market_revenue_eur_12w"]
+        ratio = revenue / market if market > 0 else None
+        benchmark = bench.get((row["subcategory"], row["shade_group"]))
+        comp_price = benchmark["comp_med_price"] if benchmark else None
+        price_index = row["price_eur"] / comp_price if comp_price else None
+        revenue_scenario = _scenario()
+        if peer_ratio is not None and market > 0:
+            distance = max(0.0, market * peer_ratio - revenue)
+            revenue_scenario = _scenario(
+                distance, "Revenue",
+                f"max(0, {eur(market)} x {peer_ratio:.16g} - {eur(revenue)}) = {eur(distance)}",
+                [
+                    f"Benchmark: median channel / market-demand-proxy ratio of {len(peers)} other active, in-stock, selling SKUs in this subcategory.",
+                    "Assumes the peer ratio is a relevant comparison; it does not prove stock or promotion caused the distance.",
+                    "Snapshot benchmark distance, not forecast, guaranteed gain or upper bound; stock duration and distribution coverage are unknown.",
+                    "No annualisation, elasticity, promotional cost or cannibalisation is modelled.",
+                ],
+            )
+        candidates = []
 
-        actions = []  # (action, value_eur, rationale)
+        def add(action, rationale, scenario=None, order=None):
+            details = ACTION_DETAILS[action]
+            candidates.append({
+                "action": action, "rationale": rationale,
+                "scenario": scenario if scenario is not None else _scenario(),
+                "order": details["order"] if order is None else order,
+            })
 
-        # 1) FIX AVAILABILITY -- active, demand rising, but not buyable
-        if s["status"] == "aktiv" and s["stock_status"] in ("out_of_stock", "low_stock") \
-                and s["market_sales_trend_12w_pct"] > 0:
-            actions.append(("Fix availability", gap,
-                            f"{s['stock_status'].replace('_',' ')} while market demand is "
-                            f"{s['market_sales_trend_12w_pct']*100:+.0f}% (12w)"))
-
-        # 2) PROMOTE -- in stock, strong & growing demand, we under-capture it
-        if s["status"] == "aktiv" and s["stock_status"] == "in_stock" \
-                and s["market_revenue_eur_12w"] >= T["mkt_rev_strong"] \
-                and s["market_sales_trend_12w_pct"] > CFG["promote_min_mkt_trend"] \
-                and s["chan_share"] < chan_share_med:
-            actions.append(("Promote", gap,
-                            f"top-tercile demand {eur(s['market_revenue_eur_12w'])} "
-                            f"({s['market_sales_trend_12w_pct']*100:+.0f}% 12w) but only "
-                            f"{s['chan_share']*100:.1f}% channel share"))
-
-        # 3) DELIST / MARKDOWN -- no traction, demand falling, or already inactive
-        if s["status"] == "inaktiv" or (
-                s["channel_revenue_eur_12w"] <= T["chan_rev_low"]
-                and s["market_sales_trend_12w_pct"] < 0
-                and s["channel_sales_trend_12w_pct"] <= 0):
-            reason = ("marked inaktiv" if s["status"] == "inaktiv"
-                      else f"{eur(s['channel_revenue_eur_12w'])} channel rev, demand "
-                           f"{s['market_sales_trend_12w_pct']*100:+.0f}%")
-            actions.append(("Delist / markdown", 0.0,
-                            f"{reason}; frees {s['shelf_space_cm']:.0f} cm shelf"))
-
-        # 4) PRICE / MARGIN REVIEW -- thin margin on a seller, or priced far above benchmark
-        if s["channel_margin_pct"] <= T["margin_low"] and s["channel_revenue_eur_12w"] >= T["volume_seller"]:
-            target = sub_margin[s["subcategory"]]
-            uplift = max(0.0, s["channel_revenue_eur_12w"] * (target - s["channel_margin_pct"]))
-            actions.append(("Price / margin", uplift,
-                            f"{s['channel_margin_pct']*100:.0f}% margin on {eur(s['channel_revenue_eur_12w'])} "
-                            f"seller vs {target*100:.0f}% subcategory median"))
-        elif price_index and price_index > CFG["price_index_flag"] \
-                and s["status"] == "aktiv" and s["channel_sales_trend_12w_pct"] < 0:
-            actions.append(("Price / margin", 0.0,
-                            f"priced {price_index:.1f}x competitor benchmark ({eur(s['price_eur'])} vs "
-                            f"{eur(b['comp_med_price'])}) and declining {s['channel_sales_trend_12w_pct']*100:+.0f}%"))
-
-        if not actions:
+        growing = market > 0 and row["market_sales_trend_12w_pct"] > 0
+        if row["status"] == "inaktiv":
+            if growing:
+                add("Review reactivation",
+                    f"Inactive, but the market-demand proxy is {eur(market)} and growing {row['market_sales_trend_12w_pct']:+.1%}. The reason for inactivity is not supplied.")
+            else:
+                add("Confirm exit",
+                    f"Inactive assortment status; channel revenue {eur(revenue)}, market trend {row['market_sales_trend_12w_pct']:+.1%}. Status is not evidence of residual stock or a failed product.")
+        else:
+            if row["stock_status"] in {"out_of_stock", "low_stock"} and growing:
+                state = row["stock_status"].replace("_", " ")
+                add("Fix availability",
+                    f"Active and {state}; market-demand proxy {eur(market)}, trend {row['market_sales_trend_12w_pct']:+.1%}. Stock duration and lost sales are unknown.",
+                    revenue_scenario, order=0 if row["stock_status"] == "out_of_stock" else 1)
+            zero_sales = revenue == 0 or row["channel_units_sold_12w"] == 0
+            if row["stock_status"] == "in_stock" and zero_sales and growing:
+                add("Investigate zero sales",
+                    f"Active and in stock, with {eur(revenue)} channel revenue and {row['channel_units_sold_12w']} units. Market-demand proxy {eur(market)}, trend {row['market_sales_trend_12w_pct']:+.1%}. This exception does not require top-third demand.")
+            if (
+                row["stock_status"] == "in_stock" and not zero_sales
+                and market >= thresholds["mkt_rev_strong"]
+                and row["market_sales_trend_12w_pct"] > CFG["promote_min_mkt_trend"]
+                and peer_ratio is not None and ratio is not None and ratio < peer_ratio
+            ):
+                add("Test promotion",
+                    f"In stock, with demand proxy {eur(market)} above the {eur(thresholds['mkt_rev_strong'])} threshold and growing {row['market_sales_trend_12w_pct']:+.1%}. Channel / proxy ratio {ratio:.2%} is below the {peer_ratio:.2%} subcategory peer median.",
+                    revenue_scenario)
+            if (
+                row["stock_status"] == "in_stock" and revenue <= thresholds["chan_rev_low"]
+                and row["market_sales_trend_12w_pct"] < 0 and row["channel_sales_trend_12w_pct"] <= 0
+            ):
+                action = "Review delist / markdown" if row["seasonality"] == "Evergreen" else "Review seasonal range"
+                add(action,
+                    f"Channel revenue {eur(revenue)} is below the {eur(thresholds['chan_rev_low'])} threshold; channel trend {row['channel_sales_trend_12w_pct']:+.1%}, market trend {row['market_sales_trend_12w_pct']:+.1%}. Review product role before changing the range.")
+            if (
+                revenue > 0 and row["channel_margin_pct"] <= thresholds["margin_low"]
+                and revenue >= thresholds["volume_seller"]
+                and (peer_margin is None or row["channel_margin_pct"] < peer_margin)
+            ):
+                margin_scenario = _scenario()
+                if peer_margin is not None:
+                    uplift = max(0.0, revenue * (peer_margin - row["channel_margin_pct"]))
+                    margin_scenario = _scenario(
+                        uplift, "Gross profit",
+                        f"max(0, {eur(revenue)} x ({peer_margin:.16g} - {row['channel_margin_pct']:.16g})) = {eur(uplift)}",
+                        [
+                            f"Benchmark: margin median of {len(peers)} other active, in-stock, selling SKUs in the subcategory.",
+                            "Holds current revenue constant; changing price may alter demand. A peer margin is not an achievable supplier concession.",
+                            "Additional gross profit, not additional revenue or net profit; costs of implementing the action are not supplied.",
+                        ],
+                    )
+                add("Review margin",
+                    f"Margin {row['channel_margin_pct']:.1%} is at or below the {thresholds['margin_low']:.1%} threshold on {eur(revenue)} channel revenue. Validate cost and commercial terms.",
+                    margin_scenario)
+            if price_index is not None and price_index > CFG["price_index_flag"] and row["channel_sales_trend_12w_pct"] < 0:
+                add("Review price benchmark",
+                    f"Price {eur(row['price_eur'])} is {price_index:.2f}x the {eur(comp_price)} category/shade comparator median while channel trend is {row['channel_sales_trend_12w_pct']:+.1%}. Like-for-like comparability is unverified.")
+        if not candidates:
             continue
 
-        # Priority order decides the primary action; the rest become secondary flags.
-        priority = {"Fix availability": 0, "Promote": 1, "Price / margin": 2, "Delist / markdown": 3}
-        actions.sort(key=lambda a: priority[a[0]])
-        primary_action, value_eur, rationale = actions[0]
-        # if a revenue action co-exists, prefer the larger-value one as primary
-        rev_actions = [a for a in actions if a[1] > 0]
-        if rev_actions:
-            best = max(rev_actions, key=lambda a: a[1])
-            if best[0] != "Delist / markdown":
-                primary_action, value_eur, rationale = best
-
-        # confidence: first-party data (channel/market/margin) is robust; a benchmark-only
-        # price flag leans on thin competitor cells, so grade it by competitor sample size.
-        if primary_action == "Price / margin" and value_eur == 0:
-            cn = b["comp_n"] if b else 0
-            confidence = "Low" if cn <= 1 else "Medium"
-        else:
-            confidence = "High"
-
+        candidates.sort(key=lambda candidate: candidate["order"])
+        primary = candidates[0]
+        action = primary["action"]
+        details = ACTION_DETAILS[action]
+        context_actions = {
+            "Investigate zero sales", "Review reactivation", "Confirm exit",
+            "Review seasonal range", "Review delist / markdown",
+        }
+        evidence_strength = (
+            "Limited comparison" if action == "Review price benchmark"
+            else "Needs context" if action in context_actions else "Snapshot only"
+        )
+        caveats = [
+            "One 12-week aggregate and current status/stock fields; the period end and stock duration are not supplied.",
+            "Market revenue is a demand proxy, not a verified addressable sales pool.",
+        ]
+        if row["seasonality"] != "Evergreen":
+            caveats.append(f"{row['seasonality']} item: verify the selling calendar before promotion, reactivation or clearance; the performance-window end is unknown.")
+        supply_context = (
+            row["status"] == "aktiv" and row["stock_status"] != "in_stock"
+            and action != "Fix availability"
+        )
+        if supply_context:
+            caveats.append(
+                f"Current stock is {row['stock_status'].replace('_', ' ')}. Verify supply before assuming the historical sales volume can continue."
+            )
+        if peer_ratio is None:
+            caveats.append("No other comparable active, in-stock sellers; no peer-based revenue scenario is estimated.")
+        elif len(peers) < 3:
+            caveats.append(f"Small peer group ({len(peers)} SKUs); the benchmark may be unstable.")
+        if benchmark and any(candidate["action"] == "Review price benchmark" for candidate in candidates):
+            caveats.extend(_comparison_caveats(benchmark, as_of))
+        source_refs = [
+            _source_ref(INPUT_FILES[0], row),
+            {"file": INPUT_FILES[1], "record_id": row["product_id"], "row_number": row.get("_metadata_row")},
+        ]
+        if benchmark:
+            source_refs.extend(_source_ref(INPUT_FILES[2], peer, "competitor_product_id") for peer in benchmark["rows"])
         flagged.append({
-            "product_id": s["product_id"], "product_name": s["product_name"],
-            "brand": s["brand"], "subcategory": s["subcategory"], "shade_group": s["shade_group"],
-            "supplier": s["supplier"], "private_label": s["private_label"],
-            "status": s["status"], "stock_status": s["stock_status"],
-            "price_eur": round(s["price_eur"], 2),
-            "comp_benchmark_price_eur": round(b["comp_med_price"], 2) if b else None,
-            "price_index": round(price_index, 2) if price_index else None,
-            "channel_revenue_eur_12w": round(s["channel_revenue_eur_12w"], 0),
-            "channel_units_12w": to_int(s["channel_units_sold_12w"]),
-            "channel_margin_pct": round(s["channel_margin_pct"], 3),
-            "channel_trend_12w_pct": round(s["channel_sales_trend_12w_pct"], 3),
-            "market_revenue_eur_12w": round(s["market_revenue_eur_12w"], 0),
-            "market_trend_12w_pct": round(s["market_sales_trend_12w_pct"], 3),
-            "channel_share_pct": round(s["chan_share"] * 100, 2),
-            "modeled_potential_eur": round(pot, 0),
-            "shelf_space_cm": round(s["shelf_space_cm"], 0),
-            "primary_action": primary_action,
-            "opportunity_value_eur": round(value_eur, 0),
-            "confidence": confidence,
-            "rationale": rationale,
-            "also_flagged": "; ".join(a[0] for a in actions if a[0] != primary_action),
+            "id": f"sku-{row['product_id']}", "kind": "sku",
+            "title": f"{details['verb']} {row['product_name']} ({row['product_id']})",
+            "product_id": row["product_id"], "product_name": row["product_name"],
+            "brand": row["brand"], "subcategory": row["subcategory"], "shade_group": row["shade_group"],
+            "supplier": row["supplier"], "private_label": row["private_label"],
+            "status": row["status"], "stock_status": row["stock_status"],
+            "seasonality": row["seasonality"], "pack_size": row["pack_size"],
+            "price_eur": row["price_eur"], "channel_revenue_eur_12w": revenue,
+            "channel_units_12w": row["channel_units_sold_12w"],
+            "channel_margin_pct": row["channel_margin_pct"],
+            "channel_trend_12w_pct": row["channel_sales_trend_12w_pct"],
+            "market_revenue_eur_12w": market,
+            "market_trend_12w_pct": row["market_sales_trend_12w_pct"],
+            "channel_to_market_ratio_pct": ratio * 100 if ratio is not None else None,
+            "peer_ratio_pct": peer_ratio * 100 if peer_ratio is not None else None,
+            "peer_margin_pct": peer_margin,
+            "peer_count": len(peers), "peer_ids": sorted(peer["product_id"] for peer in peers),
+            "comp_benchmark_price_eur": comp_price,
+            "competitor_rows": benchmark["comp_n"] if benchmark else 0,
+            "shelf_space_cm": row["shelf_space_cm"],
+            "primary_action": action, "priority_tier": details["tier"], "priority_order": primary["order"],
+            "rationale": primary["rationale"],
+            "next_step": (
+                "Also verify current availability before making a volume-dependent commercial change. "
+                if supply_context else ""
+            ) + details["step"],
+            "suggested_owner": details["owner"], "success_measure": details["measure"],
+            "evidence_strength": evidence_strength,
+            "evidence_reason": (
+                f"{len(benchmark['rows'])} category/shade competitor observations; independent sources and pack/form comparability are not established."
+                if action == "Review price benchmark"
+                else "Source fields support a review; a single snapshot does not establish the cause, commercial feasibility or probability of success."
+            ),
+            "caveats": caveats, "source_refs": source_refs,
+            "competitor_examples": [competitor_example(peer) for peer in benchmark["rows"]] if benchmark else [],
+            "scenario": primary["scenario"],
+            "also_flagged": [candidate["action"] for candidate in candidates[1:]],
         })
-
-    # normalized 0-100 priority for display bars
-    maxv = max((f["opportunity_value_eur"] for f in flagged), default=0) or 1
-    for f in flagged:
-        f["priority_score"] = round(100 * f["opportunity_value_eur"] / maxv, 1)
-    flagged.sort(key=lambda f: f["opportunity_value_eur"], reverse=True)
-    return flagged, T, chan_share_med
+    flagged.sort(key=_decision_sort)
+    return flagged, thresholds, overall_ratio
 
 
-def assortment_gaps(sku, bench, comp=None):
-    # example competitor products per (subcategory, shade), strongest signal first
-    cell_products = {}
-    for c in (comp or []):
-        cell_products.setdefault((c["subcategory"], c["shade_group"]), []).append(c)
+def _decision_sort(item):
+    scenario = item["scenario"]["value_eur"]
+    return (
+        item["priority_order"],
+        -(item.get("market_revenue_eur_12w", 0) if item["priority_order"] == 0 else scenario or 0),
+        -item.get("market_revenue_eur_12w", 0),
+        item["id"],
+    )
+
+
+def assortment_gaps(sku, bench, comp=None, as_of=None):
+    as_of = as_of or date.today()
     gaps = []
-    for (sc, shade), b in bench.items():
-        cover = [s for s in sku if s["subcategory"] == sc and s["shade_group"] == shade
-                 and s["status"] == "aktiv" and s["stock_status"] != "out_of_stock"]
-        strong = b["comp_signal"] >= CFG["gap_signal_min"] or b["comp_trend"] >= CFG["gap_trend_min"]
-        if strong and len(cover) <= CFG["gap_max_active_cover"]:
-            # blended priority: popularity is the robust signal, trend a bounded multiplier
-            gap_score = b["comp_signal"] * (1 + max(0.0, min(b["comp_trend"], 0.6)))
-            prods = sorted(cell_products.get((sc, shade), []),
-                           key=lambda c: c["signal_score_0_100"], reverse=True)[:3]
-            examples = [{"name": c["competitor_product_name"], "brand": c["brand"],
-                         "price_eur": round(c["price_eur"], 2)} for c in prods]
-            confidence = "Low" if b["comp_n"] <= 1 else ("Medium" if b["comp_n"] <= 3 else "High")
-            gaps.append({
-                "subcategory": sc, "shade_group": shade,
-                "gap_score": round(gap_score, 1),
-                "confidence": confidence,
-                "competitor_signal_0_100": round(b["comp_signal"], 1),
-                "competitor_trend_12w_pct": round(b["comp_trend"], 3),
-                "competitor_rows": b["comp_n"],
-                "active_skus_held": len(cover),
-                "channel_revenue_eur_12w": round(sum(s["channel_revenue_eur_12w"] for s in cover), 0),
-                "examples": examples,
-                "example_products": "; ".join(
-                    f"{e['name']} ({e['brand']}, €{e['price_eur']:.2f})" for e in examples),
-            })
-    gaps.sort(key=lambda g: g["gap_score"], reverse=True)
+    for (subcategory, shade), benchmark in sorted(bench.items()):
+        existing = [row for row in sku if row["subcategory"] == subcategory and row["shade_group"] == shade]
+        active = [row for row in existing if row["status"] == "aktiv"]
+        available = [row for row in active if row["stock_status"] != "out_of_stock"]
+        signal = benchmark["comp_signal"]
+        strong = (
+            signal is not None and signal >= CFG["gap_signal_min"]
+        ) or benchmark["comp_trend"] >= CFG["gap_trend_min"]
+        # Existing active products count as assortment coverage even when out of stock.
+        if not strong or len(active) > CFG["gap_max_active_cover"]:
+            continue
+        score = signal * (1 + max(0.0, min(benchmark["comp_trend"], 0.6))) if signal is not None else None
+        key = hashlib.sha256(f"{subcategory}\0{shade}".encode("utf-8")).hexdigest()[:12]
+        step = (
+            "Check existing inactive products and the reason for inactivity before adding a substitute. "
+            if existing and not active else
+            "Check availability of the existing active product before interpreting this as a new range gap. "
+            if active and not available else ""
+        )
+        gaps.append({
+            "id": f"gap-{key}", "kind": "gap",
+            "title": f"Validate demand for {subcategory} / {shade}",
+            "subcategory": subcategory, "shade_group": shade,
+            "primary_action": "Assortment follow-up", "priority_tier": "Validate first", "priority_order": 10,
+            "rationale": (
+                f"{benchmark['comp_n']} competitor observation(s); {len(active)} active products, "
+                f"{len(available)} currently available. Popularity "
+                f"{f'{signal:.1f}/100' if signal is not None else 'unavailable after invalid-score exclusions'}, "
+                f"mean trend {benchmark['comp_trend']:+.1%}."
+            ),
+            "next_step": step + "Refresh the signal and validate product form, pack size and supplier feasibility before a small range trial.",
+            "suggested_owner": "Category buyer",
+            "success_measure": "Validated demand and supply evidence; if approved, trial sell-through and gross profit.",
+            "evidence_strength": "Limited comparison",
+            "evidence_reason": f"{benchmark['comp_n']} observations, {benchmark['valid_signal_rows']} valid popularity scores. Row count is not proof of independent corroboration.",
+            "caveats": _comparison_caveats(benchmark, as_of),
+            "source_refs": [
+                _source_ref(INPUT_FILES[2], row, "competitor_product_id") for row in benchmark["rows"]
+            ] + [_source_ref(INPUT_FILES[0], row) for row in existing],
+            "competitor_examples": [competitor_example(row) for row in benchmark["rows"]],
+            "scenario": _scenario(), "also_flagged": [],
+            "competitor_signal_0_100": signal,
+            "competitor_trend_12w_pct": benchmark["comp_trend"],
+            "competitor_rows": benchmark["comp_n"], "valid_signal_rows": benchmark["valid_signal_rows"],
+            "active_skus_held": len(active), "available_skus_held": len(available),
+            "existing_product_ids": sorted(row["product_id"] for row in existing),
+            "gap_score": round(score, 2) if score is not None else None,
+        })
+    gaps.sort(key=lambda gap: (-(gap["gap_score"] or 0), gap["id"]))
     return gaps
 
 
-# ------------------------------------- Reporting --------------------------------------
-def write_csv(path, rows, fields):
-    with open(path, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
-        w.writeheader()
-        for r in rows:
-            w.writerow({k: r.get(k) for k in fields})
+def recommendations(flagged, gaps, summary=None):
+    ordered = sorted(flagged, key=_decision_sort) + gaps
+    selected, actions = [], set()
+    for item in ordered:
+        if item["primary_action"] not in actions:
+            selected.append(item)
+            actions.add(item["primary_action"])
+        if len(selected) == 5:
+            break
+    if len(selected) < 3:
+        selected_ids = {item["id"] for item in selected}
+        for item in ordered:
+            if item["id"] not in selected_ids:
+                selected.append(item)
+                selected_ids.add(item["id"])
+            if len(selected) >= 3:
+                break
+    return selected
 
 
 def build_summary(sku, flagged, gaps):
-    by_action = {}
-    for f in flagged:
-        by_action.setdefault(f["primary_action"], {"n": 0, "value": 0.0})
-        by_action[f["primary_action"]]["n"] += 1
-        by_action[f["primary_action"]]["value"] += f["opportunity_value_eur"]
-    chan = sum(s["channel_revenue_eur_12w"] for s in sku)
-    mkt = sum(s["market_revenue_eur_12w"] for s in sku)
-    avail = sum(a["value"] for k, a in by_action.items() if k == "Fix availability")
-    promo = sum(a["value"] for k, a in by_action.items() if k == "Promote")
-    margin = sum(a["value"] for k, a in by_action.items() if k == "Price / margin")
-    delist_n = by_action.get("Delist / markdown", {}).get("n", 0)
-    shelf = sum(f["shelf_space_cm"] for f in flagged if f["primary_action"] == "Delist / markdown")
+    channel = sum(row["channel_revenue_eur_12w"] for row in sku)
+    market = sum(row["market_revenue_eur_12w"] for row in sku)
+    action_counts = dict(Counter(row["primary_action"] for row in flagged))
+    availability = [row for row in flagged if row["primary_action"] == "Fix availability"]
     return {
-        "n_skus": len(sku),
-        "channel_rev": chan, "market_rev": mkt, "channel_share_pct": 100 * chan / mkt,
-        "by_action": by_action,
-        "upside_availability": avail, "upside_promote": promo, "upside_margin": margin,
-        "total_revenue_upside": avail + promo, "delist_n": delist_n, "shelf_freed_cm": shelf,
-        "n_gaps": len(gaps),
+        "n_skus": len(sku), "n_flagged": len(flagged),
+        "channel_rev": round(channel, 2), "market_rev": round(market, 2),
+        "channel_to_market_ratio_pct": 100 * channel / market if market else None,
+        "revenue_scenario_eur": round(sum(
+            row["scenario"]["value_eur"] or 0 for row in flagged if row["scenario"]["value_type"] == "Revenue"
+        ), 2),
+        "gross_profit_scenario_eur": round(sum(
+            row["scenario"]["value_eur"] or 0 for row in flagged if row["scenario"]["value_type"] == "Gross profit"
+        ), 2),
+        "availability_out_of_stock": sum(row["stock_status"] == "out_of_stock" for row in availability),
+        "availability_low_stock": sum(row["stock_status"] == "low_stock" for row in availability),
+        "zero_sales_count": action_counts.get("Investigate zero sales", 0),
+        "reactivation_count": action_counts.get("Review reactivation", 0),
+        "action_counts": action_counts,
     }
 
 
-def recommendations(flagged, gaps, S):
-    """Assemble the ranked, evidence-backed recommendations (data-driven, no hardcoding)."""
-    def top(action, n=3):
-        rows = [f for f in flagged if f["primary_action"] == action]
-        if action == "Delist / markdown":
-            rows = sorted(rows, key=lambda f: f["shelf_space_cm"], reverse=True)
-        return rows[:n]
-
-    recs = []
-    recs.append({
-        "title": "Fix availability on in-demand active SKUs — fastest recoverable revenue",
-        "action": "Fix availability",
-        "why": (f"{S['by_action'].get('Fix availability',{}).get('n',0)} active SKUs are out- or low-stock "
-                f"while their market demand is still growing. Modeled recoverable channel revenue is up to "
-                f"{eur(S['upside_availability'])} (ceiling — near-term capture is a fraction)."),
-        "evidence": top("Fix availability"),
-        "do": "Expedite replenishment / set safety stock on the listed SKUs before the category review.",
-    })
-    recs.append({
-        "title": "Promote strong-demand SKUs we are under-executing",
-        "action": "Promote",
-        "why": (f"{S['by_action'].get('Promote',{}).get('n',0)} in-stock active SKUs sit in the top third of "
-                f"market demand and are still rising, yet we capture below-median channel share. Modeled "
-                f"execution upside up to {eur(S['upside_promote'])}."),
-        "evidence": top("Promote"),
-        "do": "Feature in category promo / gondola ends / online merchandising and monitor share for 12w.",
-    })
-    recs.append({
-        "title": "Delist or mark down dead SKUs to free shelf space and working capital",
-        "action": "Delist / markdown",
-        "why": (f"{S['delist_n']} SKUs are inactive or have no channel traction with falling demand. "
-                f"Delisting frees ~{S['shelf_freed_cm']:.0f} cm of shelf to reallocate to the promote / gap SKUs."),
-        "evidence": top("Delist / markdown", 4),
-        "do": "Delist at next review; clear residual stock via markdown; reallocate facings.",
-    })
-    recs.append({
-        "title": "Repair margin on volume sellers and review off-benchmark prices",
-        "action": "Price / margin",
-        "why": (f"Several high-volume SKUs run bottom-quintile margin; lifting them toward the subcategory "
-                f"median is worth up to {eur(S['upside_margin'])}. A handful of fashion-colour SKUs are also "
-                f"priced well above the nearest competitor benchmark while declining."),
-        "evidence": top("Price / margin"),
-        "do": "Renegotiate cost or adjust price on volume drivers; investigate premium-priced decliners.",
-    })
-    recs.append({
-        "title": "Close assortment gaps where competitors show demand and we are thin",
-        "action": "Assortment gap",
-        "why": (f"{S['n_gaps']} competitor demand cells (subcategory × shade) show high popularity or a rising "
-                f"trend where we hold ≤1 active SKU. Treat as a supplier follow-up watchlist "
-                f"(competitor sample per cell is small — validate before ranging in)."),
-        "evidence": gaps[:4],
-        "do": "Brief top 3–4 cells to suppliers; range-in or request samples; re-check next signal refresh.",
-    })
-    return recs
-
-
-def render_markdown(S, recs, gaps):
-    d = date.today().isoformat()
-    L = []
-    L.append("# Category Opportunity Review — Hair Coloration")
-    L.append(f"_Customer: ZenBeauty Retail · Category: Beauty > Hair Coloration · Generated {d}_\n")
-    L.append("> Auto-generated by `analyze.py` from the three source CSVs. Every number below traces "
-             "to specific rows in `outputs/opportunities.csv` / `outputs/assortment_gaps.csv`.\n")
-
-    L.append("## Headline")
-    L.append(f"- The retailer captures only **{S['channel_share_pct']:.1f}%** of wider-market demand in this "
-             f"category ({eur(S['channel_rev'])} channel vs {eur(S['market_rev'])} market, 12w) — the core story "
-             f"is **execution, not demand**.")
-    L.append(f"- Modeled near-term revenue upside from availability + promotion: up to "
-             f"**{eur(S['total_revenue_upside'])}**; margin-repair upside up to **{eur(S['upside_margin'])}**.")
-    L.append(f"- **{S['delist_n']}** SKUs are delist/markdown candidates, freeing ~**{S['shelf_freed_cm']:.0f} cm** "
-             f"of shelf to reallocate.\n")
-
-    L.append("## Where the opportunities sit")
-    L.append("| Action | SKUs | Modeled value (12w) |")
-    L.append("|---|--:|--:|")
-    order = ["Fix availability", "Promote", "Price / margin", "Delist / markdown"]
-    for a in order:
-        d0 = S["by_action"].get(a, {"n": 0, "value": 0})
-        val = eur(d0["value"]) if d0["value"] else "—"
-        L.append(f"| {a} | {d0['n']} | {val} |")
-    L.append(f"| Assortment gap (cells) | {S['n_gaps']} | watchlist |\n")
-
-    L.append("## Recommendations")
-    for i, r in enumerate(recs, 1):
-        L.append(f"### {i}. {r['title']}")
-        L.append(f"**Why:** {r['why']}\n")
-        if r["action"] == "Assortment gap":
-            L.append("| Subcategory | Shade | Comp. signal | Comp. trend | Active SKUs | Comp. rows |")
-            L.append("|---|---|--:|--:|--:|--:|")
-            for g in r["evidence"]:
-                L.append(f"| {g['subcategory']} | {g['shade_group']} | {g['competitor_signal_0_100']:.0f} "
-                         f"| {g['competitor_trend_12w_pct']*100:+.0f}% | {g['active_skus_held']} | {g['competitor_rows']} |")
-        else:
-            L.append("| SKU | Product | Evidence | Value (12w) |")
-            L.append("|---|---|---|--:|")
-            for f in r["evidence"]:
-                val = eur(f["opportunity_value_eur"]) if f["opportunity_value_eur"] else "—"
-                L.append(f"| {f['product_id']} | {f['product_name']} | {f['rationale']} | {val} |")
-        L.append(f"\n**Action:** {r['do']}\n")
-
-    L.append("## Method & caveats")
-    L.append("- **Execution gap / modeled value** = `market_revenue × subcategory-median channel share − current "
-             "channel revenue`. `market_*` is a demand proxy, so this is a prioritisation ceiling, not a forecast.")
-    L.append("- Rules use percentile thresholds computed from the data (see `README.md` → Methodology).")
-    L.append("- Competitor price/gap cells can be thin (few competitor rows); `comp_rows` is shown so low-n "
-             "signals can be validated before acting.")
-    L.append("- Data is synthetic; brand names are illustrative.")
-    return "\n".join(L)
-
-
-HTML_TEMPLATE = r"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Category Opportunity Review — Hair Coloration</title>
-<script>
-  (() => {
-    const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
-    const theme = param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme", theme);
-  })();
-</script>
-<style>
-:root{
-  color-scheme:light;
-  --cp-bg:#f7f4ef;--cp-bg-elevated:#fcfbf8;--cp-surface:#ffffff;--cp-surface-soft:#f5f5f5;
-  --cp-border:#dedede;--cp-border-strong:#919191;--cp-text:#242424;--cp-text-muted:#5c5c5c;
-  --cp-text-soft:#6f6f6f;--cp-accent:#b11f4b;--cp-accent-hover:#9a1a41;--cp-accent-soft:rgba(177,31,75,0.08);
-  --cp-accent-fg:#ffffff;--cp-success:#16a34a;--cp-danger:#dc2626;--cp-warning:#f59e0b;--cp-link:#0078d4;
-  --cp-shadow:0 18px 48px rgba(0,0,0,0.12);--cp-highlight:rgba(177,31,75,0.12);
-}
-html[data-theme="dark"]{
-  color-scheme:dark;
-  --cp-bg:#3d3b3a;--cp-bg-elevated:#343231;--cp-surface:#292929;--cp-surface-soft:#2e2e2e;
-  --cp-border:#474747;--cp-border-strong:#5f5f5f;--cp-text:#dedede;--cp-text-muted:#919191;
-  --cp-text-soft:#b0b0b0;--cp-accent:#fd8ea1;--cp-accent-hover:#fb7b91;--cp-accent-soft:rgba(253,142,161,0.14);
-  --cp-accent-fg:#1a1a1a;--cp-success:#4ade80;--cp-danger:#f87171;--cp-warning:#fbbf24;--cp-link:#4da6ff;
-  --cp-shadow:0 18px 48px rgba(0,0,0,0.32);--cp-highlight:rgba(253,142,161,0.12);
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--cp-bg);color:var(--cp-text);
-  font-family:"Segoe UI",Aptos,Calibri,-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.45}
-.wrap{max-width:1200px;margin:0 auto;padding:28px 22px 64px}
-header h1{margin:0 0 4px;font-size:1.6rem}
-header p{margin:0;color:var(--cp-text-muted);font-size:.92rem}
-.theme-btn{float:right;background:var(--cp-surface);color:var(--cp-text);border:1px solid var(--cp-border);
-  border-radius:.625rem;padding:6px 12px;cursor:pointer;font-size:.85rem}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0}
-.kpi{background:var(--cp-surface);border:1px solid var(--cp-border);border-radius:16px;padding:16px 18px;
-  box-shadow:0 0 2px rgba(0,0,0,0.12),0 1px 2px rgba(0,0,0,0.14)}
-.kpi .v{font-size:1.5rem;font-weight:700}
-.kpi .l{color:var(--cp-text-muted);font-size:.8rem;margin-top:2px}
-.kpi .s{color:var(--cp-text-soft);font-size:.72rem;margin-top:6px}
-h2{font-size:1.15rem;margin:30px 0 12px;border-bottom:1px solid var(--cp-border);padding-bottom:6px}
-.recs{display:grid;gap:14px}
-.rec{background:var(--cp-surface);border:1px solid var(--cp-border);border-left:4px solid var(--cp-accent);
-  border-radius:12px;padding:14px 16px}
-.rec h3{margin:0 0 6px;font-size:1.02rem}
-.rec .why{color:var(--cp-text-muted);font-size:.9rem;margin-bottom:8px}
-.rec .do{font-size:.86rem;margin-top:8px}
-.rec ul{margin:6px 0 0;padding-left:18px;font-size:.85rem}
-.rec li{margin:3px 0}
-.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 14px}
-.controls input,.controls select{background:var(--cp-surface);color:var(--cp-text);border:1px solid var(--cp-border);
-  border-radius:.625rem;padding:8px 10px;font-size:.85rem}
-.controls input{flex:1;min-width:200px}
-.pill{border:1px solid var(--cp-border);background:var(--cp-surface);color:var(--cp-text-muted);border-radius:999px;
-  padding:5px 12px;font-size:.8rem;cursor:pointer;user-select:none}
-.pill.active{background:var(--cp-accent);color:var(--cp-accent-fg);border-color:var(--cp-accent)}
-.tablewrap{overflow-x:auto;border:1px solid var(--cp-border);border-radius:12px;background:var(--cp-surface)}
-table{border-collapse:collapse;width:100%;font-size:.83rem}
-th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--cp-border);white-space:nowrap}
-th{background:var(--cp-surface-soft);cursor:pointer;position:sticky;top:0;font-weight:600}
-td.num,th.num{text-align:right}
-tr:hover td{background:var(--cp-accent-soft)}
-.tag{font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--cp-border);color:var(--cp-text)}
-.tag.avail{background:rgba(245,158,11,.14);border-color:var(--cp-warning)}
-.tag.promo{background:rgba(22,163,74,.14);border-color:var(--cp-success)}
-.tag.delist{background:rgba(220,38,38,.12);border-color:var(--cp-danger)}
-.tag.price{background:var(--cp-accent-soft);border-color:var(--cp-accent)}
-.bar{height:6px;border-radius:999px;background:var(--cp-surface-soft);position:relative;min-width:60px}
-.bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--cp-accent)}
-.muted{color:var(--cp-text-soft)}
-.charts{display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
-@media(max-width:860px){.charts{grid-template-columns:1fr}}
-.card{background:var(--cp-surface);border:1px solid var(--cp-border);border-radius:16px;padding:16px 18px;
-  box-shadow:0 0 2px rgba(0,0,0,0.12),0 1px 2px rgba(0,0,0,0.14)}
-.card h3{margin:0 0 2px;font-size:1rem}
-.card .sub{color:var(--cp-text-muted);font-size:.8rem;margin-bottom:10px}
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.legc{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--cp-text-muted);
-  border:1px solid var(--cp-border);border-radius:999px;padding:3px 9px;cursor:pointer;user-select:none}
-.legc.off{opacity:.35}
-.legc .dot{width:10px;height:10px;border-radius:50%}
-.map svg{width:100%;height:auto;display:block;overflow:visible}
-.map circle{cursor:pointer;transition:opacity .1s}
-.map .axis{stroke:var(--cp-border);stroke-width:1}
-.map .grid{stroke:var(--cp-border);stroke-dasharray:2 3;opacity:.5}
-.map .refline{stroke:var(--cp-accent);stroke-dasharray:5 4;stroke-width:1.3;opacity:.8}
-.map .atxt{fill:var(--cp-text-soft);font-size:11px}
-.map .qtxt{fill:var(--cp-text-soft);font-size:10.5px;font-style:italic;opacity:.75}
-.sbar{display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center;margin:7px 0;font-size:.8rem}
-.sbar .lab{color:var(--cp-text-muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sbar .track{background:var(--cp-surface-soft);border-radius:999px;height:20px;position:relative;overflow:hidden}
-.sbar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--cp-accent);border-radius:999px}
-.sbar .val{position:absolute;right:8px;top:0;line-height:20px;font-size:.72rem;color:var(--cp-text)}
-#tip{position:fixed;z-index:50;pointer-events:none;display:none;max-width:260px;background:var(--cp-panel-strong,
-  var(--cp-surface));color:var(--cp-text);border:1px solid var(--cp-border-strong);border-radius:10px;
-  padding:8px 10px;font-size:.78rem;box-shadow:var(--cp-shadow)}
-#tip b{color:var(--cp-accent)}
-.count{color:var(--cp-text-muted);font-size:.82rem;margin-left:auto}
-.conf{font-size:.68rem;padding:1px 7px;border-radius:999px;border:1px solid var(--cp-border);white-space:nowrap}
-.conf.High{color:var(--cp-success);border-color:var(--cp-success);background:rgba(22,163,74,.12)}
-.conf.Medium{color:var(--cp-warning);border-color:var(--cp-warning);background:rgba(245,158,11,.12)}
-.conf.Low{color:var(--cp-text-soft)}
-.btn{background:var(--cp-accent);color:var(--cp-accent-fg);border:1px solid var(--cp-accent);border-radius:.625rem;padding:8px 14px;font-size:.82rem;cursor:pointer;font-weight:600}
-.btn:hover{background:var(--cp-accent-hover)}
-.chk{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:var(--cp-text-muted);cursor:pointer;user-select:none}
-.src{font-size:.78rem;color:var(--cp-text-muted)}
-footer{margin-top:34px;color:var(--cp-text-soft);font-size:.78rem}
-a{color:var(--cp-link)}
-</style>
-</head>
-<body>
-<div class="wrap">
-<header>
-  <button class="theme-btn" onclick="toggleTheme()">◐ theme</button>
-  <h1>Category Opportunity Review — Hair Coloration</h1>
-  <p>ZenBeauty Retail · Beauty &gt; Hair Coloration · generated <span id="gen"></span> · <span id="nsku"></span> SKUs analysed</p>
-</header>
-
-<div class="kpis" id="kpis"></div>
-
-<h2>The 5 recommendations</h2>
-<p style="color:var(--cp-text-muted);font-size:.88rem;margin:-4px 0 14px">The evidence-backed actions for this category review. Each card = <b>what to do</b> · <b>why</b> (with the numbers) · the specific <b>SKUs</b> as evidence · the <b>action</b> to take.</p>
-<div class="recs" id="recs"></div>
-
-<h2>Opportunity map — where the prize is</h2>
-<div class="charts">
-  <div class="card map">
-    <h3>Demand vs. our execution</h3>
-    <div class="sub">Each bubble is a SKU · x = 12-week market demand (log scale) · y = our channel share ·
-      size = € opportunity · colour = action. Bubbles in the low-right are strong demand we under-capture.</div>
-    <div id="scatter"></div>
-    <div class="legend" id="legend"></div>
-  </div>
-  <div class="card">
-    <h3>Execution by subcategory</h3>
-    <div class="sub">Channel share of market demand — the whole category sits far below potential.</div>
-    <div id="subbars"></div>
-  </div>
-</div>
-
-<h2>Opportunity explorer</h2>
-<div class="controls">
-  <div id="pills"></div>
-</div>
-<div class="controls">
-  <input id="q" placeholder="Search product, brand, subcategory…" oninput="render()"/>
-  <select id="subcat" onchange="render()"></select>
-  <select id="brand" onchange="render()"></select>
-  <select id="supplier" onchange="render()"></select>
-  <label class="chk"><input type="checkbox" id="plonly" onchange="render()"/> Private label only</label>
-  <button class="btn" onclick="downloadCSV()">⬇ Download CSV</button>
-  <span class="count" id="count"></span>
-</div>
-<div class="tablewrap">
-  <table id="tbl">
-    <thead><tr>
-      <th data-k="product_id">SKU</th>
-      <th data-k="product_name">Product</th>
-      <th data-k="primary_action">Action</th>
-      <th data-k="subcategory">Subcategory</th>
-      <th class="num" data-k="opportunity_value_eur">Value €</th>
-      <th class="num" data-k="priority_score">Priority</th>
-      <th class="num" data-k="channel_revenue_eur_12w">Channel €</th>
-      <th class="num" data-k="market_revenue_eur_12w">Market €</th>
-      <th class="num" data-k="channel_share_pct">Share %</th>
-      <th class="num" data-k="channel_margin_pct">Margin</th>
-      <th data-k="confidence">Confidence</th>
-      <th>Evidence</th>
-    </tr></thead>
-    <tbody id="rows"></tbody>
-  </table>
-</div>
-
-<h2>Assortment gap watchlist</h2>
-<div class="tablewrap">
-  <table>
-    <thead><tr>
-      <th>Subcategory</th><th>Shade</th><th class="num">Comp. signal</th>
-      <th class="num">Comp. trend</th><th class="num">Active SKUs</th><th class="num">Comp. rows</th>
-      <th>Confidence</th><th>Products to source (competitor examples)</th>
-    </tr></thead>
-    <tbody id="gaprows"></tbody>
-  </table>
-</div>
-
-<div id="tip"></div>
-<footer>
-  Modeled value = market revenue × subcategory-median channel share − current channel revenue (a prioritisation
-  ceiling, not a forecast). Data is synthetic; brand names illustrative. Source of truth:
-  <code>outputs/opportunities.csv</code>, <code>outputs/assortment_gaps.csv</code>.
-</footer>
-</div>
-
-<script>
-const DATA = __DATA__;
-const TAGCLS = {"Fix availability":"avail","Promote":"promo","Delist / markdown":"delist","Price / margin":"price"};
-let activeAction = "All", sortK = "opportunity_value_eur", sortDir = -1, lastRows = [];
-
-function fmtEur(v){return v ? "€"+Math.round(v).toLocaleString() : "—";}
-function pct(v){return (v*100).toFixed(0)+"%";}
-
-function kpis(){
-  const s = DATA.summary;
-  const cards = [
-    ["Channel share of market", s.channel_share_pct.toFixed(1)+"%", fmtEur(s.channel_rev)+" of "+fmtEur(s.market_rev), "execution headroom"],
-    ["Revenue upside (12w)", fmtEur(s.total_revenue_upside), "≈ "+fmtEur(s.total_revenue_upside*52/12)+"/yr · +"+(100*s.total_revenue_upside/s.channel_rev).toFixed(1)+"% to category", "availability + promotion"],
-    ["Margin-repair upside", fmtEur(s.upside_margin), "thin-margin volume sellers", ""],
-    ["Delist candidates", s.delist_n, "~"+Math.round(s.shelf_freed_cm)+" cm shelf freed", ""],
-    ["Assortment gaps", s.n_gaps, "competitor demand cells", "supplier follow-up"],
-  ];
-  document.getElementById("kpis").innerHTML = cards.map(c=>
-    `<div class="kpi"><div class="v">${c[1]}</div><div class="l">${c[0]}</div><div class="s">${c[2]}${c[3]?" · "+c[3]:""}</div></div>`).join("");
-}
-
-function recs(){
-  document.getElementById("recs").innerHTML = DATA.recommendations.map((r,i)=>{
-    let ev="";
-    if(r.action==="Assortment gap"){
-      ev = "<ul>"+r.evidence.map(g=>`<li><b>${g.subcategory} · ${g.shade_group}</b> — signal ${g.competitor_signal_0_100.toFixed(0)}, trend ${(g.competitor_trend_12w_pct*100).toFixed(0)}%, ${g.active_skus_held} active SKU(s) <span class="conf ${g.confidence}">${g.confidence}</span>${g.examples&&g.examples.length?`<br><span class="src">source e.g.: ${g.examples.map(e=>esc(e.name)+" ("+esc(e.brand)+", €"+e.price_eur.toFixed(2)+")").join(" · ")}</span>`:""}</li>`).join("")+"</ul>";
-    } else {
-      ev = "<ul>"+r.evidence.map(f=>`<li><b>${f.product_id}</b> ${f.product_name} — ${f.rationale}${f.opportunity_value_eur?" ("+fmtEur(f.opportunity_value_eur)+")":""} <span class="conf ${f.confidence}">${f.confidence}</span></li>`).join("")+"</ul>";
+def build_review(as_of=None, base=BASE):
+    as_of = as_of or date.today()
+    sku, comp = load(base)
+    benchmarks = competitor_benchmarks(comp)
+    flagged, thresholds, _ = classify(sku, benchmarks, as_of)
+    gaps = assortment_gaps(sku, benchmarks, as_of=as_of)
+    summary = build_summary(sku, flagged, gaps)
+    by_id = {row["product_id"]: row for row in flagged}
+    landscape = []
+    groups = {}
+    for row in sku:
+        decision = by_id.get(row["product_id"])
+        landscape.append({
+            "id": f"sku-{row['product_id']}", "product_id": row["product_id"],
+            "product_name": row["product_name"], "brand": row["brand"], "subcategory": row["subcategory"],
+            "market_revenue_eur_12w": row["market_revenue_eur_12w"],
+            "channel_revenue_eur_12w": row["channel_revenue_eur_12w"],
+            "channel_to_market_ratio_pct": row["chan_share"] * 100 if row["chan_share"] is not None else None,
+            "primary_action": decision["primary_action"] if decision else "No rule matched",
+            "scenario_value_eur": decision["scenario"]["value_eur"] if decision else None,
+            "scenario_type": decision["scenario"]["value_type"] if decision else "Not estimated",
+        })
+        groups.setdefault(row["subcategory"], []).append(row)
+    subcategories = []
+    for name, rows in sorted(groups.items()):
+        channel = sum(row["channel_revenue_eur_12w"] for row in rows)
+        market = sum(row["market_revenue_eur_12w"] for row in rows)
+        subcategories.append({
+            "subcategory": name, "channel_rev": round(channel, 2), "market_rev": round(market, 2),
+            "ratio_pct": 100 * channel / market if market else None, "n": len(rows),
+        })
+    fingerprint = hashlib.sha256(
+        json.dumps({"rules": RULE_VERSION, "config": CFG}, sort_keys=True).encode("utf-8")
+    )
+    for filename in INPUT_FILES:
+        fingerprint.update(filename.encode("utf-8") + b"\0" + (Path(base) / filename).read_bytes())
+    return {
+        "schema_version": 2, "snapshot_id": fingerprint.hexdigest()[:20],
+        "generated": as_of.isoformat(), "data_quality": data_quality(sku, comp, as_of),
+        "summary": summary, "methodology": {**METHODOLOGY, "thresholds": thresholds},
+        "recommendations": recommendations(flagged, gaps),
+        "opportunities": flagged, "assortment_gaps": gaps,
+        "landscape": landscape, "subcategories": subcategories,
     }
-    return `<div class="rec"><h3>${i+1}. ${r.title}</h3><div class="why">${r.why}</div>${ev}<div class="do">→ <b>Action:</b> ${r.do}</div></div>`;
-  }).join("");
-}
 
-function setup(){
-  document.getElementById("gen").textContent = DATA.generated;
-  document.getElementById("nsku").textContent = DATA.summary.n_skus;
-  const actions = ["All", ...Object.keys(TAGCLS)];
-  document.getElementById("pills").innerHTML = actions.map(a=>
-    `<span class="pill${a===activeAction?' active':''}" onclick="setAction('${a}')">${a}</span>`).join(" ");
-  const subs = ["All subcategories", ...[...new Set(DATA.opportunities.map(o=>o.subcategory))].sort()];
-  document.getElementById("subcat").innerHTML = subs.map(s=>`<option>${s}</option>`).join("");
-  const brands = ["All brands", ...[...new Set(DATA.opportunities.map(o=>o.brand))].sort()];
-  document.getElementById("brand").innerHTML = brands.map(s=>`<option>${s}</option>`).join("");
-  const supps = ["All suppliers", ...[...new Set(DATA.opportunities.map(o=>o.supplier).filter(Boolean))].sort()];
-  document.getElementById("supplier").innerHTML = supps.map(s=>`<option>${s}</option>`).join("");
-  document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{
-    const k=th.dataset.k; sortDir = (sortK===k)?-sortDir:-1; sortK=k; render();
-  });
-  document.getElementById("gaprows").innerHTML = DATA.assortment_gaps.map(g=>
-    `<tr><td>${g.subcategory}</td><td>${g.shade_group}</td><td class="num">${g.competitor_signal_0_100.toFixed(0)}</td>
-     <td class="num">${(g.competitor_trend_12w_pct*100).toFixed(0)}%</td><td class="num">${g.active_skus_held}</td>
-     <td class="num">${g.competitor_rows}</td><td><span class="conf ${g.confidence}">${g.confidence}</span></td>
-     <td class="src">${g.examples&&g.examples.length?g.examples.map(e=>esc(e.name)+" ("+esc(e.brand)+", €"+e.price_eur.toFixed(2)+")").join("<br>"):"—"}</td></tr>`).join("");
-  kpis(); recs(); render(); charts();
-}
 
-function setAction(a){activeAction=a;document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active',p.textContent===a));render();}
-function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');}
+def csv_cell(value):
+    if isinstance(value, (list, dict)):
+        value = json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True)
+    if isinstance(value, str) and re.match(r"^\s*[=+\-@]", value):
+        return "'" + value
+    return value
 
-function render(){
-  const q = document.getElementById("q").value.toLowerCase();
-  const sc = document.getElementById("subcat").value;
-  const br = document.getElementById("brand").value;
-  const sp = document.getElementById("supplier").value;
-  const plonly = document.getElementById("plonly").checked;
-  let rows = DATA.opportunities.filter(o=>{
-    if(activeAction!=="All" && o.primary_action!==activeAction) return false;
-    if(sc && !sc.startsWith("All") && o.subcategory!==sc) return false;
-    if(br && !br.startsWith("All") && o.brand!==br) return false;
-    if(sp && !sp.startsWith("All") && o.supplier!==sp) return false;
-    if(plonly && !o.private_label) return false;
-    if(q && !(o.product_name+" "+o.brand+" "+o.subcategory+" "+o.product_id).toLowerCase().includes(q)) return false;
-    return true;
-  });
-  rows.sort((a,b)=>{let x=a[sortK],y=b[sortK];if(typeof x==="string"){x=x||"";y=y||"";return sortDir*x.localeCompare(y);}return sortDir*((x||0)-(y||0));});
-  lastRows = rows;
-  const maxv = Math.max(...DATA.opportunities.map(o=>o.opportunity_value_eur),1);
-  document.getElementById("rows").innerHTML = rows.map(o=>{
-    const cls = TAGCLS[o.primary_action]||"";
-    return `<tr>
-      <td>${o.product_id}</td>
-      <td>${o.product_name}<div class="muted">${o.brand}${o.private_label?" · PL":""}</div></td>
-      <td><span class="tag ${cls}">${o.primary_action}</span></td>
-      <td>${o.subcategory}</td>
-      <td class="num">${fmtEur(o.opportunity_value_eur)}</td>
-      <td class="num"><div class="bar"><span style="width:${Math.round(100*o.opportunity_value_eur/maxv)}%"></span></div></td>
-      <td class="num">${fmtEur(o.channel_revenue_eur_12w)}</td>
-      <td class="num">${fmtEur(o.market_revenue_eur_12w)}</td>
-      <td class="num">${o.channel_share_pct.toFixed(1)}%</td>
-      <td class="num">${pct(o.channel_margin_pct)}</td>
-      <td><span class="conf ${o.confidence}">${o.confidence}</span></td>
-      <td class="muted">${o.rationale}</td>
-    </tr>`;
-  }).join("");
-  document.getElementById("count").textContent = rows.length+" of "+DATA.opportunities.length+" flagged SKUs";
-}
 
-function downloadCSV(){
-  const cols = ["product_id","product_name","brand","subcategory","shade_group","supplier","private_label","primary_action","opportunity_value_eur","confidence","channel_revenue_eur_12w","market_revenue_eur_12w","channel_share_pct","channel_margin_pct","rationale"];
-  const cell = v => { v = v==null?"":String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
-  const csv = [cols.join(",")].concat(lastRows.map(r=>cols.map(c=>cell(r[c])).join(","))).join("\n");
-  const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "category_opportunities_"+(activeAction==="All"?"all":activeAction.replace(/[^a-z]/gi,"_").toLowerCase())+".csv";
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
-}
+def write_csv(path, rows, fields):
+    with open(path, "w", newline="", encoding="utf-8-sig") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({key: csv_cell(row.get(key)) for key in fields})
 
-const ACOLOR={"Fix availability":"--cp-warning","Promote":"--cp-success","Delist / markdown":"--cp-danger","Price / margin":"--cp-accent","None":"--cp-border-strong"};
-const hidden = new Set();
 
-function pctile(arr,q){const s=[...arr].sort((a,b)=>a-b);if(!s.length)return 0;const p=q*(s.length-1),lo=Math.floor(p);return s[lo]+(p-lo)*((s[lo+1]??s[lo])-s[lo]);}
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+def _markdown(value):
+    return str(value).replace("|", r"\|").replace("\r", " ").replace("\n", " ")
 
-function charts(){
-  drawScatter(); drawSubbars();
-  const tip=document.getElementById("tip");
-  document.addEventListener("mousemove",e=>{if(tip.style.display==="block"){tip.style.left=Math.min(e.clientX+14,window.innerWidth-270)+"px";tip.style.top=(e.clientY+16)+"px";}});
-}
 
-function drawScatter(){
-  const pts=DATA.landscape, W=900,H=470,pL=58,pR=18,pT=16,pB=44;
-  const mkts=pts.map(p=>Math.max(500,p.market_revenue_eur_12w));
-  const xmin=Math.max(500,Math.min(...mkts)), xmax=Math.max(...mkts);
-  const lx=v=>Math.log10(Math.max(500,v));
-  const X=v=>pL+(lx(v)-lx(xmin))/(lx(xmax)-lx(xmin))*(W-pL-pR);
-  const shares=pts.map(p=>p.channel_share_pct);
-  const yMax=Math.max(10,Math.ceil(pctile(shares,0.98)/5)*5);
-  const Y=v=>(H-pB)-(Math.min(v,yMax)/yMax)*(H-pT-pB);
-  const maxVal=Math.max(...pts.map(p=>p.opportunity_value_eur),1);
-  const R=p=>p.opportunity_value_eur>0?4+(Math.sqrt(p.opportunity_value_eur)/Math.sqrt(maxVal))*15:2.6;
-
-  let g="";
-  // y grid + ticks
-  for(let s=0;s<=yMax;s+=5){const y=Y(s);g+=`<line class="grid" x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}"/><text class="atxt" x="${pL-8}" y="${y+3}" text-anchor="end">${s}%</text>`;}
-  // x ticks at powers of ten
-  for(let e=3;e<=6;e++){const v=Math.pow(10,e);if(v<xmin*0.9||v>xmax*1.1)continue;const x=X(v);const lab=e>=6?"€1M":e===5?"€100k":e===4?"€10k":"€1k";g+=`<line class="grid" x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}"/><text class="atxt" x="${x}" y="${H-pB+16}" text-anchor="middle">${lab}</text>`;}
-  g+=`<line class="axis" x1="${pL}" y1="${H-pB}" x2="${W-pR}" y2="${H-pB}"/><line class="axis" x1="${pL}" y1="${pT}" x2="${pL}" y2="${H-pB}"/>`;
-  // median execution reference line
-  const med=DATA.channel_share_median, my=Y(med);
-  g+=`<line class="refline" x1="${pL}" y1="${my}" x2="${W-pR}" y2="${my}"/><text class="atxt" x="${W-pR}" y="${my-5}" text-anchor="end" style="fill:var(--cp-accent)">median execution ${med.toFixed(1)}%</text>`;
-  g+=`<text class="qtxt" x="${W-pR-6}" y="${H-pB-8}" text-anchor="end">▸ high demand · low share = the prize</text>`;
-  // bubbles (draw largest first so small sit on top)
-  const sorted=[...pts].sort((a,b)=>R(b)-R(a));
-  for(const p of sorted){
-    const c=ACOLOR[p.primary_action], op=p.primary_action==="None"?0.28:0.82;
-    g+=`<circle data-a="${esc(p.primary_action)}" cx="${X(p.market_revenue_eur_12w).toFixed(1)}" cy="${Y(p.channel_share_pct).toFixed(1)}" r="${R(p).toFixed(1)}" style="fill:var(${c});fill-opacity:${op};stroke:var(${c});stroke-opacity:.55" `
-      +`onmouseover="showTip(event,'${esc(p.product_id)}')" onmouseout="hideTip()" onclick="jumpTo('${esc(p.product_id)}')"><title>${esc(p.product_name)}</title></circle>`;
-  }
-  g+=`<text class="atxt" x="${(pL+W-pR)/2}" y="${H-6}" text-anchor="middle">12-week market demand (log)</text>`;
-  g+=`<text class="atxt" transform="translate(14,${(pT+H-pB)/2}) rotate(-90)" text-anchor="middle">our channel share</text>`;
-  document.getElementById("scatter").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Opportunity map">${g}</svg>`;
-
-  const acts=["Fix availability","Promote","Price / margin","Delist / markdown","None"];
-  document.getElementById("legend").innerHTML=acts.map(a=>
-    `<span class="legc${hidden.has(a)?' off':''}" onclick="toggleAct('${esc(a)}')"><span class="dot" style="background:var(${ACOLOR[a]})"></span>${a==="None"?"No action":a}</span>`).join("");
-}
-
-function toggleAct(a){hidden.has(a)?hidden.delete(a):hidden.add(a);
-  document.querySelectorAll('#scatter circle').forEach(c=>{if(c.dataset.a===a)c.style.display=hidden.has(a)?'none':'';});
-  document.querySelectorAll('.legc').forEach(el=>{if(el.textContent.trim()===(a==="None"?"No action":a))el.classList.toggle('off',hidden.has(a));});}
-
-const LMAP=Object.fromEntries(DATA.landscape.map(p=>[p.product_id,p]));
-function showTip(e,id){const p=LMAP[id],tip=document.getElementById("tip");
-  tip.innerHTML=`<b>${esc(p.product_name)}</b><br>${esc(p.brand)} · ${esc(p.subcategory)}<br>`
-    +`Market €${Math.round(p.market_revenue_eur_12w).toLocaleString()} · share ${p.channel_share_pct.toFixed(1)}%<br>`
-    +`<b>${p.primary_action==="None"?"No action":esc(p.primary_action)}</b>${p.opportunity_value_eur?" · €"+Math.round(p.opportunity_value_eur).toLocaleString()+" opportunity":""}`;
-  tip.style.display="block";tip.style.left=Math.min(e.clientX+14,window.innerWidth-270)+"px";tip.style.top=(e.clientY+16)+"px";}
-function hideTip(){document.getElementById("tip").style.display="none";}
-function jumpTo(id){document.getElementById("q").value=id;render();document.getElementById("tbl").scrollIntoView({behavior:"smooth",block:"center"});}
-
-function drawSubbars(){
-  const subs=DATA.subcategories, maxS=Math.max(...subs.map(s=>s.share_pct));
-  document.getElementById("subbars").innerHTML=subs.map(s=>{
-    const w=Math.max(2,(s.share_pct/maxS)*100);
-    return `<div class="sbar"><div class="lab" title="${esc(s.subcategory)}">${esc(s.subcategory)}</div>`
-      +`<div class="track"><div class="fill" style="width:${w}%"></div><span class="val">${s.share_pct.toFixed(1)}%</span></div></div>`;
-  }).join("")+`<div class="sub" style="margin-top:8px">Bars scaled to the strongest subcategory (${maxS.toFixed(1)}% share). Category-wide share is ${DATA.summary.channel_share_pct.toFixed(1)}%.</div>`;
-}
-
-setup();
-</script>
-</body>
-</html>
-"""
+def render_markdown(payload):
+    summary, quality = payload["summary"], payload["data_quality"]
+    lines = [
+        "# Category review: Hair Coloration",
+        f"ZenBeauty Retail | Generated {payload['generated']} | Review snapshot `{payload['snapshot_id']}`",
+        "",
+        "> Synthetic data. Proposed reviews and experiments, not approved orders or range changes.",
+        "",
+        "## Start here",
+        f"{len(payload['recommendations'])} specific decisions selected from {summary['n_flagged']} flagged SKUs and {len(payload['assortment_gaps'])} assortment follow-ups.",
+        METHODOLOGY["selection"],
+        "",
+    ]
+    for index, item in enumerate(payload["recommendations"], 1):
+        lines.extend([
+            f"### {index}. {_markdown(item['title'])}",
+            f"**Priority:** {item['priority_tier']} | **Evidence:** {item['evidence_strength']}",
+            f"**Why:** {_markdown(item['rationale'])}",
+            f"**Next action:** {_markdown(item['next_step'])}",
+            f"**Proposed owner:** {item['suggested_owner']} (not assigned)",
+            f"**Success measure:** {_markdown(item['success_measure'])}",
+        ])
+        if item["kind"] == "sku":
+            lines.extend([
+                f"**Snapshot:** `{item['product_id']}`; {item['status']}; {item['stock_status']}; {item['seasonality']}; {item['pack_size']}.",
+                f"Channel {eur(item['channel_revenue_eur_12w'])}, {item['channel_units_12w']} units, margin {item['channel_margin_pct']:.1%}, trend {item['channel_trend_12w_pct']:+.1%}. Market-demand proxy {eur(item['market_revenue_eur_12w'])}, trend {item['market_trend_12w_pct']:+.1%}.",
+            ])
+        scenario = item["scenario"]
+        scenario_label = (
+            "Not estimated" if scenario["value_eur"] is None
+            else f"{scenario['value_type']} / {eur(scenario['value_eur'])}"
+        )
+        lines.extend([
+            f"**12-week scenario:** {scenario_label}. {_markdown(scenario['formula'])}",
+            f"**Assumptions:** {' '.join(_markdown(value) for value in scenario['assumptions'])}",
+            f"**Evidence limitation:** {_markdown(item['evidence_reason'])}",
+            f"**Caveats:** {' '.join(_markdown(value) for value in item['caveats'])}",
+            "**Sources:** " + "; ".join(
+                f"`{ref['file']}` / `{ref['record_id']}`" + (f" / row {ref['row_number']}" if ref["row_number"] else "")
+                for ref in item["source_refs"]
+            ),
+            "",
+        ])
+    lines.extend([
+        "## Snapshot and scenarios",
+        f"Channel revenue: {eur(summary['channel_rev'])}; market-demand proxy: {eur(summary['market_rev'])}, both over the supplied 12-week window.",
+        f"Revenue benchmark-distance scenarios: {eur(summary['revenue_scenario_eur'])}. Gross-profit scenarios: {eur(summary['gross_profit_scenario_eur'])}.",
+        METHODOLOGY["scenario"],
+        "",
+        "| Review type | SKU count |",
+        "|---|---:|",
+    ])
+    lines.extend(f"| {_markdown(action)} | {count} |" for action, count in summary["action_counts"].items())
+    lines.extend([
+        "",
+        "## Evidence quality and dates",
+        f"Competitor observations: {quality['competitor_observed_from'] or 'Not supplied'} to {quality['competitor_observed_to'] or 'Not supplied'}. Generated date is not a data refresh.",
+        METHODOLOGY["evidence"],
+    ])
+    lines.extend(f"- {_markdown(warning)}" for warning in quality["warnings"])
+    if quality["exclusions"]:
+        lines.extend(["", "| Excluded popularity score | Raw value | Source row |", "|---|---:|---:|"])
+        lines.extend(
+            f"| {row['record_id']} | {row['value']} | {row['row_number']} |"
+            for row in quality["exclusions"]
+        )
+    lines.extend([
+        "",
+        "## Handoff",
+        "Use View evidence in the dashboard to inspect metrics, comparator records and calculation assumptions. Add selected items to the review plan, record an owner/due date/decision/status/notes, then export the plan.",
+        "Plan edits are browser-local, not assignments or shared workflow state. File and hosted versions may have different storage; export before switching browsers or origins.",
+        "Full decision evidence is in `outputs/review.json`; flat action lists are in `outputs/opportunities.csv` and `outputs/assortment_gaps.csv`.",
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def render_dashboard(payload):
-    return HTML_TEMPLATE.replace("__DATA__", json.dumps(payload, ensure_ascii=False))
+    template = (Path(BASE) / "dashboard_template.html").read_text(encoding="utf-8")
+    if template.count("__DATA__") != 1:
+        raise ValueError("dashboard_template.html must contain exactly one __DATA__ placeholder")
+    data = json.dumps(payload, ensure_ascii=False, allow_nan=False, sort_keys=True)
+    for char, escaped in (("<", r"\u003c"), (">", r"\u003e"), ("&", r"\u0026"), ("\u2028", r"\u2028"), ("\u2029", r"\u2029")):
+        data = data.replace(char, escaped)
+    return template.replace("__DATA__", data)
 
 
-# Root landing page so the GitHub Pages URL opens the dashboard directly.
-INDEX_REDIRECT = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta http-equiv="refresh" content="0; url=outputs/dashboard.html"/>
-<link rel="canonical" href="outputs/dashboard.html"/>
-<title>Category Opportunity Review — Hair Coloration</title>
-</head>
-<body style="font-family:Segoe UI,Calibri,sans-serif;padding:2rem">
-Redirecting to the <a href="outputs/dashboard.html">Category Opportunity Review dashboard</a>…
-</body>
-</html>
-"""
+def write_outputs(payload, output_dir=OUT, root=BASE):
+    dashboard = render_dashboard(payload)
+    report = render_markdown(payload)
+    directory = Path(output_dir)
+    directory.mkdir(parents=True, exist_ok=True)
+    common_fields = [
+        "id", "title", "primary_action", "priority_tier", "evidence_strength", "evidence_reason",
+        "rationale", "next_step", "suggested_owner", "success_measure", "scenario_value_eur",
+        "scenario_type", "scenario_period", "scenario_formula", "scenario_assumptions",
+        "also_flagged", "caveats", "source_refs", "competitor_examples",
+    ]
+
+    def flatten(items):
+        return [{
+            **item, "scenario_value_eur": item["scenario"]["value_eur"],
+            "scenario_type": item["scenario"]["value_type"], "scenario_period": item["scenario"]["period"],
+            "scenario_formula": item["scenario"]["formula"], "scenario_assumptions": item["scenario"]["assumptions"],
+        } for item in items]
+
+    write_csv(directory / "opportunities.csv", flatten(payload["opportunities"]), common_fields + [
+        "product_id", "product_name", "brand", "subcategory", "shade_group", "supplier",
+        "private_label", "status", "stock_status", "seasonality", "pack_size", "price_eur",
+        "channel_revenue_eur_12w", "channel_units_12w", "channel_margin_pct", "channel_trend_12w_pct",
+        "market_revenue_eur_12w", "market_trend_12w_pct", "channel_to_market_ratio_pct",
+        "peer_ratio_pct", "peer_margin_pct", "peer_count", "peer_ids",
+        "comp_benchmark_price_eur", "competitor_rows", "shelf_space_cm",
+    ])
+    write_csv(directory / "assortment_gaps.csv", flatten(payload["assortment_gaps"]), common_fields + [
+        "subcategory", "shade_group", "competitor_signal_0_100", "competitor_trend_12w_pct",
+        "competitor_rows", "valid_signal_rows", "active_skus_held", "available_skus_held",
+        "existing_product_ids", "gap_score",
+    ])
+    (directory / "category_review.md").write_text(report, encoding="utf-8")
+    (directory / "review.json").write_text(
+        json.dumps(payload, ensure_ascii=False, allow_nan=False, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (directory / "dashboard.html").write_text(dashboard, encoding="utf-8")
+    (Path(root) / "index.html").write_text(dashboard, encoding="utf-8")
 
 
-# ------------------------------------------ Main --------------------------------------
-def main():
-    os.makedirs(OUT, exist_ok=True)
-    sku, comp = load()
-    bench = competitor_benchmarks(comp)
-    flagged, T, share_med = classify(sku, bench)
-    gaps = assortment_gaps(sku, bench, comp)
-    S = build_summary(sku, flagged, gaps)
-    recs = recommendations(flagged, gaps, S)
-
-    opp_fields = ["product_id", "product_name", "brand", "subcategory", "shade_group", "supplier",
-                  "private_label", "status", "stock_status", "primary_action", "opportunity_value_eur",
-                  "confidence", "priority_score", "rationale", "also_flagged", "price_eur",
-                  "comp_benchmark_price_eur", "price_index", "channel_revenue_eur_12w", "channel_units_12w",
-                  "channel_margin_pct", "channel_trend_12w_pct", "market_revenue_eur_12w",
-                  "market_trend_12w_pct", "channel_share_pct", "modeled_potential_eur", "shelf_space_cm"]
-    gap_fields = ["subcategory", "shade_group", "gap_score", "confidence", "competitor_signal_0_100",
-                  "competitor_trend_12w_pct", "competitor_rows", "active_skus_held",
-                  "channel_revenue_eur_12w", "example_products"]
-
-    write_csv(os.path.join(OUT, "opportunities.csv"), flagged, opp_fields)
-    write_csv(os.path.join(OUT, "assortment_gaps.csv"), gaps, gap_fields)
-
-    with open(os.path.join(OUT, "category_review.md"), "w", encoding="utf-8") as f:
-        f.write(render_markdown(S, recs, gaps))
-
-    # per-SKU landscape (all 235) + subcategory execution rollup for the visuals
-    flagged_by_id = {f["product_id"]: f for f in flagged}
-    landscape = []
-    for s in sku:
-        fb = flagged_by_id.get(s["product_id"])
-        landscape.append({
-            "product_id": s["product_id"], "product_name": s["product_name"],
-            "brand": s["brand"], "subcategory": s["subcategory"],
-            "market_revenue_eur_12w": round(s["market_revenue_eur_12w"], 0),
-            "channel_revenue_eur_12w": round(s["channel_revenue_eur_12w"], 0),
-            "channel_share_pct": round(s["chan_share"] * 100, 2),
-            "primary_action": fb["primary_action"] if fb else "None",
-            "opportunity_value_eur": fb["opportunity_value_eur"] if fb else 0,
-        })
-    sub_agg = {}
-    for s in sku:
-        a = sub_agg.setdefault(s["subcategory"], {"chan": 0.0, "mkt": 0.0, "n": 0})
-        a["chan"] += s["channel_revenue_eur_12w"]
-        a["mkt"] += s["market_revenue_eur_12w"]
-        a["n"] += 1
-    subcategories = sorted(
-        [{"subcategory": k, "channel_rev": round(v["chan"], 0), "market_rev": round(v["mkt"], 0),
-          "share_pct": round(100 * v["chan"] / v["mkt"], 2) if v["mkt"] else 0.0, "n": v["n"]}
-         for k, v in sub_agg.items()],
-        key=lambda x: x["market_rev"], reverse=True)
-
-    payload = {
-        "generated": date.today().isoformat(),
-        "summary": {k: S[k] for k in ("n_skus", "channel_rev", "market_rev", "channel_share_pct",
-                                       "total_revenue_upside", "upside_availability", "upside_promote",
-                                       "upside_margin", "delist_n", "shelf_freed_cm", "n_gaps")},
-        "channel_share_median": round(share_med * 100, 2),
-        "recommendations": recs,
-        "opportunities": flagged,
-        "landscape": landscape,
-        "subcategories": subcategories,
-        "assortment_gaps": gaps,
-    }
-    with open(os.path.join(OUT, "dashboard.html"), "w", encoding="utf-8") as f:
-        f.write(render_dashboard(payload))
-
-    # site entry point for GitHub Pages (root URL -> dashboard)
-    with open(os.path.join(BASE, "index.html"), "w", encoding="utf-8") as f:
-        f.write(INDEX_REDIRECT)
-
-    # console handoff
-    print("Category Opportunity Review — pipeline complete\n" + "-" * 48)
-    print(f"SKUs analysed        : {S['n_skus']}")
-    print(f"Channel share of mkt : {S['channel_share_pct']:.1f}%  ({eur(S['channel_rev'])} / {eur(S['market_rev'])})")
-    print(f"Flagged SKUs         : {len(flagged)}")
-    for a in ["Fix availability", "Promote", "Price / margin", "Delist / markdown"]:
-        d0 = S["by_action"].get(a, {"n": 0, "value": 0})
-        print(f"  - {a:<18}: {d0['n']:>3}  value {eur(d0['value'])}")
-    print(f"Assortment gaps      : {S['n_gaps']} cells")
-    print(f"Revenue upside (12w) : up to {eur(S['total_revenue_upside'])}  | margin repair up to {eur(S['upside_margin'])}")
-    print(f"Shelf freed (delist) : ~{S['shelf_freed_cm']:.0f} cm")
-    print("\nOutputs written to ./outputs :")
-    print("  opportunities.csv, assortment_gaps.csv, category_review.md, dashboard.html")
-    print("Site entry point    : ./index.html (redirects to the dashboard for GitHub Pages)")
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--as-of", type=date.fromisoformat, default=date.today(), help="Review date (YYYY-MM-DD); fixes freshness calculations for reproducible outputs.")
+    arguments = parser.parse_args(argv)
+    try:
+        payload = build_review(arguments.as_of)
+        write_outputs(payload)
+    except (ValueError, OSError) as exc:
+        parser.exit(1, f"Category review failed: {exc}\n")
+    summary = payload["summary"]
+    print(f"Category review: {summary['n_skus']} SKUs, {summary['n_flagged']} review items.")
+    print(f"Selected decisions: {len(payload['recommendations'])}; competitor observations: {payload['data_quality']['competitor_observed_to'] or 'not supplied'}.")
+    print(f"Excluded invalid popularity scores: {payload['data_quality']['invalid_signal_count']}. See the data-quality warnings.")
+    print("Scenarios are not forecasts; revenue and gross-profit effects are separate.")
+    print("Generated outputs: dashboard.html, category_review.md, opportunities.csv, assortment_gaps.csv, review.json; root index.html.")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Category review · Decisions and evidence</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    :root {
+      --cp-card-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font: 16px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    [hidden] { display: none !important; }
+    button, input, select, textarea { font: inherit; }
+    button, input, select, textarea, summary { border-radius: 0.625rem; }
+    button, input, select, textarea {
+      border: 1px solid var(--cp-border-strong);
+      color: var(--cp-text);
+      background: var(--cp-surface);
+    }
+    button {
+      min-height: 44px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+      white-space: normal;
+    }
+    button:hover:not(:disabled) { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    button.primary { color: var(--cp-accent-fg); background: var(--cp-accent); border-color: var(--cp-accent); }
+    button.primary:hover:not(:disabled) { background: var(--cp-accent-hover); }
+    button:disabled { color: var(--cp-text-muted); background: var(--cp-surface-soft); border-color: var(--cp-border); cursor: not-allowed; }
+    button.text-button { color: var(--cp-link); background: var(--cp-surface); text-align: left; border-color: var(--cp-border); }
+    button.remove-button { color: var(--cp-danger); }
+    input, select, textarea { width: 100%; min-height: 44px; padding: 8px 12px; }
+    textarea { min-height: 96px; resize: vertical; }
+    input[type="checkbox"] { width: 20px; min-height: 20px; height: 20px; margin: 0; accent-color: var(--cp-accent); flex-shrink: 0; }
+    input::placeholder, textarea::placeholder { color: var(--cp-text-soft); }
+    :focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 3px; }
+    a { color: var(--cp-link); }
+    code { font-family: Consolas, "Courier New", Courier, monospace; font-size: 0.875em; overflow-wrap: anywhere; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.16; max-width: 1000px; margin-bottom: 16px; letter-spacing: -0.025em; }
+    h2 { font-size: 1.35rem; line-height: 1.25; margin-bottom: 8px; }
+    h3 { font-size: 1.1rem; line-height: 1.35; margin-bottom: 12px; }
+    p { margin-bottom: 12px; }
+    ul { padding-left: 24px; }
+    li + li { margin-top: 8px; }
+    .page { width: min(1400px, 100%); margin: auto; padding: 32px; }
+    .page-header { padding: 8px 0 16px; }
+    .eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; color: var(--cp-accent); margin-bottom: 12px; }
+    .muted, .small { color: var(--cp-text-muted); }
+    .small { font-size: 0.875rem; }
+    .skip-link { position: absolute; left: 16px; top: -100px; z-index: 10; padding: 12px; background: var(--cp-surface); }
+    .skip-link:focus { top: 12px; }
+    .notice { border: 1px solid var(--cp-border); border-left: 4px solid var(--cp-accent); border-radius: 0.625rem; background: var(--cp-surface); padding: 12px 16px; margin: 16px 0; }
+    .warning { border-left-color: var(--cp-warning); }
+    .error { border-left-color: var(--cp-danger); }
+    .notice p:last-child { margin-bottom: 0; }
+    .section { margin-top: 32px; }
+    .section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
+    .section-head p { margin-bottom: 0; }
+    .recommendations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .card, .panel, .plan-entry { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; box-shadow: var(--cp-card-shadow); }
+    .card { padding: 20px; display: flex; flex-direction: column; min-width: 0; }
+    .card h3 { margin-top: 12px; overflow-wrap: anywhere; }
+    .card .actions { margin-top: auto; padding-top: 16px; }
+    .card dl { margin: 0; }
+    .card dt { font-size: 0.75rem; color: var(--cp-text-muted); font-weight: 700; margin-top: 12px; }
+    .card dd { margin: 4px 0 0; font-size: 0.9375rem; overflow-wrap: anywhere; }
+    .badges, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .badge { display: inline-block; border-radius: 0.625rem; background: var(--cp-surface-soft); border: 1px solid var(--cp-border); padding: 4px 8px; font-size: 0.75rem; font-weight: 600; }
+    .badge.priority { background: var(--cp-accent-soft); color: var(--cp-accent); border-color: var(--cp-accent); }
+    .badge.attention { border-color: var(--cp-warning); }
+    .scenario-label { color: var(--cp-text-muted); border-top: 1px solid var(--cp-border); margin: 16px 0 0; padding-top: 12px; font-size: 0.875rem; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; }
+    .stat { background: var(--cp-surface); border: 1px solid var(--cp-border); padding: 16px; border-radius: 16px; min-width: 0; }
+    .stat dt { color: var(--cp-text-muted); font-size: 0.8125rem; }
+    .stat dd { font-size: 1.45rem; font-weight: 600; margin: 8px 0; overflow-wrap: anywhere; }
+    .stat .stat-detail { font-size: 0.8125rem; font-weight: 400; color: var(--cp-text-muted); margin: 0; }
+    .stat .stat-text { font-size: 0.9375rem; }
+    details.panel > summary, .plan-entry > summary { padding: 20px; cursor: pointer; font-weight: 600; }
+    details.panel > summary:hover, .plan-entry > summary:hover { background: var(--cp-accent-soft); }
+    .panel-content { padding: 0 20px 20px; }
+    .detail-label { font-size: 0.875rem; color: var(--cp-text-muted); font-weight: 400; margin-left: 8px; }
+    .quality-status { margin: 16px 0 0; font-weight: 600; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 20px; margin: 12px 0 24px; }
+    .metric-grid > div { min-width: 0; border-bottom: 1px solid var(--cp-border); padding-bottom: 12px; }
+    .metric-grid dt { color: var(--cp-text-muted); font-size: 0.8125rem; margin-bottom: 4px; }
+    .metric-grid dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .stacked-metrics { grid-template-columns: 1fr; }
+    .quality-layout { margin-top: 16px; }
+    .plan-toolbar { margin: 16px 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+    .plan-entries { display: grid; gap: 12px; }
+    .plan-entry summary .badge { margin-left: 8px; }
+    .plan-content { padding: 0 20px 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 16px 0; }
+    .field { display: block; min-width: 0; }
+    .field label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; }
+    .field.full { grid-column: 1 / -1; }
+    .saved-meta { font-size: 0.8125rem; color: var(--cp-text-muted); overflow-wrap: anywhere; }
+    .filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 20px 0 12px; }
+    .filters .search-field { grid-column: span 2; }
+    .filter-help { margin-bottom: 16px; }
+    .table-region { max-width: 100%; overflow: auto; border: 1px solid var(--cp-border); border-radius: 0.625rem; margin: 12px 0 24px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th, td { text-align: left; vertical-align: top; padding: 12px; border-bottom: 1px solid var(--cp-border); }
+    th { font-weight: 600; color: var(--cp-text-muted); background: var(--cp-surface-soft); white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: var(--cp-accent-soft); }
+    td { overflow-wrap: anywhere; min-width: 104px; }
+    td.wide-cell { min-width: 240px; }
+    td.control-cell { min-width: 180px; }
+    td .small { display: block; margin-top: 4px; }
+    .empty { background: var(--cp-bg-elevated); border: 1px dashed var(--cp-border-strong); padding: 24px; border-radius: 0.625rem; margin: 12px 0; }
+    .empty p:last-child { margin-bottom: 0; }
+    .chart-box { width: 100%; overflow-x: auto; margin: 12px 0; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); }
+    .chart-box svg { width: 100%; min-width: 640px; height: auto; display: block; }
+    .chart-tick, .chart-label { fill: var(--cp-text-muted); font-size: 12px; }
+    .chart-label { font-size: 13px; }
+    .chart-grid { stroke: var(--cp-border); stroke-width: 1; }
+    .chart-axis { stroke: var(--cp-border-strong); stroke-width: 1; }
+    .chart-point { fill: var(--cp-accent); stroke: var(--cp-surface); stroke-width: 1.5; cursor: pointer; }
+    .chart-point.unflagged { fill: var(--cp-surface); stroke: var(--cp-border-strong); }
+    .chart-point:hover, .chart-point:focus { stroke: var(--cp-accent); stroke-width: 4; outline: none; fill: var(--cp-highlight); }
+    .legend-dot { width: 12px; height: 12px; display: inline-block; border-radius: 50%; background: var(--cp-accent); vertical-align: middle; margin-right: 4px; border: 1px solid var(--cp-accent); }
+    .legend-dot.hollow { background: var(--cp-surface); border-color: var(--cp-border-strong); }
+    dialog { width: min(1040px, calc(100% - 32px)); max-height: 90vh; padding: 0; color: var(--cp-text); background: var(--cp-surface); border: 1px solid var(--cp-border-strong); border-radius: 16px; box-shadow: var(--cp-card-shadow); }
+    dialog::backdrop { background: var(--cp-overlay); }
+    .dialog-head { padding: 20px; border-bottom: 1px solid var(--cp-border); display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+    .dialog-head h2 { margin-bottom: 0; overflow-wrap: anywhere; }
+    .dialog-head button { flex-shrink: 0; }
+    .dialog-body { padding: 20px; }
+    .dialog-body section + section { border-top: 1px solid var(--cp-border); margin-top: 24px; padding-top: 24px; }
+    .dialog-footer { padding: 16px 20px; border-top: 1px solid var(--cp-border); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    footer { margin-top: 32px; border-top: 1px solid var(--cp-border); padding-top: 20px; }
+    @media (max-width: 1100px) {
+      .recommendations { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .page { padding: 20px 16px; }
+      .recommendations, .filters, .form-grid, .metric-grid { grid-template-columns: 1fr; }
+      .filters .search-field { grid-column: auto; }
+      .card, .panel-content, .plan-content, .dialog-head, .dialog-body { padding: 16px; }
+      .panel-content, .plan-content { padding-top: 0; }
+      .section { margin-top: 24px; }
+      .dialog-head { flex-wrap: wrap; }
+      .detail-label { display: block; margin: 4px 0 0 20px; }
+      .actions button { flex-grow: 1; }
+      .stat { padding: 12px; }
+      .stat dd { font-size: 1.1rem; }
+      .plan-toolbar > button { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#recommendations-heading">Skip to decisions</a>
+  <div class="page">
+    <header class="page-header">
+      <p class="eyebrow">CATEGORY REVIEW / 12-WEEK SNAPSHOT</p>
+      <h1 id="headline">Start here: decisions for the category review</h1>
+      <p class="muted">A short review queue, the evidence behind each decision, and a plan that stays in your browser.</p>
+      <p id="generated-label" class="small"></p>
+      <div class="notice">
+        <strong>Synthetic data; recommendations require validation; scenarios not forecasts.</strong>
+        <p class="small">12-week period end: not supplied. Observation dates and generation date are shown separately below. Revenue and gross-profit scenarios are different measures, never a combined benefit.</p>
+      </div>
+      <noscript><p class="notice error">JavaScript is required for this local dashboard. No data is fetched from the network.</p></noscript>
+      <p id="startup-state" role="status">Loading the supplied snapshot…</p>
+      <div id="app-error" class="notice error" role="alert" hidden></div>
+    </header>
+
+    <main>
+      <section aria-labelledby="recommendations-heading">
+        <div class="section-head">
+          <div>
+            <h2 id="recommendations-heading" tabindex="-1">Decision shortlist</h2>
+            <p class="small">Global recommendations, ordered for review. Local decisions and explorer filters do not change this shortlist.</p>
+          </div>
+          <button type="button" id="jump-to-plan">Go to review plan</button>
+        </div>
+        <div id="recommendations" class="recommendations"></div>
+      </section>
+
+      <section class="section" aria-labelledby="snapshot-heading">
+        <div class="section-head">
+          <div>
+            <h2 id="snapshot-heading">At-a-glance snapshot · global</h2>
+            <p class="small">Global snapshot, not the filtered explorer. Scenario totals cover all flagged primary actions—not just the shortlist, local plan or matching table rows. Channel-to-market revenue ratios are descriptive proxy comparisons, not market share, a sales target or proof of execution quality.</p>
+          </div>
+        </div>
+        <dl id="snapshot-stats" class="stats"></dl>
+        <p id="quality-status" class="quality-status"></p>
+        <details class="panel quality-layout">
+          <summary>Sources, freshness &amp; assumptions <span class="detail-label">Observation dates, exclusions, methodology and review snapshot</span></summary>
+          <div id="quality-details" class="panel-content"></div>
+        </details>
+      </section>
+
+      <section class="section" aria-labelledby="plan-heading">
+        <div class="section-head">
+          <div>
+            <h2 id="plan-heading" tabindex="-1">Your review plan <span id="plan-count"></span></h2>
+            <p class="small">Local only. No shared backend, orders or emails. Owners are proposals, not assignments. File and Pages origins do not sync.</p>
+          </div>
+        </div>
+        <div id="storage-warning" class="notice warning" role="alert" hidden>
+          <p id="storage-warning-text"></p>
+          <button type="button" id="export-preserved-storage" hidden>Download preserved saved JSON</button>
+        </div>
+        <p id="storage-status" class="small" role="status"></p>
+        <div class="plan-toolbar">
+          <label class="checkbox-label" for="select-all-plan"><input type="checkbox" id="select-all-plan">Select all plan entries for export</label>
+          <button type="button" id="export-plan" class="primary" disabled>Export selected plan (0)</button>
+        </div>
+        <div id="plan-entries" class="plan-entries"></div>
+      </section>
+
+      <details id="explorer" class="panel section">
+        <summary>Explore the full review queue <span id="explorer-summary" class="detail-label">SKU evidence and assortment follow-ups</span></summary>
+        <div class="panel-content">
+          <p class="small">Priority order, then source order; not a mixed monetary ranking. Open any row to inspect its evidence or add it to the plan.</p>
+          <div class="filters">
+            <div class="field search-field"><label for="filter-search">Search names, IDs or rationale</label><input type="search" id="filter-search" placeholder="Product, shade, identifier, comparator…"></div>
+            <div class="field"><label for="filter-category">Subcategory</label><select id="filter-category"></select></div>
+            <div class="field"><label for="filter-action">Action or secondary flag</label><select id="filter-action"></select></div>
+            <div class="field"><label for="filter-brand">Brand · SKUs only</label><select id="filter-brand"></select></div>
+            <div class="field"><label for="filter-supplier">Supplier · SKUs only</label><select id="filter-supplier"></select></div>
+            <div class="field"><label for="filter-private">Private label · SKUs only</label><select id="filter-private"><option value="">All ownership</option><option value="true">Private label</option><option value="false">Not private label</option></select></div>
+          </div>
+          <div class="actions filter-help"><button type="button" id="reset-filters">Reset filters</button><span id="filter-count" class="small" role="status"></span></div>
+          <p class="small">Category, action and text filters apply to both lists. Brand, supplier and private-label filters apply only to SKUs. A competitor supplier is never inferred. Shortlist, snapshot and charts remain global.</p>
+          <div class="section-head">
+            <h3>SKU review queue</h3>
+            <button type="button" id="export-opportunities" disabled>Export matching SKUs</button>
+          </div>
+          <div id="opportunity-table"></div>
+          <div class="section-head">
+            <h3>Assortment follow-ups</h3>
+            <button type="button" id="export-gaps" disabled>Export matching follow-ups</button>
+          </div>
+          <div id="gap-table"></div>
+        </div>
+      </details>
+
+      <details id="market-context" class="panel section">
+        <summary>Market context <span class="detail-label">Global SKU map and subcategories · filters do not apply here</span></summary>
+        <div class="panel-content">
+          <h3>Channel and market proxy revenue · 12 weeks</h3>
+          <p class="small">A descriptive map, not an estimate of untapped sales or proof of execution quality. All dots have the same size; incomparable revenue and gross-profit scenarios are not used for sizing. Each dot opens its own evidence regardless of explorer filters. Hollow dots have no rule-matched review item.</p>
+          <p class="small"><span class="legend-dot" aria-hidden="true"></span>Review item &nbsp; <span class="legend-dot hollow" aria-hidden="true"></span>No rule matched</p>
+          <div id="landscape-chart" class="chart-box" tabindex="0" role="region" aria-label="Scrollable global SKU map"></div>
+          <p id="landscape-note" class="small"></p>
+          <h3>Subcategory snapshot · global</h3>
+          <p class="small">Source scope and product comparability are not verified. Ratios are not market share; a missing denominator is not a zero ratio.</p>
+          <div id="subcategory-table"></div>
+        </div>
+      </details>
+    </main>
+    <footer class="small">This standalone file reads only its embedded snapshot. Review-plan edits never change the source data or the recommendations. Keep exported plans private as appropriate.</footer>
+    <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+  </div>
+  <dialog id="evidence-dialog" aria-labelledby="evidence-title">
+    <div class="dialog-head">
+      <h2 id="evidence-title">Evidence</h2>
+      <button type="button" id="close-evidence" autofocus>Close evidence</button>
+    </div>
+    <div id="evidence-body" class="dialog-body"></div>
+    <div id="evidence-footer" class="dialog-footer"></div>
+  </dialog>
+  <script id="review-data" type="application/json">__DATA__</script>
+  <script id="review-core">
+    const CategoryReview = (() => {
+      "use strict";
+      const PLAN_VERSION = 1;
+      const STORAGE_KEY = "category-review.action-plan";
+      const DECISIONS = Object.freeze(["To review", "Accepted", "Deferred"]);
+      const STATUSES = Object.freeze(["Not started", "In progress", "Done"]);
+      const numberFormat = new Intl.NumberFormat("en-IE", { maximumFractionDigits: 4 });
+      const euroFormat = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const percentFormat = new Intl.NumberFormat("en-IE", { maximumFractionDigits: 3 });
+      const finite = value => typeof value === "number" && Number.isFinite(value);
+      const text = (value, fallback = "Not supplied") => value === null || value === undefined || value === "" ? fallback : String(value);
+      const number = value => finite(value) ? numberFormat.format(value) : "Not supplied";
+      const euros = (value, fallback = "Not supplied") => finite(value) ? euroFormat.format(value) : fallback;
+      const percent = value => finite(value) ? percentFormat.format(value) + "%" : "Not supplied";
+      const fractionPercent = value => finite(value) ? percent(value * 100) : "Not supplied";
+      const list = (values, fallback = "None supplied") => Array.isArray(values) && values.length ? values.map(value => text(value)).join(", ") : fallback;
+      const clone = value => JSON.parse(JSON.stringify(value));
+      const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
+      const validDueDate = value => {
+        if (value === "") return true;
+        if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || value.startsWith("0000")) return false;
+        const parsed = new Date(value + "T00:00:00Z");
+        return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+      };
+
+      function csvCell(value) {
+        if (value === null || value === undefined) return "";
+        if (typeof value === "number") {
+          if (!Number.isFinite(value)) throw new TypeError("Cannot export a non-finite number.");
+          return String(value);
+        }
+        let result = String(value);
+        // Only textual cells are neutralized; genuine negative numbers remain numeric.
+        if (/^[\s\u0000-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2060\ufeff]*[=+\-@]/u.test(result)) result = "'" + result;
+        return '"' + result.replace(/"/g, '""') + '"';
+      }
+
+      function csv(columns, rows) {
+        const lines = [columns.map(column => csvCell(column[1])).join(",")];
+        for (const row of rows) lines.push(columns.map(column => csvCell(row[column[0]])).join(","));
+        return "\ufeff" + lines.join("\r\n") + "\r\n";
+      }
+
+      function sortItems(items) {
+        return items.map((item, index) => ({ item, index })).sort((a, b) => {
+          const left = finite(a.item.priority_order) ? a.item.priority_order : Infinity;
+          const right = finite(b.item.priority_order) ? b.item.priority_order : Infinity;
+          return (left < right ? -1 : left > right ? 1 : 0) || a.index - b.index;
+        }).map(row => row.item);
+      }
+
+      function matchesItem(item, filters = {}) {
+        if (filters.subcategory && item.subcategory !== filters.subcategory) return false;
+        if (filters.action && item.primary_action !== filters.action && !(item.also_flagged || []).includes(filters.action)) return false;
+        if (item.kind !== "gap") {
+          if (filters.brand && item.brand !== filters.brand) return false;
+          if (filters.supplier && item.supplier !== filters.supplier) return false;
+          if (filters.privateLabel === "true" && item.private_label !== true) return false;
+          if (filters.privateLabel === "false" && item.private_label !== false) return false;
+        }
+        const query = String(filters.search || "").trim().toLocaleLowerCase("en");
+        if (!query) return true;
+        const fields = ["id", "product_id", "title", "product_name", "brand", "supplier", "subcategory", "shade_group", "status", "stock_status", "seasonality", "primary_action", "rationale", "next_step"];
+        const haystack = fields.map(key => text(item[key], "")).concat(item.also_flagged || []);
+        for (const example of item.competitor_examples || []) haystack.push(text(example.name, ""), text(example.brand, ""), text(example.record_id, ""));
+        return haystack.join("\n").toLocaleLowerCase("en").includes(query);
+      }
+
+      const filterItems = (items, filters) => sortItems(items.filter(item => matchesItem(item, filters)));
+      const indexItems = items => new Map(items.map(item => [item.id, item]));
+      const emptyPlan = snapshotId => ({ version: PLAN_VERSION, snapshot_id: snapshotId, entries: [] });
+
+      function validSourceItem(item) {
+        if (!object(item) || !["sku", "gap"].includes(item.kind)) return false;
+        if (!["id", "title", "primary_action", "priority_tier", "rationale", "next_step", "suggested_owner", "success_measure", "evidence_strength", "evidence_reason"].every(key => typeof item[key] === "string")) return false;
+        const stringArray = value => Array.isArray(value) && value.every(part => typeof part === "string");
+        const nullableNumber = value => value === null || finite(value);
+        if (!["caveats", "also_flagged"].every(key => stringArray(item[key]))) return false;
+        const scenario = item.scenario;
+        if (!object(scenario) || !["Revenue", "Gross profit", "Not estimated"].includes(scenario.value_type)) return false;
+        if (!nullableNumber(scenario.value_eur) || typeof scenario.period !== "string" || typeof scenario.formula !== "string" || !stringArray(scenario.assumptions)) return false;
+        if (!Array.isArray(item.source_refs) || !item.source_refs.every(ref =>
+          object(ref) && typeof ref.file === "string" && typeof ref.record_id === "string" && nullableNumber(ref.row_number))) return false;
+        if (!Array.isArray(item.competitor_examples) || !item.competitor_examples.every(example =>
+          object(example) && typeof example.record_id === "string" && typeof example.signal_valid === "boolean"
+          && ["name", "brand", "source", "observed_date"].every(key => example[key] === null || typeof example[key] === "string")
+          && nullableNumber(example.price_eur) && nullableNumber(example.trend_score_12w_pct)
+          && (nullableNumber(example.signal_score_0_100) || typeof example.signal_score_0_100 === "string"))) return false;
+        if (item.kind === "sku" && !stringArray(item.peer_ids)) return false;
+        if (item.kind === "gap" && !stringArray(item.existing_product_ids)) return false;
+        return true;
+      }
+
+      function validatePlan(plan) {
+        if (!object(plan) || plan.version !== PLAN_VERSION || typeof plan.snapshot_id !== "string" || !Array.isArray(plan.entries)) return false;
+        const ids = new Set();
+        for (const entry of plan.entries) {
+          if (!object(entry) || typeof entry.id !== "string" || !entry.id || ids.has(entry.id)) return false;
+          ids.add(entry.id);
+          if (!["sku", "gap"].includes(entry.kind) || typeof entry.title !== "string") return false;
+          if (!["added_snapshot_id", "source_snapshot_id", "owner", "due_date", "notes"].every(key => typeof entry[key] === "string")) return false;
+          if (!validDueDate(entry.due_date)) return false;
+          if (!DECISIONS.includes(entry.decision) || !STATUSES.includes(entry.status)) return false;
+          if (!["selected", "revalidation_required", "unavailable"].every(key => typeof entry[key] === "boolean")) return false;
+          if (!validSourceItem(entry.source_item) || entry.source_item.id !== entry.id || entry.source_item.kind !== entry.kind) return false;
+        }
+        return true;
+      }
+
+      function reconcilePlan(plan, snapshotId, items) {
+        const current = indexItems(items);
+        return {
+          ...plan,
+          snapshot_id: snapshotId,
+          entries: plan.entries.map(entry => {
+            const item = current.get(entry.id);
+            const actionChanged = Boolean(item && item.primary_action !== entry.source_item.primary_action);
+            return {
+              ...entry,
+              unavailable: !item,
+              revalidation_required: entry.revalidation_required || entry.source_snapshot_id !== snapshotId || !item || actionChanged
+            };
+          })
+        };
+      }
+
+      function loadPlan(readStored, snapshotId, items) {
+        let raw;
+        try {
+          raw = readStored();
+        } catch (_) {
+          return { plan: emptyPlan(snapshotId), canPersist: false, raw: null, warning: "Browser storage is unavailable. Changes are in memory only. Select all plan entries and export before closing." };
+        }
+        if (raw === null) return { plan: emptyPlan(snapshotId), canPersist: true, raw, warning: "" };
+        let saved;
+        try {
+          saved = JSON.parse(raw);
+        } catch (_) {
+          return { plan: emptyPlan(snapshotId), canPersist: false, raw, warning: "Saved plan JSON is corrupted and has been left untouched. Download the preserved saved JSON for recovery. New entries are in memory only; select all and export before closing." };
+        }
+        if (!validatePlan(saved)) {
+          return { plan: emptyPlan(snapshotId), canPersist: false, raw, warning: "The saved plan has an unknown version or invalid structure and has been left untouched. Download the preserved saved JSON for recovery. New entries are in memory only; select all and export before closing." };
+        }
+        return { plan: reconcilePlan(saved, snapshotId, items), canPersist: true, raw, warning: "" };
+      }
+
+      function savePlan(readStored, writeStored, plan, expectedRaw) {
+        let currentRaw;
+        try {
+          currentRaw = readStored();
+          if (currentRaw !== expectedRaw) {
+            return { ok: false, raw: currentRaw, warning: "The saved plan changed in another tab or window and was not overwritten. Your current edits are in memory only. Select all and export before reloading; download the preserved saved JSON to keep the other copy." };
+          }
+          const raw = JSON.stringify(plan);
+          writeStored(raw);
+          return { ok: true, raw, warning: "" };
+        } catch (_) {
+          return { ok: false, raw: currentRaw === undefined ? expectedRaw : currentRaw, warning: "Browser storage is unavailable or full. The last saved copy has not been replaced. Current edits are in memory only; select all plan entries and export before closing." };
+        }
+      }
+
+      function addToPlan(plan, item) {
+        if (plan.entries.some(entry => entry.id === item.id)) return plan;
+        const entry = {
+          id: item.id,
+          kind: item.kind,
+          title: item.title,
+          added_snapshot_id: plan.snapshot_id,
+          source_snapshot_id: plan.snapshot_id,
+          owner: text(item.suggested_owner, ""),
+          due_date: "",
+          decision: "To review",
+          status: "Not started",
+          notes: "",
+          selected: true,
+          revalidation_required: false,
+          unavailable: false,
+          source_item: clone(item)
+        };
+        return { ...plan, entries: [...plan.entries, entry] };
+      }
+
+      function editPlanEntry(plan, id, patch) {
+        const allowed = ["owner", "due_date", "decision", "status", "notes", "selected"];
+        for (const [key, value] of Object.entries(patch)) {
+          if (!allowed.includes(key)) throw new TypeError("That plan field is not editable.");
+          if (key === "selected" ? typeof value !== "boolean" : typeof value !== "string") throw new TypeError("Invalid plan field value.");
+          if (key === "decision" && !DECISIONS.includes(value)) throw new TypeError("Unknown decision.");
+          if (key === "status" && !STATUSES.includes(value)) throw new TypeError("Unknown workflow status.");
+          if (key === "due_date" && !validDueDate(value)) throw new TypeError("Use a complete due date with a valid calendar day.");
+        }
+        return { ...plan, entries: plan.entries.map(entry => entry.id === id ? { ...entry, ...patch } : entry) };
+      }
+
+      const removeFromPlan = (plan, id) => ({ ...plan, entries: plan.entries.filter(entry => entry.id !== id) });
+      const selectPlanEntries = (plan, selected) => ({ ...plan, entries: plan.entries.map(entry => ({ ...entry, selected: Boolean(selected) })) });
+
+      function acknowledgeEntry(plan, id, items) {
+        const current = indexItems(items).get(id);
+        if (!current) throw new Error("This item is unavailable in the current snapshot; its saved evidence must be retained.");
+        return {
+          ...plan,
+          entries: plan.entries.map(entry => entry.id === id ? {
+            ...entry, title: current.title, kind: current.kind, source_snapshot_id: plan.snapshot_id,
+            source_item: clone(current), revalidation_required: false, unavailable: false
+          } : entry)
+        };
+      }
+
+      const COMMON_COLUMNS = [
+        ["id", "item_id"], ["snapshot_id", "review_snapshot"], ["kind", "kind"], ["title", "decision_title"],
+        ["primary_action", "primary_action"], ["priority_tier", "priority_tier"], ["priority_order", "priority_order"],
+        ["subcategory", "subcategory"], ["shade_group", "shade_group"], ["rationale", "rationale"],
+        ["next_step", "next_step"], ["suggested_owner", "proposed_owner_not_assigned"], ["success_measure", "success_measure"],
+        ["evidence_strength", "evidence_strength"], ["evidence_reason", "evidence_reason"], ["caveats", "caveats"],
+        ["also_flagged", "also_flagged"], ["scenario_type", "scenario_type"], ["scenario_value_eur", "scenario_value_eur"],
+        ["scenario_period", "scenario_period"], ["scenario_formula", "scenario_formula"], ["scenario_assumptions", "scenario_assumptions"],
+        ["source_refs", "source_references"], ["competitor_examples", "competitor_examples"]
+      ];
+      const SKU_KEYS = [
+        "product_id", "product_name", "brand", "supplier", "private_label", "status", "stock_status", "seasonality",
+        "pack_size", "price_eur", "shelf_space_cm", "channel_revenue_eur_12w", "channel_units_12w", "channel_margin_pct",
+        "channel_trend_12w_pct", "market_revenue_eur_12w", "market_trend_12w_pct", "channel_to_market_ratio_pct",
+        "peer_ratio_pct", "peer_count", "peer_ids", "peer_margin_pct", "comp_benchmark_price_eur", "competitor_rows"
+      ];
+      const GAP_KEYS = ["competitor_signal_0_100", "competitor_trend_12w_pct", "competitor_rows", "valid_signal_rows", "active_skus_held", "available_skus_held", "existing_product_ids", "gap_score"];
+      const SKU_COLUMNS = [...COMMON_COLUMNS, ...SKU_KEYS.map(key => [key, key])];
+      const GAP_COLUMNS = [...COMMON_COLUMNS, ...GAP_KEYS.map(key => [key, key])];
+      const PLAN_COLUMNS = [
+        ["id", "item_id"], ["kind", "kind"], ["title", "decision_title"], ["added_snapshot_id", "added_review_snapshot"],
+        ["source_snapshot_id", "evidence_review_snapshot"], ["current_snapshot_id", "current_review_snapshot"],
+        ["revalidation_required", "requires_revalidation"], ["unavailable", "unavailable_in_current_snapshot"],
+        ["owner", "owner_local_proposal_not_assigned"], ["due_date", "due_date"], ["decision", "decision"],
+        ["status", "workflow_status"], ["notes", "notes"], ["primary_action", "primary_action"],
+        ["next_step", "next_step"], ["success_measure", "success_measure"], ["scenario_type", "scenario_type"],
+        ["scenario_value_eur", "scenario_value_eur"], ["scenario_period", "scenario_period"],
+        ["scenario_formula", "scenario_formula"], ["scenario_assumptions", "scenario_assumptions"],
+        ["evidence_strength", "evidence_strength"], ["evidence_reason", "evidence_reason"],
+        ["caveats", "caveats"], ["source_refs", "source_references"], ["competitor_examples", "competitor_examples"]
+      ];
+
+      function exportItemRows(items, snapshotId) {
+        return items.map(item => ({
+          ...item,
+          snapshot_id: snapshotId,
+          caveats: (item.caveats || []).join("\n"),
+          also_flagged: (item.also_flagged || []).join("\n"),
+          peer_ids: (item.peer_ids || []).join("\n"),
+          existing_product_ids: (item.existing_product_ids || []).join("\n"),
+          scenario_type: item.scenario.value_type,
+          scenario_value_eur: item.scenario.value_eur,
+          scenario_period: item.scenario.period,
+          scenario_formula: item.scenario.formula,
+          scenario_assumptions: (item.scenario.assumptions || []).join("\n"),
+          source_refs: JSON.stringify(item.source_refs || []),
+          competitor_examples: JSON.stringify(item.competitor_examples || [])
+        }));
+      }
+
+      function exportPlanRows(plan) {
+        return plan.entries.filter(entry => entry.selected).map(entry => ({
+          ...exportItemRows([entry.source_item], entry.source_snapshot_id)[0],
+          id: entry.id, kind: entry.kind, title: entry.title,
+          added_snapshot_id: entry.added_snapshot_id, source_snapshot_id: entry.source_snapshot_id,
+          current_snapshot_id: plan.snapshot_id, revalidation_required: entry.revalidation_required,
+          unavailable: entry.unavailable, owner: entry.owner, due_date: entry.due_date,
+          decision: entry.decision, status: entry.status, notes: entry.notes
+        }));
+      }
+
+      function scenarioLabel(scenario) {
+        if (!scenario || !finite(scenario.value_eur) || scenario.value_type === "Not estimated") return "Not estimated";
+        return text(scenario.value_type) + " · " + euros(scenario.value_eur) + " · " + text(scenario.period);
+      }
+
+      function evidenceModel(item) {
+        const scenario = item.scenario || {};
+        const common = [
+          ["Stable review ID", text(item.id)], ["Item kind", text(item.kind)], ["Primary action", text(item.primary_action)],
+          ["Priority", text(item.priority_tier)], ["Priority order", number(item.priority_order)],
+          ["Also flagged", list(item.also_flagged)], ["Evidence strength", text(item.evidence_strength)],
+          ["Evidence reason", text(item.evidence_reason)], ["Why review", text(item.rationale)],
+          ["Next step", text(item.next_step)], ["Proposed owner · not assigned", text(item.suggested_owner)],
+          ["Success measure", text(item.success_measure)]
+        ];
+        const measured = item.kind === "gap" ? [
+          ["Subcategory", text(item.subcategory)], ["Shade group", text(item.shade_group)],
+          ["Competitor popularity signal · 0–100", number(item.competitor_signal_0_100)],
+          ["Competitor trend · 12 weeks", fractionPercent(item.competitor_trend_12w_pct)],
+          ["Comparator row count", number(item.competitor_rows)], ["Valid popularity row count", number(item.valid_signal_rows)],
+          ["Active SKUs held", number(item.active_skus_held)], ["Available SKUs held", number(item.available_skus_held)],
+          ["Existing product IDs", list(item.existing_product_ids)], ["Gap review score · not predicted sales", number(item.gap_score)]
+        ] : [
+          ["Product ID", text(item.product_id)], ["Product name", text(item.product_name)], ["Brand", text(item.brand)],
+          ["Subcategory", text(item.subcategory)], ["Shade group", text(item.shade_group)], ["Supplier", text(item.supplier)],
+          ["Private label", item.private_label === true ? "Yes" : item.private_label === false ? "No" : "Not supplied"],
+          ["Lifecycle status", text(item.status)], ["Stock status", text(item.stock_status)], ["Seasonality", text(item.seasonality)],
+          ["Pack size", text(item.pack_size)], ["Shelf space · cm", number(item.shelf_space_cm)], ["Selling price", euros(item.price_eur)],
+          ["Channel revenue · 12 weeks", euros(item.channel_revenue_eur_12w)], ["Channel units · 12 weeks", number(item.channel_units_12w)],
+          ["Channel margin", fractionPercent(item.channel_margin_pct)], ["Channel trend · 12 weeks", fractionPercent(item.channel_trend_12w_pct)],
+          ["Market proxy revenue · 12 weeks", euros(item.market_revenue_eur_12w)], ["Market trend · 12 weeks", fractionPercent(item.market_trend_12w_pct)],
+          ["Channel-to-market revenue ratio", percent(item.channel_to_market_ratio_pct)],
+          ["Peer channel-to-market ratio", percent(item.peer_ratio_pct)], ["Peer group count", number(item.peer_count)],
+          ["Peer product IDs", list(item.peer_ids)], ["Peer margin", fractionPercent(item.peer_margin_pct)],
+          ["Competitor price benchmark", euros(item.comp_benchmark_price_eur)], ["Comparator row count", number(item.competitor_rows)]
+        ];
+        return {
+          title: text(item.title),
+          common,
+          measured,
+          scenario: [
+            ["Value type", text(scenario.value_type, "Not estimated")],
+            ["Illustrative scenario value", euros(scenario.value_eur, "Not estimated")],
+            ["Scenario period", text(scenario.period)], ["Exact supplied formula", text(scenario.formula, "Not estimated")]
+          ],
+          assumptions: (scenario.assumptions || []).map(value => text(value)),
+          caveats: (item.caveats || []).map(value => text(value)),
+          sources: (item.source_refs || []).map(ref => [text(ref.file), text(ref.record_id), number(ref.row_number)]),
+          comparators: (item.competitor_examples || []).map(example => [
+            text(example.record_id), text(example.name), text(example.brand), euros(example.price_eur),
+            text(example.source), text(example.observed_date), text(example.signal_score_0_100),
+            example.signal_valid === true ? "Included as a popularity signal only" : "EXCLUDED from popularity",
+            fractionPercent(example.trend_score_12w_pct)
+          ])
+        };
+      }
+
+      return Object.freeze({
+        PLAN_VERSION, STORAGE_KEY, DECISIONS, STATUSES, SKU_COLUMNS, GAP_COLUMNS, PLAN_COLUMNS,
+        finite, text, number, euros, percent, fractionPercent, list, csvCell, csv, sortItems, matchesItem, filterItems, indexItems,
+        emptyPlan, validatePlan, reconcilePlan, loadPlan, savePlan, addToPlan, editPlanEntry, removeFromPlan,
+        selectPlanEntries, acknowledgeEntry, exportItemRows, exportPlanRows, scenarioLabel, evidenceModel
+      });
+    })();
+  </script>
+  <script id="review-ui">
+    (() => {
+      "use strict";
+      const C = CategoryReview;
+      const byId = id => document.getElementById(id);
+      const el = (tag, className, value) => {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (value !== undefined) node.textContent = String(value);
+        return node;
+      };
+      const button = (label, handler, className = "") => {
+        const node = el("button", className, label);
+        node.type = "button";
+        node.addEventListener("click", handler);
+        return node;
+      };
+      const announce = message => { byId("announcement").textContent = message; };
+      const showError = message => {
+        byId("app-error").hidden = false;
+        byId("app-error").textContent = message;
+        byId("app-error").scrollIntoView({ block: "nearest" });
+      };
+      const definitionList = (rows, stacked = false) => {
+        const dl = el("dl", "metric-grid" + (stacked ? " stacked-metrics" : ""));
+        for (const [label, value] of rows) {
+          const pair = el("div");
+          pair.append(el("dt", "", label), el("dd", "", value));
+          dl.append(pair);
+        }
+        return dl;
+      };
+      const bulletList = (values, emptyText) => {
+        if (!values.length) return el("p", "small", emptyText);
+        const list = el("ul");
+        for (const value of values) list.append(el("li", "", value));
+        return list;
+      };
+      const table = (headers, rows, label) => {
+        const region = el("div", "table-region");
+        region.tabIndex = 0;
+        region.setAttribute("role", "region");
+        region.setAttribute("aria-label", label);
+        const grid = el("table");
+        grid.append(el("caption", "sr-only", label));
+        const head = el("thead");
+        const header = el("tr");
+        for (const labelText of headers) {
+          const th = el("th", "", labelText);
+          th.scope = "col";
+          header.append(th);
+        }
+        head.append(header);
+        const body = el("tbody");
+        for (const values of rows) {
+          const row = el("tr");
+          for (const value of values) {
+            if (value && value.nodeType === 1 && value.tagName === "TD") row.append(value);
+            else {
+              const cell = el("td");
+              if (value && value.nodeType === 1) cell.append(value);
+              else cell.textContent = String(value);
+              row.append(cell);
+            }
+          }
+          body.append(row);
+        }
+        grid.append(head, body);
+        region.append(grid);
+        return region;
+      };
+
+      try {
+        const data = JSON.parse(byId("review-data").textContent);
+        if (data.schema_version !== 2 || typeof data.snapshot_id !== "string") throw new Error("Unsupported dashboard data. Regenerate this file with schema version 2.");
+        const opportunities = data.opportunities || [];
+        const gaps = data.assortment_gaps || [];
+        const recommendations = data.recommendations || [];
+        const itemsById = C.indexItems([...recommendations, ...opportunities, ...gaps]);
+        const items = Array.from(itemsById.values());
+        const readStored = () => window.localStorage.getItem(C.STORAGE_KEY);
+        const writeStored = raw => window.localStorage.setItem(C.STORAGE_KEY, raw);
+        const restored = C.loadPlan(readStored, data.snapshot_id, items);
+        let plan = restored.plan;
+        let canPersist = restored.canPersist;
+        let storageRaw = restored.raw;
+        let storageWarning = restored.warning;
+        let matchingOpportunities = [];
+        let matchingGaps = [];
+        let evidenceReturnFocus = null;
+
+        function updateStorageMessage() {
+          byId("storage-warning").hidden = !storageWarning;
+          byId("storage-warning-text").textContent = storageWarning;
+          byId("export-preserved-storage").hidden = !storageWarning || typeof storageRaw !== "string";
+          byId("storage-status").textContent = canPersist
+            ? "Auto-save is available on this browser origin. Nothing is shared or assigned."
+            : "Memory-only changes: select all entries and export before closing.";
+        }
+
+        function persistPlan() {
+          if (canPersist) {
+            const result = C.savePlan(readStored, writeStored, plan, storageRaw);
+            canPersist = result.ok;
+            storageRaw = result.raw;
+            storageWarning = result.warning;
+          }
+          updateStorageMessage();
+        }
+
+        function download(content, filename, mime) {
+          let url;
+          let anchor;
+          try {
+            const blob = new Blob([content], { type: mime });
+            url = URL.createObjectURL(blob);
+            anchor = el("a");
+            anchor.href = url;
+            anchor.download = filename;
+            anchor.hidden = true;
+            document.body.append(anchor);
+            anchor.click();
+            announce("Download requested: " + filename + ". Check your browser downloads.");
+          } catch (error) {
+            showError("Export failed: " + C.text(error.message, "The browser could not create the download.") + " Your plan remains open; copy any unsaved work before closing.");
+          } finally {
+            if (anchor) anchor.remove();
+            if (url) window.setTimeout(() => {
+              try { URL.revokeObjectURL(url); }
+              catch (error) { showError("Download cleanup failed: " + C.text(error.message) + ". Check that the export completed."); }
+            }, 60000);
+          }
+        }
+
+        function exportCsv(columns, getRows, filename) {
+          try {
+            const rows = getRows();
+            if (!rows.length) {
+              showError("There are no selected or matching rows to export.");
+              return;
+            }
+            download(C.csv(columns, rows), filename, "text/csv;charset=utf-8");
+          }
+          catch (error) { showError("Export failed: " + C.text(error.message) + ". No changes to your plan were made."); }
+        }
+
+        function updateAddButtons() {
+          const ids = new Set(plan.entries.map(entry => entry.id));
+          for (const node of document.querySelectorAll("[data-add-id]")) {
+            const added = ids.has(node.dataset.addId);
+            node.disabled = added;
+            node.textContent = added ? "In review plan" : "Add to review plan";
+            const item = itemsById.get(node.dataset.addId);
+            node.setAttribute("aria-label", (added ? "Already in review plan: " : "Add to review plan: ") + C.text(item && item.title, node.dataset.addId));
+          }
+        }
+
+        function addButton(item) {
+          const node = button("Add to review plan", () => {
+            const next = C.addToPlan(plan, item);
+            if (next === plan) return;
+            plan = next;
+            persistPlan();
+            renderPlan(item.id);
+            updateAddButtons();
+            announce("Added to your local review plan: " + item.title);
+          }, "primary");
+          node.dataset.addId = item.id;
+          node.setAttribute("aria-label", "Add to review plan: " + item.title);
+          return node;
+        }
+
+        function showDialog(title, content, footer, invoker) {
+          evidenceReturnFocus = invoker || document.activeElement;
+          byId("evidence-title").textContent = title;
+          byId("evidence-body").replaceChildren(...content);
+          byId("evidence-footer").replaceChildren(...footer);
+          byId("evidence-footer").hidden = !footer.length;
+          const dialog = byId("evidence-dialog");
+          if (!dialog.open) dialog.showModal();
+          byId("close-evidence").focus();
+          updateAddButtons();
+        }
+
+        function evidenceSection(title, content) {
+          const section = el("section");
+          section.append(el("h3", "", title), ...content);
+          return section;
+        }
+
+        function openEvidence(item, invoker, context) {
+          const model = C.evidenceModel(item);
+          const intro = el("div", "notice");
+          intro.append(el("p", "", context || "Current review snapshot: " + data.snapshot_id));
+          intro.append(el("p", "small", "Synthetic observations, not a causal diagnosis. A stock status does not establish why sales were low. The 12-week period end was not supplied."));
+          const sections = [
+            intro,
+            evidenceSection("Decision and evidence strength", [definitionList(model.common, true)]),
+            evidenceSection("All supplied measured metrics", [definitionList(model.measured)]),
+            evidenceSection("Illustrative scenario · not a forecast", [
+              definitionList(model.scenario, true),
+              el("p", "small", "Displayed rates are rounded for readability; the supplied formula and CSV/JSON exports retain the calculation inputs. Source margin/trend rates are fractions (0.31 means 31%); channel-to-market ratio fields already use percentage points."),
+              el("h3", "", "Explicit assumptions"),
+              bulletList(model.assumptions, "No scenario assumptions supplied."),
+              el("p", "small", "Revenue and gross-profit scenarios are separate measures. Do not add them together or annualize a 12-week illustration. Peer membership and count, where supplied, are listed above.")
+            ]),
+            evidenceSection("Limits and caveats", [
+              bulletList(model.caveats, "No item-specific caveats supplied."),
+              el("p", "small", "Comparisons use similar subcategory and shade only. Product form and pack comparability are unverified. The market proxy has a different scope; channel-to-market ratios are not market share. Popularity scores are not observed competitor sales.")
+            ]),
+            evidenceSection("Raw source references", [
+              model.sources.length ? table(["File", "Record / product ID", "Source row"], model.sources, "Raw source references") : el("p", "small", "No source references supplied."),
+              el("p", "small", "Row numbers and identifiers are reported as supplied, not browser table positions.")
+            ]),
+            evidenceSection("Competitor observations and price comparators", [
+              el("p", "small", "Category/shade context only; product form and pack comparability unverified. No competitor supplier is inferred. Invalid popularity values stay visible below but are EXCLUDED from popularity calculations."),
+              model.comparators.length
+                ? table(["Record ID", "Name", "Brand", "Price", "Source", "Observed date", "Raw popularity score", "Popularity interpretation", "Trend · 12 weeks"], model.comparators, "Competitor source observations")
+                : el("p", "small", "No competitor observations supplied for this item.")
+            ])
+          ];
+          const current = itemsById.get(item.id);
+          showDialog(model.title, sections, current ? [addButton(current)] : [el("p", "small", "Unavailable in the current snapshot. Saved evidence is retained in your review plan.")], invoker);
+        }
+
+        function evidenceButton(item, label = "View evidence", context) {
+          return button(label, event => openEvidence(item, event.currentTarget, context));
+        }
+
+        function renderRecommendations() {
+          byId("headline").textContent = "Start here: " + recommendations.length + " decisions for the category review";
+          byId("generated-label").textContent = "Dashboard generated: " + C.text(data.generated) + " · Not an observation date.";
+          const cards = recommendations.map(item => {
+            const card = el("article", "card");
+            const badges = el("div", "badges");
+            badges.append(el("span", "badge priority", item.priority_tier), el("span", "badge", item.evidence_strength));
+            card.append(badges, el("h3", "", item.title));
+            const context = [
+              item.kind === "sku" ? C.text(item.product_id) : C.text(item.id),
+              C.text(item.subcategory), C.text(item.shade_group)
+            ];
+            if (item.kind === "sku") {
+              context.push(({ aktiv: "Active", inaktiv: "Inactive" })[item.status] || C.text(item.status));
+              context.push(({ in_stock: "In stock", low_stock: "Low stock", out_of_stock: "Out of stock" })[item.stock_status] || C.text(item.stock_status));
+            }
+            card.append(el("p", "small", context.join(" · ")));
+            const details = el("dl");
+            for (const [label, value] of [
+              ["Why", item.rationale], ["Next action", item.next_step],
+              ["Proposed owner · not assigned", item.suggested_owner], ["Success measure", item.success_measure]
+            ]) details.append(el("dt", "", label), el("dd", "", C.text(value)));
+            card.append(details, el("p", "scenario-label", "12-week scenario: " + C.scenarioLabel(item.scenario)));
+            card.append(el("p", "small", C.text(item.evidence_reason)));
+            const actions = el("div", "actions");
+            actions.append(evidenceButton(item), addButton(item));
+            card.append(actions);
+            return card;
+          });
+          byId("recommendations").replaceChildren(...(cards.length ? cards : [el("p", "empty", "No recommendations were supplied. No decisions have been padded or invented; use the review queue to inspect the snapshot.")]));
+        }
+
+        function renderSnapshot() {
+          const s = data.summary || {};
+          const stats = [
+            ["SKUs in snapshot", C.number(s.n_skus), "Source: product metadata and 12-week performance."],
+            ["Rule-matched SKUs", C.number(s.n_flagged), "Review candidates, not proven problems."],
+            ["Channel revenue · 12 weeks", C.euros(s.channel_rev), "Global observed snapshot total."],
+            ["Market proxy revenue · 12 weeks", C.euros(s.market_rev), "Reference scope; not the channel's addressable sales."],
+            ["Channel-to-market revenue ratio", C.percent(s.channel_to_market_ratio_pct), "Descriptive ratio, not market share."],
+            ["Revenue scenarios · 12 weeks", C.euros(s.revenue_scenario_eur, "Not estimated"), "Global: all flagged primary actions, not the shortlist, local plan or filtered table. Not additive with gross profit."],
+            ["Gross-profit scenarios · 12 weeks", C.euros(s.gross_profit_scenario_eur, "Not estimated"), "Global: all flagged primary actions, not the shortlist, local plan or filtered table. A different measure, not extra revenue."],
+            ["Availability & lifecycle review", C.number(s.availability_out_of_stock) + " out of stock · " + C.number(s.availability_low_stock) + " low stock", C.number(s.zero_sales_count) + " zero-sales reviews · " + C.number(s.reactivation_count) + " reactivation reviews.", true]
+          ];
+          byId("snapshot-stats").replaceChildren(...stats.map(([label, value, detail, long]) => {
+            const box = el("div", "stat");
+            box.append(el("dt", "", label), el("dd", long ? "stat-text" : "", value), el("dd", "stat-detail", detail));
+            return box;
+          }));
+          const q = data.data_quality || {};
+          byId("quality-status").textContent = "Invalid competitor popularity scores: " + C.number(q.invalid_signal_count) + " · EXCLUDED from popularity calculations.";
+          const quality = [
+            definitionList([
+              ["Competitor observed from", C.text(q.competitor_observed_from)],
+              ["Competitor observed to", C.text(q.competitor_observed_to)],
+              ["Observation age at generation · days", C.number(q.competitor_age_days)],
+              ["Dashboard generated", C.text(data.generated)],
+              ["12-week performance period end", "Not supplied"],
+              ["Review snapshot ID", data.snapshot_id]
+            ]),
+            el("p", "small", "Generation does not refresh source observations. The review snapshot fingerprints the source files plus the rule version and configuration. Its identifier stays stable across generation dates; changed sources, rules or thresholds require plan revalidation."),
+            el("h3", "", "Validation warnings"),
+            bulletList(q.warnings || [], "No additional validation warnings reported. This does not validate source comparability."),
+            el("h3", "", "Methodology"),
+            definitionList([
+              ["Selection", C.text((data.methodology || {}).selection)],
+              ["Scenarios", C.text((data.methodology || {}).scenario)],
+              ["Evidence", C.text((data.methodology || {}).evidence)]
+            ], true)
+          ];
+          const counts = Object.entries(s.action_counts || {});
+          if (counts.length) quality.push(el("h3", "", "Supplied action counts · global"), definitionList(counts.map(([action, count]) => [action, C.number(count)])));
+          quality.push(el("h3", "", "Excluded source values"));
+          const excluded = q.exclusions || [];
+          quality.push(excluded.length
+            ? table(["File", "Record ID", "Source row", "Field", "Raw value", "Reason"], excluded.map(row => [
+              C.text(row.file), C.text(row.record_id), C.number(row.row_number), C.text(row.field), C.text(row.value), C.text(row.reason)
+            ]), "Source exclusions")
+            : el("p", "small", "No excluded source values supplied."));
+          byId("quality-details").replaceChildren(...quality);
+        }
+
+        function updatePlanSelection() {
+          const selected = plan.entries.filter(entry => entry.selected).length;
+          byId("plan-count").textContent = "(" + plan.entries.length + ")";
+          byId("export-plan").textContent = "Export selected plan (" + selected + ")";
+          byId("export-plan").disabled = selected === 0;
+          byId("select-all-plan").disabled = plan.entries.length === 0;
+          byId("select-all-plan").checked = plan.entries.length > 0 && selected === plan.entries.length;
+          byId("select-all-plan").indeterminate = selected > 0 && selected < plan.entries.length;
+        }
+
+        function renderPlan(openId) {
+          const existingOpen = new Set(Array.from(document.querySelectorAll("[data-plan-id]")).filter(node => node.open).map(node => node.dataset.planId));
+          const entries = plan.entries.map((entry, index) => {
+            const currentItem = itemsById.get(entry.id);
+            const actionChanged = Boolean(currentItem && currentItem.primary_action !== entry.source_item.primary_action);
+            const wrapper = el("details", "plan-entry");
+            wrapper.dataset.planId = entry.id;
+            wrapper.open = entry.id === openId || existingOpen.has(entry.id);
+            const summary = el("summary");
+            const stateBadge = el("span", "badge", entry.decision + " · " + entry.status);
+            summary.append(el("span", "", entry.title), stateBadge);
+            if (entry.revalidation_required) summary.append(el("span", "badge attention", "Requires revalidation"));
+            if (entry.unavailable) summary.append(el("span", "badge attention", "Unavailable in current snapshot"));
+            const content = el("div", "plan-content");
+            const selection = el("label", "checkbox-label");
+            const checkbox = el("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = entry.selected;
+            checkbox.addEventListener("change", () => {
+              plan = C.editPlanEntry(plan, entry.id, { selected: checkbox.checked });
+              persistPlan();
+              updatePlanSelection();
+            });
+            selection.append(checkbox, el("span", "", "Include this entry in plan export"));
+            content.append(selection, el("p", "saved-meta", "Review ID: " + entry.id + " · Added from review snapshot: " + entry.added_snapshot_id + " · Saved evidence review snapshot: " + entry.source_snapshot_id));
+            if (entry.revalidation_required) {
+              const warning = el("div", "notice warning");
+              warning.append(el("p", "", entry.unavailable
+                ? "This review item is unavailable in the current snapshot. Your edits and its saved evidence have been retained. It cannot be revalidated until it is available again."
+                : actionChanged
+                  ? "The suggested action changed for this item. Your saved action and evidence have not been replaced. Compare the saved and current evidence before choosing whether to adopt the updated action."
+                  : "The review snapshot changed or this item was previously unavailable. Review the current evidence, then explicitly acknowledge it. Your decisions, owner and notes have not been reset."));
+              if (actionChanged) {
+                warning.append(definitionList([
+                  ["Saved plan action", C.text(entry.source_item.primary_action)],
+                  ["Current suggested action", C.text(currentItem.primary_action)]
+                ], true));
+                warning.append(el("p", "small", "Adopting the updated action explicitly replaces its saved action and evidence. Your owner, due date, notes, decision and workflow status are retained; reconsider the decision and status for the new action."));
+              }
+              warning.append(el("p", "small", "Current review snapshot: " + data.snapshot_id + ". Exports keep the saved evidence and mark it as requiring revalidation until acknowledged."));
+              content.append(warning);
+            }
+            const form = el("div", "form-grid");
+            function field(key, label, tag, choices) {
+              const fieldWrap = el("div", "field" + (key === "notes" ? " full" : ""));
+              const id = "plan-" + index + "-" + key;
+              const fieldLabel = el("label", "", label);
+              fieldLabel.htmlFor = id;
+              const input = el(tag);
+              input.id = id;
+              if (tag === "input") input.type = key === "due_date" ? "date" : "text";
+              if (tag === "textarea") input.rows = 3;
+              if (choices) for (const choice of choices) {
+                const option = el("option", "", choice);
+                option.value = choice;
+                input.append(option);
+              }
+              input.value = entry[key];
+              input.addEventListener(choices || key === "due_date" ? "change" : "input", () => {
+                try {
+                  plan = C.editPlanEntry(plan, entry.id, { [key]: input.value });
+                  const updated = plan.entries.find(row => row.id === entry.id);
+                  stateBadge.textContent = updated.decision + " · " + updated.status;
+                  persistPlan();
+                } catch (error) {
+                  showError("Plan edit could not be saved: " + C.text(error.message));
+                }
+              });
+              fieldWrap.append(fieldLabel, input);
+              form.append(fieldWrap);
+            }
+            field("owner", "Owner · local proposal, not assigned", "input");
+            field("due_date", "Proposed due date", "input");
+            field("decision", "Review decision", "select", C.DECISIONS);
+            field("status", "Workflow status", "select", C.STATUSES);
+            field("notes", "Your notes · saved only in this browser", "textarea");
+            content.append(form, el("p", "small", "Saved next step: " + C.text(entry.source_item.next_step)), el("p", "small", "Saved success measure: " + C.text(entry.source_item.success_measure)));
+            const actions = el("div", "actions");
+            actions.append(evidenceButton(entry.source_item, entry.revalidation_required ? "View saved evidence" : "View evidence", "Saved plan evidence from review snapshot " + entry.source_snapshot_id + (entry.revalidation_required ? ". REQUIRES REVALIDATION against " + data.snapshot_id + "." : ".")));
+            if (entry.revalidation_required && !entry.unavailable) {
+              actions.append(evidenceButton(itemsById.get(entry.id), "View current evidence"));
+              actions.append(button(actionChanged ? "Adopt updated action & evidence" : "Acknowledge current evidence", () => {
+                plan = C.acknowledgeEntry(plan, entry.id, items);
+                persistPlan();
+                renderPlan(entry.id);
+                byId("plan-" + index + "-decision").focus();
+                announce(actionChanged
+                  ? "Updated action and evidence explicitly adopted. Your local edits were preserved; reconsider the decision and status for the new action."
+                  : "Current evidence acknowledged. Your local decision and notes were preserved.");
+              }));
+            }
+            actions.append(button("Remove from plan", () => {
+              plan = C.removeFromPlan(plan, entry.id);
+              persistPlan();
+              renderPlan();
+              updateAddButtons();
+              byId("plan-heading").focus();
+              announce("Removed from your local review plan: " + entry.title);
+            }, "remove-button"));
+            content.append(actions);
+            wrapper.append(summary, content);
+            return wrapper;
+          });
+          byId("plan-entries").replaceChildren(...(entries.length ? entries : [
+            el("div", "empty", "No plan entries yet. Add a recommendation or any review-queue item, then record your decision. Nothing is assigned or actioned automatically.")
+          ]));
+          updatePlanSelection();
+        }
+
+        const filterIds = { search: "filter-search", subcategory: "filter-category", action: "filter-action", brand: "filter-brand", supplier: "filter-supplier", privateLabel: "filter-private" };
+        const readFilters = () => Object.fromEntries(Object.entries(filterIds).map(([key, id]) => [key, byId(id).value]));
+        function resetFilters() {
+          for (const id of Object.values(filterIds)) byId(id).value = "";
+          renderExplorer();
+          byId("filter-search").focus();
+          announce("All explorer filters reset.");
+        }
+        function emptyResults() {
+          const node = el("div", "empty");
+          node.append(el("p", "", "No matching rows"), button("Reset filters", resetFilters));
+          return node;
+        }
+        function renderExplorer() {
+          const filters = readFilters();
+          matchingOpportunities = C.filterItems(opportunities, filters);
+          matchingGaps = C.filterItems(gaps, filters);
+          byId("filter-count").textContent = matchingOpportunities.length + " of " + opportunities.length + " SKUs · " + matchingGaps.length + " of " + gaps.length + " assortment follow-ups";
+          byId("explorer-summary").textContent = opportunities.length + " rule-matched SKUs · " + gaps.length + " assortment follow-ups";
+          byId("export-opportunities").disabled = !matchingOpportunities.length;
+          byId("export-gaps").disabled = !matchingGaps.length;
+          function row(item) {
+            const decision = el("td", "wide-cell");
+            decision.append(el("strong", "", item.title), el("span", "small", (item.kind === "sku" ? C.text(item.product_id) : item.id) + " · " + C.text(item.subcategory) + " · " + C.text(item.shade_group)));
+            if (item.kind === "sku") decision.append(el("span", "small", C.text(item.brand) + " · " + C.text(item.supplier) + " · " + (item.private_label === true ? "Private label" : item.private_label === false ? "Not private label" : "Ownership not supplied")));
+            else decision.append(el("span", "small", C.number(item.active_skus_held) + " active / " + C.number(item.available_skus_held) + " available SKUs held"));
+            if ((item.also_flagged || []).length) decision.append(el("span", "small", "Also flagged: " + C.list(item.also_flagged)));
+            const controls = el("td", "control-cell");
+            const actions = el("div", "actions");
+            actions.append(evidenceButton(item), addButton(item));
+            controls.append(actions);
+            return [el("span", "badge priority", item.priority_tier), decision, C.text(item.primary_action), C.scenarioLabel(item.scenario), C.text(item.evidence_strength), controls];
+          }
+          const headers = ["Priority", "Specific decision", "Primary action", "Scenario · 12 weeks", "Evidence", "Review"];
+          byId("opportunity-table").replaceChildren(matchingOpportunities.length ? table(headers, matchingOpportunities.map(row), "Matching SKU review items") : emptyResults());
+          byId("gap-table").replaceChildren(matchingGaps.length ? table(headers, matchingGaps.map(row), "Matching assortment follow-ups") : emptyResults());
+          updateAddButtons();
+        }
+
+        function initializeFilters() {
+          function options(id, label, values) {
+            const all = el("option", "", label);
+            all.value = "";
+            const nodes = [all];
+            for (const value of [...new Set(values.filter(value => value !== null && value !== undefined && value !== ""))].sort((a, b) => String(a).localeCompare(String(b)))) {
+              const node = el("option", "", value);
+              node.value = String(value);
+              nodes.push(node);
+            }
+            byId(id).replaceChildren(...nodes);
+            byId(id).value = "";
+          }
+          options("filter-category", "All subcategories", items.map(item => item.subcategory));
+          options("filter-action", "All actions and flags", items.flatMap(item => [item.primary_action, ...(item.also_flagged || [])]));
+          options("filter-brand", "All brands", opportunities.map(item => item.brand));
+          options("filter-supplier", "All suppliers", opportunities.map(item => item.supplier));
+          for (const [key, id] of Object.entries(filterIds)) byId(id).addEventListener(key === "search" ? "input" : "change", renderExplorer);
+          byId("reset-filters").addEventListener("click", resetFilters);
+        }
+
+        function openLandscape(row, invoker) {
+          const item = itemsById.get(row.id);
+          if (item) {
+            openEvidence(item, invoker);
+            return;
+          }
+          showDialog(C.text(row.product_name), [
+            el("p", "notice", "No rule matched. This SKU has no supplied review item; an empty explorer filter is not being applied."),
+            definitionList([
+              ["Product ID", C.text(row.product_id)], ["Brand", C.text(row.brand)], ["Subcategory", C.text(row.subcategory)],
+              ["Market proxy revenue · 12 weeks", C.euros(row.market_revenue_eur_12w)],
+              ["Channel revenue · 12 weeks", C.euros(row.channel_revenue_eur_12w)],
+              ["Channel-to-market revenue ratio", C.percent(row.channel_to_market_ratio_pct)],
+              ["Supplied map action", C.text(row.primary_action, "No rule matched")],
+              ["Scenario type", C.text(row.scenario_type, "Not estimated")],
+              ["Scenario value", C.euros(row.scenario_value_eur, "Not estimated")]
+            ]),
+            el("p", "small", "Only the fields above were supplied for this unflagged map point. Full SKU measurements, source references and a decision scenario were not supplied. The global map is unaffected by explorer filters. No rule match does not mean the SKU has been validated.")
+          ], [], invoker);
+        }
+
+        function renderMarketContext() {
+          const landscape = data.landscape || [];
+          const measured = landscape.filter(row => C.finite(row.market_revenue_eur_12w) && C.finite(row.channel_revenue_eur_12w));
+          if (!measured.length) byId("landscape-chart").replaceChildren(el("p", "empty", "No plottable revenue observations supplied."));
+          else {
+            const ns = "http://www.w3.org/2000/svg";
+            const svgElement = (tag, attributes, value) => {
+              const node = document.createElementNS(ns, tag);
+              for (const [key, attr] of Object.entries(attributes || {})) node.setAttribute(key, String(attr));
+              if (value !== undefined) node.textContent = String(value);
+              return node;
+            };
+            const width = 900, height = 380, left = 100, right = 28, top = 24, bottom = 72;
+            const maxX = Math.max(1, ...measured.map(row => row.market_revenue_eur_12w)) * 1.08;
+            const maxY = Math.max(1, ...measured.map(row => row.channel_revenue_eur_12w)) * 1.08;
+            const minX = Math.min(0, ...measured.map(row => row.market_revenue_eur_12w));
+            const minY = Math.min(0, ...measured.map(row => row.channel_revenue_eur_12w));
+            const x = value => left + (value - minX) / (maxX - minX) * (width - left - right);
+            const y = value => height - bottom - (value - minY) / (maxY - minY) * (height - top - bottom);
+            const svg = svgElement("svg", { viewBox: "0 0 " + width + " " + height, role: "group", "aria-label": "Global channel versus market proxy revenue. Tab to a dot and press Enter to inspect it." });
+            const compact = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", notation: "compact", maximumFractionDigits: 1 });
+            for (let tick = 0; tick <= 4; tick++) {
+              const vx = minX + (maxX - minX) * tick / 4;
+              const vy = minY + (maxY - minY) * tick / 4;
+              svg.append(
+                svgElement("line", { x1: x(vx), x2: x(vx), y1: top, y2: height - bottom, class: "chart-grid" }),
+                svgElement("line", { x1: left, x2: width - right, y1: y(vy), y2: y(vy), class: "chart-grid" }),
+                svgElement("text", { x: x(vx), y: height - bottom + 24, "text-anchor": "middle", class: "chart-tick" }, compact.format(vx)),
+                svgElement("text", { x: left - 12, y: y(vy) + 4, "text-anchor": "end", class: "chart-tick" }, compact.format(vy))
+              );
+            }
+            svg.append(
+              svgElement("line", { x1: left, x2: width - right, y1: height - bottom, y2: height - bottom, class: "chart-axis" }),
+              svgElement("line", { x1: left, x2: left, y1: top, y2: height - bottom, class: "chart-axis" }),
+              svgElement("text", { x: width / 2, y: height - 16, "text-anchor": "middle", class: "chart-label" }, "Market proxy revenue (€ · 12 weeks)"),
+              svgElement("text", { transform: "translate(20 " + (height - bottom + top) / 2 + ") rotate(-90)", "text-anchor": "middle", class: "chart-label" }, "Channel revenue (€ · 12 weeks)")
+            );
+            for (const row of measured) {
+              const flagged = itemsById.has(row.id);
+              const label = C.text(row.product_id) + " · " + C.text(row.product_name) + " · Channel " + C.euros(row.channel_revenue_eur_12w) + " · Market proxy " + C.euros(row.market_revenue_eur_12w) + " · " + (flagged ? "View evidence" : "No rule matched");
+              const point = svgElement("circle", { cx: x(row.market_revenue_eur_12w), cy: y(row.channel_revenue_eur_12w), r: 6, class: "chart-point" + (flagged ? "" : " unflagged"), tabindex: 0, role: "button", "aria-label": label });
+              point.append(svgElement("title", {}, label));
+              point.addEventListener("click", () => openLandscape(row, point));
+              point.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openLandscape(row, point);
+                }
+              });
+              svg.append(point);
+            }
+            byId("landscape-chart").replaceChildren(svg);
+          }
+          byId("landscape-note").textContent = measured.length + " of " + landscape.length + " global SKUs plotted. " + (landscape.length - measured.length) + " lack numeric revenue coordinates. Equal-size dots; monetary scenarios are not encoded by size. Overlapping dots may share coordinates; the review queue provides a second route to all flagged evidence.";
+          const rows = (data.subcategories || []).map(row => [C.text(row.subcategory), C.number(row.n), C.euros(row.channel_rev), C.euros(row.market_rev), C.percent(row.ratio_pct)]);
+          byId("subcategory-table").replaceChildren(rows.length
+            ? table(["Subcategory", "SKUs", "Channel revenue · 12 weeks", "Market proxy revenue · 12 weeks", "Channel-to-market ratio"], rows, "Global subcategory snapshot")
+            : el("p", "empty", "No subcategory observations supplied."));
+        }
+
+        byId("close-evidence").addEventListener("click", () => byId("evidence-dialog").close());
+        byId("evidence-dialog").addEventListener("close", () => {
+          if (evidenceReturnFocus && evidenceReturnFocus.isConnected && !evidenceReturnFocus.disabled) evidenceReturnFocus.focus();
+          else byId("recommendations-heading").focus();
+        });
+        byId("jump-to-plan").addEventListener("click", () => {
+          byId("plan-heading").scrollIntoView({ block: "start" });
+          byId("plan-heading").focus();
+        });
+        byId("select-all-plan").addEventListener("change", event => {
+          plan = C.selectPlanEntries(plan, event.currentTarget.checked);
+          persistPlan();
+          renderPlan();
+        });
+        byId("export-plan").addEventListener("click", () => exportCsv(C.PLAN_COLUMNS, () => C.exportPlanRows(plan), "category-review-plan.csv"));
+        byId("export-opportunities").addEventListener("click", () => exportCsv(C.SKU_COLUMNS, () => C.exportItemRows(matchingOpportunities, data.snapshot_id), "matching-sku-reviews.csv"));
+        byId("export-gaps").addEventListener("click", () => exportCsv(C.GAP_COLUMNS, () => C.exportItemRows(matchingGaps, data.snapshot_id), "matching-assortment-follow-ups.csv"));
+        byId("export-preserved-storage").addEventListener("click", () => {
+          if (typeof storageRaw === "string") download(storageRaw, "preserved-category-review-plan.json", "application/json;charset=utf-8");
+        });
+        window.addEventListener("storage", event => {
+          if ((event.key === C.STORAGE_KEY || event.key === null) && event.newValue !== storageRaw) {
+            canPersist = false;
+            storageRaw = event.newValue;
+            storageWarning = "Saved storage changed in another tab or window. It has not been overwritten. Your current plan stays in memory: select all and export before reloading, and download the preserved saved JSON if available.";
+            updateStorageMessage();
+          }
+        });
+
+        renderRecommendations();
+        renderSnapshot();
+        initializeFilters();
+        renderExplorer();
+        renderPlan();
+        renderMarketContext();
+        updateAddButtons();
+        if (canPersist && storageRaw !== null && JSON.stringify(plan) !== storageRaw) persistPlan();
+        else updateStorageMessage();
+        byId("startup-state").hidden = true;
+      } catch (error) {
+        byId("startup-state").hidden = true;
+        showError("Dashboard could not start: " + C.text(error.message) + " Existing browser-saved plan data has not been intentionally cleared.");
+      }
+    })();
+  </script>
+</body>
+</html>
